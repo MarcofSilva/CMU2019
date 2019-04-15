@@ -353,6 +353,9 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
         private final String mUsername;
         private final String mPassword;
 
+        //TODO apagar
+        private String showResponse;
+
         UserRegisterTask(String username, String password) {
             mUsername = username;
             mPassword = password;
@@ -379,20 +382,20 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 
             // TODO: register the new account here.
 
-            //String response = null;
+            String response = null;
             //PrintWriter out = null;
-            /*try {
-                URL url = new URL("http://sigma02.ist.utl.pt:8350/register");
+            try {
+                URL url = new URL("http://sigma04.ist.utl.pt:8350/register");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
 
                 JSONObject postDataParams = new JSONObject();
                 postDataParams.put("username", mUsername);
                 postDataParams.put("password", mPassword);
-*/
+
                 //TODO see what each of this properties do
-                //conn.setRequestProperty("accept", "*/*");
-                /*conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("accept", "*/*");
+                conn.setRequestProperty("Content-Type", "application/json");
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setRequestProperty("connection", "Keep-Alive");
                 conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
@@ -407,11 +410,14 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
                 InputStream in = new BufferedInputStream(conn.getInputStream());
                 response = Network.convertStreamToString(in);
 
+                //TODO apagar
+                showResponse = response;
+
                 Log.v("Mydebug", response);
 
             } catch (Exception e) {
                 Log.e("MYDEBUG", "Exception: " + e.getMessage());
-            }*/
+            }
             /*String hint = "";
             try{
                 JSONObject jsonObj = new JSONObject(response);
@@ -429,14 +435,16 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             }catch (Exception e){
                 Log.e("MYDEBUG", "Exception: " + e.getMessage());
             }*/
-
             return true;
+
         }
 
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
             showProgress(false);
+
+            Toast.makeText(RegisterActivity.this, showResponse, Toast.LENGTH_LONG);
 
             if (success) {
                 finish();
