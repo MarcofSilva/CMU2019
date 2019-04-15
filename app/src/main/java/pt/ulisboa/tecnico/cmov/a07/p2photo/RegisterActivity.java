@@ -447,6 +447,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             Toast.makeText(RegisterActivity.this, showResponse, Toast.LENGTH_LONG);
 
             if (success) {
+                //TODO send the information to the login page and make login automaticly
                 finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));

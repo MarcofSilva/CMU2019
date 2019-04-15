@@ -9,6 +9,7 @@ import android.view.View;
 
 public class InsideAlbumActivity extends AppCompatActivity {
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,5 +26,4 @@ public class InsideAlbumActivity extends AppCompatActivity {
             }
         });
     }
-
 }
