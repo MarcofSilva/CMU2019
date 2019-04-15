@@ -368,7 +368,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     return pieces[1].equals(mPassword);
                 }
             }
-
+            return false;
 
             //String response = null;
             //PrintWriter out = null;
@@ -397,6 +397,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 // read the response TODO
                 InputStream in = new BufferedInputStream(conn.getInputStream());
                 response = Network.convertStreamToString(in);
+                //TODO check response, if user is already registered or not
+                if(response = username nao existe){
+                    mUsernameView.setError(getString(R.string.error_unknown_username));
+                }
 
                 Log.v("Mydebug", response);
 
@@ -408,7 +412,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }*/
 
             // TODO: register the new account here.
-            return true;
+
         }
 
         @Override

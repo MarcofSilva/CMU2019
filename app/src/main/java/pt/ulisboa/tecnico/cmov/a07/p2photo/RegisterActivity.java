@@ -195,7 +195,6 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             focusView = mPasswordView;
             cancel = true;
         } else if (!isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
         }
@@ -229,10 +228,29 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
     }
 
     private boolean isPasswordValid(String password) {
-        return password.matches("[^\\d]*\\d.*") &&
-        password.matches("[^A-Z]*[A-Z].*") &&
-        password.matches("[^a-z]*[a-z].*") &&
-        password.matches("[^.-_]*[.-_].*");
+        if(password.matches("[^a-z]*[a-z].*")){
+            mPasswordView.setError(getString(R.string.error_invalid_password_small));
+            return false;
+        }
+        else if ( password.length() < 4 ){
+            mPasswordView.setError(getString(R.string.error_invalid_password_len));
+            return false;
+        }
+        else if(password.matches("[^A-Z]*[A-Z].*")){
+            mPasswordView.setError(getString(R.string.error_invalid_password_capital));
+            return false;
+        }
+        else if(password.matches("[^\\d]*\\d.*")){
+            mPasswordView.setError(getString(R.string.error_invalid_password_number));
+            return false;
+        }
+        else if( password.matches("[^.-_@]*[.-_@].*") ){
+            mPasswordView.setError(getString(R.string.error_invalid_password_symbol));
+            return false;
+        }
+        else {
+            return true;
+        }
     }
 
     /**

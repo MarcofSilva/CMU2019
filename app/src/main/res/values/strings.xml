@@ -13,7 +13,13 @@
     <string name="action_sign_up_link">Don\'t have an account? Register</string>
     <string name="action_sign_in_link">Already have an account? Login</string>
     <string name="error_invalid_username">This username is invalid</string>
-    <string name="error_invalid_password">This password is invalid</string>
+    <string name="error_unknown_username">This username is unknown</string>
+    <string name="error_invalid_password">This password is incorrect</string>
+    <string name="error_invalid_password_small">This password is invalid. It needs to contain lower case letters</string>
+    <string name="error_invalid_password_len">This password is invalid. It needs to be at least 4 characters long</string>
+    <string name="error_invalid_password_capital">This password is invalid. It needs to contain upper case letters</string>
+    <string name="error_invalid_password_number">This password is invalid. It needs to contain a number</string>
+    <string name="error_invalid_password_symbol">This password is invalid. It needs to contain one of the following symbols: ".-_@"</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
