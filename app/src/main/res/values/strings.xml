@@ -13,7 +13,7 @@
     <string name="action_sign_up_link">Don\'t have an account? Register</string>
     <string name="action_sign_in_link">Already have an account? Login</string>
     <string name="error_invalid_username">This username is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_invalid_password">This password is invalid</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
