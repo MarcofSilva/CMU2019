@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -15,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONObject;
@@ -28,9 +28,16 @@ import java.net.URL;
 public class AlbumsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private UserLoginTask mAuthTask = null;
+    //Intent extra tag
+    private static final String USERNAME_EXTRA = "username";
+
+    //server response types to login attempt
     private static final String LOGOUT_SUCCESS = "Success";
 
+    private UserLogoutTask mAuthTask = null;
+
+    // UI references.
+    private TextView mUsernameView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +50,7 @@ public class AlbumsActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO FLOTATING BUTTON NOT BEING USED
+                //TODO FLOATING BUTTON NOT BEING USED
             }
         });
 
@@ -55,6 +62,14 @@ public class AlbumsActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //Get navigation view header reference
+        View headerView = navigationView.getHeaderView(0);
+
+        //Put the username in the nav tab
+        mUsernameView = headerView.findViewById(R.id.tabUsername);
+        String username = getIntent().getStringExtra(USERNAME_EXTRA);
+        mUsernameView.setText(username);
     }
 
     @Override
@@ -103,7 +118,7 @@ public class AlbumsActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_logout) {
             String username = getIntent().getStringExtra("username");
-            mAuthTask = new UserLoginTask(username);
+            mAuthTask = new UserLogoutTask(username);
             mAuthTask.execute((Void) null);
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -111,11 +126,11 @@ public class AlbumsActivity extends AppCompatActivity
         return true;
     }
 
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLogoutTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mUsername;
 
-        UserLoginTask(String username) {
+        UserLogoutTask(String username) {
             mUsername = username;
         }
 
