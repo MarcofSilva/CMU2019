@@ -85,9 +85,9 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
         mUsernameView = findViewById(R.id.register_username);
         populateAutoComplete();
 
-        mPasswordView1 = findViewById(R.id.register_confirm_password);
+        mPasswordView1 = findViewById(R.id.register_password);
 
-        mPasswordView2 = findViewById(R.id.register_password);
+        mPasswordView2 = findViewById(R.id.register_confirm_password);
         mPasswordView2.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
