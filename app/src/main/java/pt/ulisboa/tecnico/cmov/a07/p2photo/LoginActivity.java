@@ -23,6 +23,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -34,6 +35,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -352,7 +360,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
 
 
-
+            /*
             // TODO: attempt authentication against a network service.
 
             try {
@@ -372,27 +380,27 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         return LOGIN_INCORRECT_PASSWORD;
                 }
             }
-            return LOGIN_UNKNOWN_USER;
+            return LOGIN_UNKNOWN_USER;*/
 
 
 
 
             //TODO to use with server
 
-            //String response = null;
+            String response = null;
             //PrintWriter out = null;
-            /*try {
-                URL url = new URL("http://sigma04.ist.utl.pt:8350/login");
+            try {
+                URL url = new URL("http://sigma03.ist.utl.pt:8350/login");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
 
                 JSONObject postDataParams = new JSONObject();
                 postDataParams.put("username", mUsername);
-                postDataParams.put("password", mPassword);*/
+                postDataParams.put("password", mPassword);
 
                 //TODO see what each of this properties do
-                //conn.setRequestProperty("accept", "*/*");
-                /*conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("accept", "*/*");
+                conn.setRequestProperty("Content-Type", "application/json");
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setRequestProperty("connection", "Keep-Alive");
                 conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
@@ -413,7 +421,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Log.e("MYDEBUG", "Exception: " + e.getMessage());
             }
 
-            return response;*/
+            return response;
         }
 
         @Override
