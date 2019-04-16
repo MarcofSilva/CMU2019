@@ -30,38 +30,37 @@ def login():
     print(username)
     password = request.json.get('password', None)
 
-    if username and password:
-        if validateArgs(username,password):
-            user = User.query.filter_by(username=username).first()
-            login_user(user, remember=True)
-            next = request.args.get('next')
-            print("buu")
-            if current_user.is_authenticated:
-                print("baa")
-                return current_user.username + " you are logged in"
-    return "nope" #TODO
+    validate = validateArgs(username,password)
+    if validate == 'Success':
+        user = User.query.filter_by(username=username).first()
+        login_user(user, remember=True)
+        next = request.args.get('next')
+        print("buu")
+        if current_user.is_authenticated:
+            print("baa")
+    return validate
 
-@app.route('/logout', methods=['GET'])
+
+@app.route('/logout', methods=['POST'])
 @login_required
 def logout():
     logout_user()
-    return "you are logged out"
+    return "Success"
 
 @app.route('/register', methods=['POST'])
 def register():
     username = request.json.get('username', None)
     print(username)
     password = request.json.get('password', None)
-    #if 'username' in args and 'password' in args:
     users = User.query.filter_by(username=username) #TODO
     print(users.count())
     if users.count() != 0:
-        return "Username taken"
+        return "UsernameTaken"
     else:
         u = User(username=username, password=password)
         db.session.add(u)
         db.session.commit()
-        return "Success!"
+        return "Success"
 
 
 
@@ -79,9 +78,11 @@ class User(UserMixin, db.Model):
     return '<User %r %r>' % (self.id, self.username)
 
 def validateArgs(username, password):
+    print(User.query.filter_by(username=username).count())
+    print(User.query.filter_by(username=username).first())
     if User.query.filter_by(username=username).count() == 0:
-        return False
+        return 'UnknownUser'
     user = User.query.filter_by(username=username).first()
     if user.password != password:
-        return False
-    return True
+        return 'IncorrectPassword'
+    return 'Success'
