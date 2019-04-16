@@ -29,7 +29,7 @@ public class AlbumsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private UserLoginTask mAuthTask = null;
-
+    private static final String LOGOUT_SUCCESS = "Success";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,18 +113,12 @@ public class AlbumsActivity extends AppCompatActivity
 
         private final String mUsername;
 
-        //TODO apagar
-        private String showResponse;
-
         UserLoginTask(String username) {
             mUsername = username;
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
-
-            String response = null;
-            //PrintWriter out = null;
             try {
                 URL url = new URL("http://sigma03.ist.utl.pt:8350/logout");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -146,24 +140,19 @@ public class AlbumsActivity extends AppCompatActivity
                 os.write(postDataParams.toString().getBytes());
                 os.close();
 
-                // read the response TODO
                 InputStream in = new BufferedInputStream(conn.getInputStream());
-                response = Network.convertStreamToString(in);
-                //TODO check response, if user is already registered or not
-                /*if(response = username nao existe){
-                    mUsernameView.setError(getString(R.string.error_unknown_username));
-                }*/
+                String response = Network.convertStreamToString(in);
 
                 Log.v("Mydebug", response);
 
-                //TODO apagar isto
-                showResponse = response;
+                if(response.equals(LOGOUT_SUCCESS)){
+                    return true;
+                }
+                return false;
 
             } catch (Exception e) {
                 Log.e("MYDEBUG", "Exception: " + e.getMessage());
             }
-
-            // TODO: register the new account here.
             return true;
         }
 
@@ -171,9 +160,15 @@ public class AlbumsActivity extends AppCompatActivity
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
 
-            Toast.makeText(AlbumsActivity.this, showResponse, Toast.LENGTH_LONG);
-
-
+            if(success){
+                Toast.makeText(AlbumsActivity.this, "Logout successful", Toast.LENGTH_LONG);
+                Intent logoutData = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(logoutData);
+                finish();
+            }
+            else {
+                Toast.makeText(AlbumsActivity.this, "Logout unsuccessful", Toast.LENGTH_LONG);
+            }
         }
 
         @Override

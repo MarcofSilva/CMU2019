@@ -240,23 +240,23 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 
     //TODO penso que seria melhor, em todos os casos aparecer uma mensagem com todos os tipos de caracteres necessarios, uma frase o mais curta possivel
     private boolean isPasswordValid(String password) {
-        if(password.matches("[^a-z]*[a-z].*")){
+        if(!password.matches("[^a-z]*[a-z].*")){
             mPasswordView1.setError(getString(R.string.error_invalid_password_small));
             return false;
         }
-        else if ( password.length() < 4 ){
+        else if (!(password.length() > 4) ){
             mPasswordView1.setError(getString(R.string.error_invalid_password_len));
             return false;
         }
-        else if(password.matches("[^A-Z]*[A-Z].*")){
+        else if(!password.matches("[^A-Z]*[A-Z].*")){
             mPasswordView1.setError(getString(R.string.error_invalid_password_capital));
             return false;
         }
-        else if(password.matches("[^\\d]*\\d.*")){
+        else if(!password.matches("[^\\d]*\\d.*")){
             mPasswordView1.setError(getString(R.string.error_invalid_password_number));
             return false;
         }
-        else if( password.matches("[^.-_@]*[.-_@].*") ){
+        else if(!password.matches("[^.-_@]*[.-_@].*") ){
             mPasswordView1.setError(getString(R.string.error_invalid_password_symbol));
             return false;
         }
