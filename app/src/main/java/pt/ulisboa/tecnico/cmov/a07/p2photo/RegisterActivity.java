@@ -400,7 +400,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             /*String response = null;
             //PrintWriter out = null;
             try {
-                URL url = new URL("http://sigma04.ist.utl.pt:8350/register");
+                URL url = new URL("http://sigma03.ist.utl.pt:8350/register");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
 

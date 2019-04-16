@@ -41,9 +41,7 @@ public class AlbumsActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String username = getIntent().getStringExtra("username");
-                mAuthTask = new UserLoginTask(username);
-                mAuthTask.execute((Void) null);
+                //TODO FLOTATING BUTTON NOT BEING USED
             }
         });
 
@@ -101,14 +99,11 @@ public class AlbumsActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_slideshow) {
 
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        } else if (id == R.id.nav_logout) {
+            String username = getIntent().getStringExtra("username");
+            mAuthTask = new UserLoginTask(username);
+            mAuthTask.execute((Void) null);
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -131,7 +126,7 @@ public class AlbumsActivity extends AppCompatActivity
             String response = null;
             //PrintWriter out = null;
             try {
-                URL url = new URL("http://sigma04.ist.utl.pt:8350/logout");
+                URL url = new URL("http://sigma03.ist.utl.pt:8350/logout");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
 
