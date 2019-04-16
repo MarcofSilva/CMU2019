@@ -16,6 +16,7 @@
         tools:layout_editor_absoluteY="0dp" />
 
     <ListView
+        android:id="@+id/listViewNAUsers"
         android:layout_width="413dp"
         android:layout_height="wrap_content"
         android:paddingTop="80dp"
@@ -26,7 +27,15 @@
         android:layout_width="150dp"
         android:layout_height="50dp"
         android:text="Add User"
-        tools:layout_editor_absoluteX="130dp"
+        tools:layout_editor_absoluteX="230dp"
+        tools:layout_editor_absoluteY="665dp" />
+
+    <Button
+        android:id="@+id/buttonAddPhotos"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:text="Add Photos"
+        tools:layout_editor_absoluteX="30dp"
         tools:layout_editor_absoluteY="665dp" />
 
 
