@@ -30,6 +30,8 @@ public class AlbumsActivity extends AppCompatActivity
 
     private UserLoginTask mAuthTask = null;
     private static final String LOGOUT_SUCCESS = "Success";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
