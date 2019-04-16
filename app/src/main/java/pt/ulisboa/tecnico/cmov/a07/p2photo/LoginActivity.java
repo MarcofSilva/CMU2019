@@ -65,7 +65,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
      */
-    public static final String[] DUMMY_CREDENTIALS = new String[]{
+    public static String[] DUMMY_CREDENTIALS = new String[]{
             "Marco:Silva1_", "Matilde:Ramos1_", "João:Sousa1_", "", "", "", "", "", "", "", "", "", "", "", ""
     };
     /**
@@ -371,8 +371,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     else
                         return LOGIN_INCORRECT_PASSWORD;
                 }
-                return LOGIN_UNKNOWN_USER;
             }
+            return LOGIN_UNKNOWN_USER;
 
 
 
@@ -414,7 +414,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
 
             return response;*/
-            return LOGIN_ERROR; //TODO apagar
         }
 
         @Override
