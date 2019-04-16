@@ -360,7 +360,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
 
 
-            /*
+
             // TODO: attempt authentication against a network service.
 
             try {
@@ -380,14 +380,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         return LOGIN_INCORRECT_PASSWORD;
                 }
             }
-            return LOGIN_UNKNOWN_USER;*/
+            return LOGIN_UNKNOWN_USER;
 
 
 
 
             //TODO to use with server
 
-            String response = null;
+            /*String response = null;
             //PrintWriter out = null;
             try {
                 URL url = new URL("http://sigma03.ist.utl.pt:8350/login");
@@ -396,11 +396,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                 JSONObject postDataParams = new JSONObject();
                 postDataParams.put("username", mUsername);
-                postDataParams.put("password", mPassword);
+                postDataParams.put("password", mPassword);*/
 
                 //TODO see what each of this properties do
-                conn.setRequestProperty("accept", "*/*");
-                conn.setRequestProperty("Content-Type", "application/json");
+                //conn.setRequestProperty("accept", "*/*");
+                /*conn.setRequestProperty("Content-Type", "application/json");
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setRequestProperty("connection", "Keep-Alive");
                 conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
@@ -421,7 +421,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Log.e("MYDEBUG", "Exception: " + e.getMessage());
             }
 
-            return response;
+            return response;*/
         }
 
         @Override
@@ -435,7 +435,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             if (response.equals(LOGIN_SUCCESS)) {
                 Intent loginData = new Intent(getApplicationContext(), AlbumsActivity.class);
-                loginData.putExtra("username", mUsername);
+                loginData.putExtra(USERNAME_EXTRA, mUsername);
                 startActivity(loginData);
                 finish();
             }
