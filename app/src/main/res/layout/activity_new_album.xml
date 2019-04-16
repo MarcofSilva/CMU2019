@@ -8,7 +8,7 @@
 
     <EditText
         android:id="@+id/textAlbumName"
-        android:layout_width="300dp"
+        android:layout_width="250dp"
         android:layout_height="70dp"
         android:hint="Insert Album Name"
         android:paddingTop="30dp"
@@ -16,7 +16,7 @@
         tools:layout_editor_absoluteY="0dp" />
 
     <ListView
-        android:layout_width="match_parent"
+        android:layout_width="413dp"
         android:layout_height="wrap_content"
         android:paddingTop="80dp"
         android:paddingBottom="100dp"></ListView>
@@ -28,4 +28,18 @@
         android:text="Add User"
         tools:layout_editor_absoluteX="130dp"
         tools:layout_editor_absoluteY="665dp" />
+
+
+    <ImageButton
+        android:id="@+id/buttonFinish"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_verified"
+        tools:layout_editor_absoluteX="345dp"
+        tools:layout_editor_absoluteY="16dp"
+
+
+        />
+
+
 </android.support.constraint.ConstraintLayout>
