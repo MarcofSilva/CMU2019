@@ -14,7 +14,7 @@
     <string name="action_sign_in_link">Already have an account? Login</string>
     <string name="error_invalid_username">This username is invalid</string>
     <string name="error_unknown_username">This username is unknown</string>
-    <string name="error_username_already_exists">This username already exists</string>
+    <string name="error_username_taken">This username already exists</string>
     <string name="error_invalid_password">This password is invalid</string>
     <string name="error_invalid_password_small">This password is invalid. It needs to contain lower case letters</string>
     <string name="error_invalid_password_len">This password is invalid. It needs to be at least 4 characters long</string>

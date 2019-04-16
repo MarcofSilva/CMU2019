@@ -56,7 +56,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 
     //server response types to request attempt TODO this strings should correspond to the ones sent by the server after login attempt
     private static final String REGISTER_SUCCESS = "Success";
-    private static final String REGISTER_USERNAME_ALREADY_EXISTS = "UsernameAlreadyExists";
+    private static final String REGISTER_USERNAME_TAKEN = "UsernameTaken";
     private static final String REGISTER_ERROR = "Error";
 
     /**
@@ -374,7 +374,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
         protected String doInBackground(Void... params) {
 
 
-
+            /*
             // TODO: attempt authentication against a network service. while not having server
 
             try {
@@ -387,17 +387,17 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             int i;
             for (i = 0; i < LoginActivity.DUMMY_CREDENTIALS.length && !LoginActivity.DUMMY_CREDENTIALS[i].equals(""); i++) {
                 if(LoginActivity.DUMMY_CREDENTIALS[i].equals(mUsername)) {
-                    return REGISTER_USERNAME_ALREADY_EXISTS;
+                    return REGISTER_USERNAME_TAKEN;
                 }
             }
             LoginActivity.DUMMY_CREDENTIALS[i] = "" + mUsername + ":" + mPassword;
-            return REGISTER_SUCCESS;
+            return REGISTER_SUCCESS;*/
 
 
 
             // TODO: register the new account here. For server
 
-            /*String response = null;
+            String response = null;
             //PrintWriter out = null;
             try {
                 URL url = new URL("http://sigma03.ist.utl.pt:8350/register");
@@ -406,11 +406,11 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 
                 JSONObject postDataParams = new JSONObject();
                 postDataParams.put("username", mUsername);
-                postDataParams.put("password", mPassword);*/
+                postDataParams.put("password", mPassword);
 
                 //TODO see what each of this properties do
-                //conn.setRequestProperty("accept", "*/*");
-                /*conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("accept", "*/*");
+                conn.setRequestProperty("Content-Type", "application/json");
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setRequestProperty("connection", "Keep-Alive");
                 conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
@@ -431,7 +431,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
                 Log.e("MYDEBUG", "Exception: " + e.getMessage());
             }
 
-            return response;*/
+            return response;
 
         }
 
@@ -451,8 +451,8 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
                 setResult(RESULT_OK, accountData);
                 finish();
             }
-            else if(response.equals(REGISTER_USERNAME_ALREADY_EXISTS)) {
-                mUsernameView.setError(getString(R.string.error_username_already_exists));
+            else if(response.equals(REGISTER_USERNAME_TAKEN)) {
+                mUsernameView.setError(getString(R.string.error_username_taken));
                 mUsernameView.requestFocus();
             }
             else { //REGISTER_ERROR is returned or something else not expected
