@@ -23,7 +23,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -35,16 +34,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,8 +46,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     //request code for activity for result, when starting RegisterActivity
     private static final int REQUEST_REGISTER_CODE = 1;
-    private static final String LOGIN_USERNAME_EXTRA = "username";
-    private static final String LOGIN_PASSWORD_EXTRA = "password";
+    private static final String USERNAME_EXTRA = "username";
+    private static final String PASSWORD_EXTRA = "password";
+
+    //server response types to login attempt TODO this strings should correspond to the ones sent by the server after login attempt
+    private static final String LOGIN_SUCCESS = "Success";
+    private static final String LOGIN_UNKNOWN_USER = "UnknownUser";
+    private static final String LOGIN_INCORRECT_PASSWORD = "IncorrectPassword";
+    private static final String LOGIN_ERROR = "Error";
+
 
     /**
      * Id to identity READ_CONTACTS permission request.
@@ -69,8 +65,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
      */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "Marco:Silva", "Matilde:Ramos", "João:Sousa"
+    public static final String[] DUMMY_CREDENTIALS = new String[]{
+            "Marco:Silva1_", "Matilde:Ramos1_", "João:Sousa1_", "", "", "", "", "", "", "", "", "", "", "", ""
     };
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -130,8 +126,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == REQUEST_REGISTER_CODE && resultCode == RESULT_OK && data != null) {
             //TODO use the account information to log in the user that just registered
-            data.getStringExtra(LOGIN_USERNAME_EXTRA);
-            data.getStringExtra(LOGIN_PASSWORD_EXTRA);
+            mUsernameView.setText(data.getStringExtra(USERNAME_EXTRA));
+            mPasswordView.setText(data.getStringExtra(PASSWORD_EXTRA));
+            attemptLogin();
         }
     }
 
@@ -340,13 +337,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends AsyncTask<Void, Void, String> {
 
         private final String mUsername;
         private final String mPassword;
-
-        //TODO apagar
-        private String showResponse;
 
         UserLoginTask(String username, String password) {
             mUsername = username;
@@ -354,38 +348,51 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected String doInBackground(Void... params) {
+
+
+
+
             // TODO: attempt authentication against a network service.
 
             try {
                 // Simulate network access.
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
-                return false;
+                return LOGIN_ERROR;
             }
 
             for (String credential : DUMMY_CREDENTIALS) {
                 String[] pieces = credential.split(":");
                 if (pieces[0].equals(mUsername)) {
                     // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
+                    if(pieces[1].equals(mPassword))
+                        return LOGIN_SUCCESS;
+                    else
+                        return LOGIN_INCORRECT_PASSWORD;
                 }
+                return LOGIN_UNKNOWN_USER;
             }
 
-            String response = null;
+
+
+
+            //TODO to use with server
+
+            //String response = null;
             //PrintWriter out = null;
-            try {
+            /*try {
                 URL url = new URL("http://sigma04.ist.utl.pt:8350/login");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
 
                 JSONObject postDataParams = new JSONObject();
                 postDataParams.put("username", mUsername);
-                postDataParams.put("password", mPassword);
+                postDataParams.put("password", mPassword);*/
 
                 //TODO see what each of this properties do
-                conn.setRequestProperty("accept", "*/*");
-                conn.setRequestProperty("Content-Type", "application/json");
+                //conn.setRequestProperty("accept", "*/*");
+                /*conn.setRequestProperty("Content-Type", "application/json");
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setRequestProperty("connection", "Keep-Alive");
                 conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
@@ -399,40 +406,42 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 // read the response TODO
                 InputStream in = new BufferedInputStream(conn.getInputStream());
                 response = Network.convertStreamToString(in);
-                //TODO check response, if user is already registered or not
-                /*if(response = username nao existe){
-                    mUsernameView.setError(getString(R.string.error_unknown_username));
-                }*/
 
                 Log.v("Mydebug", response);
-
-                //TODO apagar isto
-                showResponse = response;
 
             } catch (Exception e) {
                 Log.e("MYDEBUG", "Exception: " + e.getMessage());
             }
 
-            // TODO: register the new account here.
-            return true;
+            return response;*/
+            return LOGIN_ERROR; //TODO apagar
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(final String response) {
             mAuthTask = null;
             showProgress(false);
 
-            Toast.makeText(LoginActivity.this, showResponse, Toast.LENGTH_LONG);
+            //TODO
+            Toast.makeText(LoginActivity.this, response, Toast.LENGTH_LONG).show();
 
 
-            if (success) {
+            if (response.equals(LOGIN_SUCCESS)) {
                 Intent loginData = new Intent(getApplicationContext(), AlbumsActivity.class);
                 loginData.putExtra("username", mUsername);
                 startActivity(loginData);
                 finish();
-            } else {
+            }
+            else if(response.equals(LOGIN_UNKNOWN_USER)) {
+                mUsernameView.setError(getString(R.string.error_unknown_username));
+                mUsernameView.requestFocus();
+            }
+            else if(response.equals(LOGIN_INCORRECT_PASSWORD)) {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
+            }
+            else { //LOGIN_ERROR is returned or something else not expected
+                Toast.makeText(LoginActivity.this, "Something went wrong, try again later", Toast.LENGTH_LONG);
             }
         }
 

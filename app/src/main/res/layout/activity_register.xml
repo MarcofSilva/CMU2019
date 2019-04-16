@@ -95,6 +95,7 @@
                 android:id="@+id/link_sign_in"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingTop="20dp"
                 android:text="@string/action_sign_in_link"
                 android:gravity="center"/>
 
