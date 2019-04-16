@@ -244,7 +244,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             mPasswordView1.setError(getString(R.string.error_invalid_password_small));
             return false;
         }
-        else if (!(password.length() > 4) ){
+        else if (!(password.length() > 3) ){
             mPasswordView1.setError(getString(R.string.error_invalid_password_len));
             return false;
         }
@@ -424,8 +424,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
                 // read the response TODO
                 InputStream in = new BufferedInputStream(conn.getInputStream());
                 response = Network.convertStreamToString(in);
-
-                Log.v("Mydebug", response);
+                response = response.split("\n")[0];
 
             } catch (Exception e) {
                 Log.e("MYDEBUG", "Exception: " + e.getMessage());
@@ -443,7 +442,10 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             //TODO
             Toast.makeText(RegisterActivity.this, response, Toast.LENGTH_LONG).show();
 
-            if (response.equals(REGISTER_SUCCESS)) {
+            if (response == null || response.equals(REGISTER_ERROR)){ //REGISTER_ERROR is returned or something else not expected
+                Toast.makeText(RegisterActivity.this, "Something went wrong, try again later", Toast.LENGTH_LONG);
+            }
+            else if (response.equals(REGISTER_SUCCESS)) {
                 //TODO send the information to the login page and make login automaticly
                 Intent accountData = new Intent();
                 accountData.putExtra(USERNAME_EXTRA, mUsername);
@@ -454,9 +456,6 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             else if(response.equals(REGISTER_USERNAME_TAKEN)) {
                 mUsernameView.setError(getString(R.string.error_username_taken));
                 mUsernameView.requestFocus();
-            }
-            else { //REGISTER_ERROR is returned or something else not expected
-                Toast.makeText(RegisterActivity.this, "Something went wrong, try again later", Toast.LENGTH_LONG);
             }
         }
 

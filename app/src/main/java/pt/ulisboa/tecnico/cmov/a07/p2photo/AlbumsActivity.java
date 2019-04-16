@@ -46,7 +46,7 @@ public class AlbumsActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_albums);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -159,10 +159,9 @@ public class AlbumsActivity extends AppCompatActivity
 
                 InputStream in = new BufferedInputStream(conn.getInputStream());
                 String response = Network.convertStreamToString(in);
+                response = response.split("\n")[0];
 
-                Log.v("Mydebug", response);
-
-                if(response.equals(LOGOUT_SUCCESS)){
+                if(response != null && response.equals(LOGOUT_SUCCESS)){
                     return true;
                 }
                 return false;
