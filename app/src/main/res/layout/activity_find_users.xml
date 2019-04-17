@@ -38,7 +38,7 @@ tools:context=".LoginActivity">
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <AutoCompleteTextView
+        <EditText
             android:id="@+id/findUser_search"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -51,6 +51,7 @@ tools:context=".LoginActivity">
     </android.support.design.widget.TextInputLayout>
 
     <ListView
+        android:id="@+id/lvShowUsers"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="40dp"></ListView>
