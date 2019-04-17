@@ -65,7 +65,7 @@ public class AlbumsActivity extends AppCompatActivity
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(AlbumsActivity.this);
                 final EditText input = new EditText(AlbumsActivity.this);
                 input.setHint("Album's name");
-                dialogBuilder.setTitle("Create New Album:")
+                dialogBuilder.setTitle("Create New Album")
                         .setView(input)
                         .setPositiveButton("Create", new DialogInterface.OnClickListener() {
                             @Override
