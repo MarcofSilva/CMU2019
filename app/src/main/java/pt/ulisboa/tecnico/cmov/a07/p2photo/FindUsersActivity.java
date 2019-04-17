@@ -1,15 +1,23 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
+import android.content.Intent;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import java.io.BufferedInputStream;
@@ -22,6 +30,7 @@ import java.util.List;
 
 public class FindUsersActivity extends AppCompatActivity {
 
+    private ArrayList<String> allUsers = new ArrayList<>();
     private ArrayList<String> users = new ArrayList<>();
     private ArrayList<String> usersToShowList = new ArrayList<>();
     private CostumAdapterUsers usersCostumAdapter;
@@ -45,6 +54,39 @@ public class FindUsersActivity extends AppCompatActivity {
         EditText text = findViewById(R.id.findUser_search);
         text.addTextChangedListener(textWatcher);
 
+        TextView doneAlbum = findViewById(R.id.done_btn);
+        doneAlbum.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //done button behaviour
+            }
+        });
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                LinearLayout ll = (LinearLayout) view;
+                TextView tv= (TextView)ll.getChildAt(0);
+                CheckBox cb= (CheckBox)ll.getChildAt(1);
+
+                boolean checked = cb.isChecked();
+                if(!checked){
+                    cb.setChecked(true);
+                    users.add(tv.getText().toString());
+                }
+                else {
+                    cb.setChecked(false);
+                    String name = (tv.getText().toString());
+
+                    for(String u : users){
+                        if(u.equals(name)){
+                            users.remove(u);
+                            break;
+                        }
+                    }
+                }
+            }
+        });
         mGetTask = new GetUsersTask();
         mGetTask.execute((Void) null);
 
@@ -57,7 +99,7 @@ public class FindUsersActivity extends AppCompatActivity {
             ArrayList<String> addUsers = new ArrayList<>();
 
             usersCostumAdapter.clear();
-            for(String user : users){
+            for(String user : allUsers){
                 user.toLowerCase();
                 nameUpdated.toLowerCase();
                 if(user.startsWith(nameUpdated)){
@@ -114,9 +156,9 @@ public class FindUsersActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(final String usersStr) {
             for(String s : usersStr.split(";")){
-                users.add(s);
+                allUsers.add(s);
             }
-            usersCostumAdapter.addAll(users);
+            usersCostumAdapter.addAll(allUsers);
         }
 
         @Override
