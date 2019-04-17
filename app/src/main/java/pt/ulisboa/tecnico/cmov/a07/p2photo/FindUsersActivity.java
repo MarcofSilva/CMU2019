@@ -27,12 +27,16 @@ public class FindUsersActivity extends AppCompatActivity {
     private ArrayAdapter<String> usersShowAdapter;
     private GetUsersTask mGetTask = null;
 
+    private EditText searchUserView;
+
     private String DUMMY_LIST = "Marco123;Joao1;Matilde2";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_users);
+
+        searchUserView = findViewById(R.id.findUser_search);
 
         usersShowAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, usersToShowList);
 
@@ -44,22 +48,23 @@ public class FindUsersActivity extends AppCompatActivity {
 
         mGetTask = new GetUsersTask();
         mGetTask.execute((Void) null);
-
-        usersShowAdapter.addAll(users);
     }
 
     private TextWatcher textWatcher = new TextWatcher() {
 
         public void afterTextChanged(Editable s) {
-            EditText editUpdated = (EditText) s ;
-            String nameUpdated = editUpdated.getText().toString();
+            String nameUpdated = searchUserView.getText().toString();
             List<String> addUsers = new ArrayList<>();
 
             usersShowAdapter.clear();
-            for(String u : users){
-                if(u.startsWith(nameUpdated)){
+            for(String user : users){
+                //Standardize strings for ignoring case
+                user.toLowerCase();
+                nameUpdated.toLowerCase();
+
+                if(user.startsWith(nameUpdated)){
                     //usersShowAdapter.add(u);
-                    addUsers.add(u);
+                    addUsers.add(user);
                 }
             }
             usersShowAdapter.addAll(addUsers);
@@ -113,6 +118,7 @@ public class FindUsersActivity extends AppCompatActivity {
             for(String s : usersStr.split(";")){
                 users.add(s);
             }
+            usersShowAdapter.addAll(users);
         }
 
         @Override
