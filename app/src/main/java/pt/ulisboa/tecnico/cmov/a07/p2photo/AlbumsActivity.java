@@ -43,8 +43,10 @@ public class AlbumsActivity extends AppCompatActivity
 
     //Storage filename
     private static final String TOKEN_FILENAME = "AuthToken";
+    private static final String DUMMYURL = "www.pornhub.com";
 
-    private UserLogoutTask mAuthTask = null;
+    private UserLogoutTask mLogout = null;
+    private UserCreateAlbum mCreateAlb = null;
 
     // UI references.
     private TextView mUsernameView;
@@ -68,11 +70,15 @@ public class AlbumsActivity extends AppCompatActivity
                         .setPositiveButton("Create", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                //TODO create the new album in the cloud
-                                Toast.makeText(AlbumsActivity.this,"New Album needs to be created", Toast.LENGTH_LONG).show();
+                                String albumName = input.getText().toString();
+                                if( albumName.length() == 0 ){
+                                    return;
+                                }
+                                String url = DUMMYURL;
+                                mCreateAlb = new UserCreateAlbum(albumName, url);
+                                mCreateAlb.execute((Void) null);
 
-                                //TODO isto e para testes tem-se de apagar e mudar
-                                startActivity(new Intent(getApplicationContext(), InsideAlbumActivity.class));
+                                //startActivity(new Intent(getApplicationContext(), InsideAlbumActivity.class));
                             }
                         })
                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -151,8 +157,8 @@ public class AlbumsActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_logout) {
             String username = getIntent().getStringExtra("username");
-            mAuthTask = new UserLogoutTask(username);
-            mAuthTask.execute((Void) null);
+            mLogout = new UserLogoutTask(username);
+            mLogout.execute((Void) null);
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -185,7 +191,7 @@ public class AlbumsActivity extends AppCompatActivity
                 //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
                 conn.setDoOutput(true);
 
-                conn.setRequestProperty("Authorization", readToken());
+                conn.setRequestProperty("Authorization", NetworkHandler.readToken(AlbumsActivity.this));
 
                 OutputStream os = conn.getOutputStream();
                 os.write(postDataParams.toString().getBytes());
@@ -208,7 +214,7 @@ public class AlbumsActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
+            mLogout= null;
 
             if(success){
                 Toast.makeText(AlbumsActivity.this, "Logout successful", Toast.LENGTH_LONG);
@@ -223,15 +229,82 @@ public class AlbumsActivity extends AppCompatActivity
 
         @Override
         protected void onCancelled() {
-            mAuthTask = null;
+            mLogout = null;
         }
 
-        private String readToken() throws Exception {
-            //TODO missing security
-            FileInputStream fis = openFileInput(TOKEN_FILENAME);
-            String token = NetworkHandler.convertStreamToString(fis);
-            fis.close();
-            return token;
+    }
+
+
+    public class UserCreateAlbum extends AsyncTask<Void, Void, Boolean> {
+
+        private final String _albumName;
+        private final String _url;
+
+        UserCreateAlbum(String albumName, String url) {
+            _albumName = albumName;
+            _url = url;
         }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                URL url = new URL("http://sigma03.ist.utl.pt:8350/createAlbum");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+
+                JSONObject postDataParams = new JSONObject();
+                postDataParams.put("albumName", _albumName);
+                postDataParams.put("url", _url);
+
+
+                //TODO see what each of this properties do
+                //conn.setRequestProperty("accept", "*/*");
+                conn.setRequestProperty("Content-Type", "application/json");
+                //conn.setRequestProperty("Accept", "application/json");
+                //conn.setRequestProperty("connection", "Keep-Alive");
+                //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
+                conn.setDoOutput(true);
+
+                conn.setRequestProperty("Authorization", NetworkHandler.readToken(AlbumsActivity.this));
+
+                OutputStream os = conn.getOutputStream();
+                os.write(postDataParams.toString().getBytes());
+                os.close();
+
+                InputStream in = new BufferedInputStream(conn.getInputStream());
+                String response = NetworkHandler.convertStreamToString(in);
+
+                if(response != null && response.equals(LOGOUT_SUCCESS)){
+                    NetworkHandler.writeTokenFile("", AlbumsActivity.this);
+                    return true;
+                }
+                return false;
+
+            } catch (Exception e) {
+                Log.e("MyDebug", "Exception: " + e.getMessage());
+            }
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            mCreateAlb = null;
+
+            if(success){
+                Toast.makeText(AlbumsActivity.this, "Logout successful", Toast.LENGTH_LONG);
+                Intent logoutData = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(logoutData);
+                finish();
+            }
+            else {
+                Toast.makeText(AlbumsActivity.this, "Logout unsuccessful", Toast.LENGTH_LONG);
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            mCreateAlb = null;
+        }
+
     }
 }
