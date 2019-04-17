@@ -291,13 +291,10 @@ public class AlbumsActivity extends AppCompatActivity
             mCreateAlb = null;
 
             if(success){
-                Toast.makeText(AlbumsActivity.this, "Logout successful", Toast.LENGTH_LONG);
-                Intent logoutData = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(logoutData);
-                finish();
+                Toast.makeText(AlbumsActivity.this, "You created an album! Gl finding it", Toast.LENGTH_LONG).show();
             }
             else {
-                Toast.makeText(AlbumsActivity.this, "Logout unsuccessful", Toast.LENGTH_LONG);
+                Toast.makeText(AlbumsActivity.this, "Error creating albums", Toast.LENGTH_LONG).show();
             }
         }
 
