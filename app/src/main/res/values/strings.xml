@@ -13,7 +13,7 @@
     <string name="action_sign_up_link">Don\'t have an account? Register</string>
     <string name="action_sign_in_link">Already have an account? Login</string>
     <string name="error_invalid_username">This username is invalid</string>
-    <string name="error_ilegal_chars_username">The username cannot have , and ;</string>
+    <string name="error_illegal_chars_username">The username cannot have , and ;</string>
     <string name="error_unknown_username">This username is unknown</string>
     <string name="error_username_taken">This username already exists</string>
     <string name="error_invalid_password">This password is invalid</string>

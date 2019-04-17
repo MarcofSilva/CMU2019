@@ -27,12 +27,13 @@ public class InsideAlbumActivity extends AppCompatActivity {
                             @Override
                             public void onClick(View v) {
                                 //TODO start activity for adding photos
+
                             }
                         })
                         .setAction("Add Users", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                Intent addUsersIntent = new Intent(getApplicationContext(), InsideAlbumActivity.class);
+                                Intent addUsersIntent = new Intent(getApplicationContext(), FindUsersActivity.class);
                                 startActivity(addUsersIntent);
                             }
                         })

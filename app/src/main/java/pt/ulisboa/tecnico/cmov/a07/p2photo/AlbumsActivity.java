@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -23,6 +24,8 @@ import android.widget.Toast;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -36,6 +39,10 @@ public class AlbumsActivity extends AppCompatActivity
 
     //server response types to login attempt
     private static final String LOGOUT_SUCCESS = "Success";
+    private static final String LOGIN_NEED_AUTHENTICATION = "AuthenticationRequired";
+
+    //Storage filename
+    private static final String TOKEN_FILENAME = "AuthToken";
 
     private UserLogoutTask mAuthTask = null;
 
@@ -65,7 +72,7 @@ public class AlbumsActivity extends AppCompatActivity
                                 Toast.makeText(AlbumsActivity.this,"New Album needs to be created", Toast.LENGTH_LONG).show();
 
                                 //TODO isto e para testes tem-se de apagar e mudar
-                                startActivity(new Intent(getApplicationContext(), FindUsersActivity.class));
+                                startActivity(new Intent(getApplicationContext(), InsideAlbumActivity.class));
                             }
                         })
                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -171,29 +178,30 @@ public class AlbumsActivity extends AppCompatActivity
                 postDataParams.put("username", mUsername);
 
                 //TODO see what each of this properties do
-                conn.setRequestProperty("accept", "*/*");
+                //conn.setRequestProperty("accept", "*/*");
                 conn.setRequestProperty("Content-Type", "application/json");
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setRequestProperty("connection", "Keep-Alive");
-                conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
+                //conn.setRequestProperty("Accept", "application/json");
+                //conn.setRequestProperty("connection", "Keep-Alive");
+                //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
                 conn.setDoOutput(true);
-                conn.setDoInput(true);
+
+                conn.setRequestProperty("Authorization", readToken());
 
                 OutputStream os = conn.getOutputStream();
                 os.write(postDataParams.toString().getBytes());
                 os.close();
 
                 InputStream in = new BufferedInputStream(conn.getInputStream());
-                String response = Network.convertStreamToString(in);
-                response = response.split("\n")[0];
+                String response = NetworkHandler.convertStreamToString(in);
 
                 if(response != null && response.equals(LOGOUT_SUCCESS)){
+                    NetworkHandler.writeTokenFile("", AlbumsActivity.this);
                     return true;
                 }
                 return false;
 
             } catch (Exception e) {
-                Log.e("MYDEBUG", "Exception: " + e.getMessage());
+                Log.e("MyDebug", "Exception: " + e.getMessage());
             }
             return true;
         }
@@ -216,6 +224,14 @@ public class AlbumsActivity extends AppCompatActivity
         @Override
         protected void onCancelled() {
             mAuthTask = null;
+        }
+
+        private String readToken() throws Exception {
+            //TODO missing security
+            FileInputStream fis = openFileInput(TOKEN_FILENAME);
+            String token = NetworkHandler.convertStreamToString(fis);
+            fis.close();
+            return token;
         }
     }
 }

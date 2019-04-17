@@ -5,6 +5,7 @@ package pt.ulisboa.tecnico.cmov.a07.p2photo;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
@@ -38,6 +39,7 @@ import android.widget.Toast;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -62,6 +64,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private static final String LOGIN_UNKNOWN_USER = "UnknownUser";
     private static final String LOGIN_INCORRECT_PASSWORD = "IncorrectPassword";
     private static final String LOGIN_ERROR = "Error";
+
+    //Storage filename
+    private static final String TOKEN_FILENAME = "AuthToken";
 
 
     /**
@@ -363,7 +368,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             // TODO: attempt authentication against a network service.
 
-            try {
+            /*try {
                 // Simulate network access.
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
@@ -380,32 +385,30 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         return LOGIN_INCORRECT_PASSWORD;
                 }
             }
-            return LOGIN_UNKNOWN_USER;
+            return LOGIN_UNKNOWN_USER;*/
 
 
 
 
             //TODO to use with server
 
-            //String response = null;
-            //PrintWriter out = null;
-            /*try {
+            String response = null;
+            try {
                 URL url = new URL("http://sigma03.ist.utl.pt:8350/login");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
 
                 JSONObject postDataParams = new JSONObject();
                 postDataParams.put("username", mUsername);
-                postDataParams.put("password", mPassword);*/
+                postDataParams.put("password", mPassword);
 
                 //TODO see what each of this properties do
                 //conn.setRequestProperty("accept", "*/*");
-                /*conn.setRequestProperty("Content-Type", "application/json");
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setRequestProperty("connection", "Keep-Alive");
-                conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
+                conn.setRequestProperty("Content-Type", "application/json");
+                //conn.setRequestProperty("Accept", "application/json");
+                //conn.setRequestProperty("connection", "Keep-Alive");
+                //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
                 conn.setDoOutput(true);
-                conn.setDoInput(true);
 
                 OutputStream os = conn.getOutputStream();
                 os.write(postDataParams.toString().getBytes());
@@ -413,14 +416,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                 // read the response TODO
                 InputStream in = new BufferedInputStream(conn.getInputStream());
-                response = Network.convertStreamToString(in);
-                response = response.split("\n")[0];
+                response = NetworkHandler.convertStreamToString(in);
+
+                String token = response.split(" ")[1];
+                NetworkHandler.writeTokenFile(token, LoginActivity.this);
+
+                response = response.split(" ")[0];
 
             } catch (Exception e) {
                 Log.e("MYDEBUG", "Exception: " + e.getMessage());
             }
 
-            return response;*/
+            return response;
         }
 
         @Override

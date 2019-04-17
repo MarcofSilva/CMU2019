@@ -31,6 +31,7 @@ public class CostumAdapterUsers extends BaseAdapter {
 
     public void clear() {
         _users.clear();
+        notifyDataSetChanged();
     }
 
     public void addAll(ArrayList<String> users){

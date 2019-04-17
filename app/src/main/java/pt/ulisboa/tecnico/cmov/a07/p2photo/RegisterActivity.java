@@ -236,7 +236,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
     private boolean isUsernameValid(String username) {
         if(username.matches("[^a-zA-Z]*[a-zA-Z].*")) {
             if(username.contains(",") || username.contains(";")) {
-                mUsernameView.setError(getString(R.string.error_ilegal_chars_username));
+                mUsernameView.setError(getString(R.string.error_illegal_chars_username));
                 return false;
             }
             return true;
@@ -384,7 +384,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 
             // TODO: attempt authentication against a network service. while not having server
 
-            try {
+            /*try {
                 // Simulate network access.
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
@@ -398,14 +398,13 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
                 }
             }
             LoginActivity.DUMMY_CREDENTIALS[i] = "" + mUsername + ":" + mPassword;
-            return REGISTER_SUCCESS;
+            return REGISTER_SUCCESS;*/
 
 
 
             // TODO: register the new account here. For server
 
-            /*String response = null;
-            //PrintWriter out = null;
+            String response = null;
             try {
                 URL url = new URL("http://sigma03.ist.utl.pt:8350/register");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -413,16 +412,16 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 
                 JSONObject postDataParams = new JSONObject();
                 postDataParams.put("username", mUsername);
-                postDataParams.put("password", mPassword);*/
+                postDataParams.put("password", mPassword);
 
                 //TODO see what each of this properties do
                 //conn.setRequestProperty("accept", "*/*");
-                /*conn.setRequestProperty("Content-Type", "application/json");
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setRequestProperty("connection", "Keep-Alive");
-                conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
+                conn.setRequestProperty("Content-Type", "application/json");
+                //conn.setRequestProperty("Accept", "application/json");
+                //conn.setRequestProperty("connection", "Keep-Alive");
+                //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
                 conn.setDoOutput(true);
-                conn.setDoInput(true);
+
 
                 OutputStream os = conn.getOutputStream();
                 os.write(postDataParams.toString().getBytes());
@@ -430,14 +429,13 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 
                 // read the response TODO
                 InputStream in = new BufferedInputStream(conn.getInputStream());
-                response = Network.convertStreamToString(in);
-                response = response.split("\n")[0];
+                response = NetworkHandler.convertStreamToString(in);
 
             } catch (Exception e) {
                 Log.e("MYDEBUG", "Exception: " + e.getMessage());
             }
 
-            return response;*/
+            return response;
 
         }
 

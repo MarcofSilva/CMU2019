@@ -34,21 +34,15 @@ tools:context=".LoginActivity">
 
     </LinearLayout>
 
-    <android.support.design.widget.TextInputLayout
+    <AutoCompleteTextView
+        android:id="@+id/findUser_search"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <AutoCompleteTextView
-            android:id="@+id/findUser_search"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="40dp"
-            android:hint="@string/prompt_search"
-            android:inputType="textPersonName"
-            android:maxLines="1"
-            android:singleLine="true" />
-
-    </android.support.design.widget.TextInputLayout>
+        android:layout_height="wrap_content"
+        android:paddingTop="40dp"
+        android:hint="@string/prompt_search"
+        android:inputType="textPersonName"
+        android:maxLines="1"
+        android:singleLine="true" />
 
     <ListView
         android:id="@+id/lvShowUsers"
