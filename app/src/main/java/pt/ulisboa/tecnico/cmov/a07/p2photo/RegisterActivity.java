@@ -216,7 +216,6 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             focusView = mUsernameView;
             cancel = true;
         } else if (!isUsernameValid(username)) {
-            mUsernameView.setError(getString(R.string.error_invalid_username));
             focusView = mUsernameView;
             cancel = true;
         }
@@ -235,7 +234,15 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
     }
 
     private boolean isUsernameValid(String username) {
-        return username.matches("[^a-zA-Z]*[a-zA-Z].*");
+        if(username.matches("[^a-zA-Z]*[a-zA-Z].*")) {
+            if(username.contains(",") || username.contains(";")) {
+                mUsernameView.setError(getString(R.string.error_ilegal_chars_username));
+                return false;
+            }
+            return true;
+        }
+        mUsernameView.setError(getString(R.string.error_invalid_username));
+        return false;
     }
 
     //TODO penso que seria melhor, em todos os casos aparecer uma mensagem com todos os tipos de caracteres necessarios, uma frase o mais curta possivel

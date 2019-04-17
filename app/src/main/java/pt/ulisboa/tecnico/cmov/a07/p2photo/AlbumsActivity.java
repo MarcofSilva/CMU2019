@@ -1,5 +1,7 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,7 +53,30 @@ public class AlbumsActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO FLOATING BUTTON NOT BEING USED
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(AlbumsActivity.this);
+                final EditText input = new EditText(AlbumsActivity.this);
+                input.setHint("Album's name");
+                dialogBuilder.setTitle("Create New Album:")
+                        .setView(input)
+                        .setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //TODO create the new album in the cloud
+                                Toast.makeText(AlbumsActivity.this,"New Album needs to be created", Toast.LENGTH_LONG).show();
+
+                                //TODO isto e para testes tem-se de apagar e mudar
+                                startActivity(new Intent(getApplicationContext(), FindUsersActivity.class));
+                            }
+                        })
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+
+                            }
+                        });
+                AlertDialog alertDialog = dialogBuilder.create();
+                alertDialog.show();
             }
         });
 
