@@ -75,10 +75,6 @@ public class FindUsersActivity extends AppCompatActivity {
 
     public class GetUsersTask extends AsyncTask<Void, Void, String> {
 
-        public GetUsersTask() {
-            super();
-        }
-
         @Override
         protected String doInBackground(Void... params) {
             String response = "";
