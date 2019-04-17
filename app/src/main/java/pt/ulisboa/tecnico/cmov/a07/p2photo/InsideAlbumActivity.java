@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -25,13 +26,14 @@ public class InsideAlbumActivity extends AppCompatActivity {
                         .setAction("Add Photos", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-
+                                //TODO start activity for adding photos
                             }
                         })
                         .setAction("Add Users", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-
+                                Intent addUsersIntent = new Intent(getApplicationContext(), InsideAlbumActivity.class);
+                                startActivity(addUsersIntent);
                             }
                         })
                         .show();

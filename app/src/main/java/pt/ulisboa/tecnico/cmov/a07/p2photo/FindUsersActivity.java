@@ -25,7 +25,7 @@ public class FindUsersActivity extends AppCompatActivity {
     private List<String> users = new ArrayList<>();
     private List<String> usersToShowList = new ArrayList<>();
     private ArrayAdapter<String> usersShowAdapter;
-    private GetUsersTasks mGetTask = null;
+    private GetUsersTask mGetTask = null;
 
     private String DUMMY_LIST = "Marco123;Joao1;Matilde2";
 
@@ -42,8 +42,10 @@ public class FindUsersActivity extends AppCompatActivity {
         EditText text = findViewById(R.id.findUser_search);
         text.addTextChangedListener(textWatcher);
 
-        mGetTask = new GetUsersTasks();
+        mGetTask = new GetUsersTask();
         mGetTask.execute((Void) null);
+
+        usersShowAdapter.addAll(users);
     }
 
     private TextWatcher textWatcher = new TextWatcher() {
@@ -71,7 +73,11 @@ public class FindUsersActivity extends AppCompatActivity {
         }
     };
 
-    public class GetUsersTasks extends AsyncTask<Void, Void, String> {
+    public class GetUsersTask extends AsyncTask<Void, Void, String> {
+
+        public GetUsersTask() {
+            super();
+        }
 
         @Override
         protected String doInBackground(Void... params) {
