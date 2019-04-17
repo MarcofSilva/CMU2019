@@ -22,9 +22,9 @@ import java.util.List;
 
 public class FindUsersActivity extends AppCompatActivity {
 
-    private List<String> users = new ArrayList<>();
-    private List<String> usersToShowList = new ArrayList<>();
-    private ArrayAdapter<String> usersShowAdapter;
+    private ArrayList<String> users = new ArrayList<>();
+    private ArrayList<String> usersToShowList = new ArrayList<>();
+    private CostumAdapterUsers usersCostumAdapter;
     private GetUsersTask mGetTask = null;
 
     private EditText searchUserView;
@@ -36,38 +36,36 @@ public class FindUsersActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_users);
 
-        searchUserView = findViewById(R.id.findUser_search);
-
-        usersShowAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, usersToShowList);
+        usersCostumAdapter = new CostumAdapterUsers(usersToShowList, this );
 
         ListView listView = findViewById(R.id.lvShowUsers);
-        listView.setAdapter(usersShowAdapter);
+
+        listView.setAdapter(usersCostumAdapter);
 
         EditText text = findViewById(R.id.findUser_search);
         text.addTextChangedListener(textWatcher);
 
         mGetTask = new GetUsersTask();
         mGetTask.execute((Void) null);
+
     }
 
     private TextWatcher textWatcher = new TextWatcher() {
 
         public void afterTextChanged(Editable s) {
             String nameUpdated = searchUserView.getText().toString();
-            List<String> addUsers = new ArrayList<>();
+            ArrayList<String> addUsers = new ArrayList<>();
 
-            usersShowAdapter.clear();
+            usersCostumAdapter.clear();
             for(String user : users){
-                //Standardize strings for ignoring case
                 user.toLowerCase();
                 nameUpdated.toLowerCase();
-
                 if(user.startsWith(nameUpdated)){
                     //usersShowAdapter.add(u);
                     addUsers.add(user);
                 }
             }
-            usersShowAdapter.addAll(addUsers);
+            usersCostumAdapter.addAll(addUsers);
         }
 
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -118,7 +116,7 @@ public class FindUsersActivity extends AppCompatActivity {
             for(String s : usersStr.split(";")){
                 users.add(s);
             }
-            usersShowAdapter.addAll(users);
+            usersCostumAdapter.addAll(users);
         }
 
         @Override
