@@ -208,6 +208,8 @@ public class AlbumsActivity extends AppCompatActivity implements NavigationView.
         public void onReceive(Context context, Intent intent) {
             try {
                 String newAlbumsIAmIn = intent.getStringExtra("data");
+                Log.d("Debug Cenas","receiver: " +  newAlbumsIAmIn);
+
                 if(newAlbumsIAmIn.equals(NEED_AUTHENTICATION)){
                     Toast.makeText(AlbumsActivity.this, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
                     //Logout and start login
