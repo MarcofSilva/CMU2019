@@ -13,18 +13,20 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class UserCreateAlbumTask extends AsyncTask<Void, Void, String> {
+public class CreateAlbumTask extends AsyncTask<Void, Void, String> {
 
-    private final String _albumName;
-    private final String _url;
-    private AlbumsActivity _act;
+    //server response types to login attempt
     private static final String SUCCESS = "Success";
     private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
 
-    UserCreateAlbumTask(String albumName, String url, AlbumsActivity act) {
+    private final String _albumName;
+    private final String _url;
+    private AlbumsActivity _activity;
+
+    CreateAlbumTask(String albumName, String url, AlbumsActivity act) {
         _albumName = albumName;
         _url = url;
-        _act = act;
+        _activity = act;
     }
 
     @Override
@@ -48,7 +50,7 @@ public class UserCreateAlbumTask extends AsyncTask<Void, Void, String> {
             //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
             conn.setDoOutput(true);
 
-            conn.setRequestProperty("Authorization", NetworkHandler.readToken(_act));
+            conn.setRequestProperty("Authorization", NetworkHandler.readToken(_activity));
 
             OutputStream os = conn.getOutputStream();
             os.write(postDataParams.toString().getBytes());
@@ -65,26 +67,26 @@ public class UserCreateAlbumTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onPostExecute(final String response) {
-        _act.setmCreateAlb(null);
+        _activity.setmCreateAlb(null);
 
         if(response != null && response.equals(SUCCESS)){
-            Toast.makeText(_act, "You created an album! Gl finding it", Toast.LENGTH_LONG).show();
+            Toast.makeText(_activity, "You created an album! Gl finding it", Toast.LENGTH_LONG).show();
         }
         else if(response.equals(NEED_AUTHENTICATION)) {
-            Toast.makeText(_act, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
+            Toast.makeText(_activity, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
             //Logout and start login
-            Intent logoutData = new Intent(_act.getApplicationContext(), LoginActivity.class);
-            _act.startActivity(logoutData);
-            _act.finish();
+            Intent logoutData = new Intent(_activity.getApplicationContext(), LoginActivity.class);
+            _activity.startActivity(logoutData);
+            _activity.finish();
         }
         else {
-            Toast.makeText(_act, "Error creating albums", Toast.LENGTH_LONG).show();
+            Toast.makeText(_activity, "Error creating albums", Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
     protected void onCancelled() {
-        _act.setmCreateAlb(null);
+        _activity.setmCreateAlb(null);
     }
 
 }

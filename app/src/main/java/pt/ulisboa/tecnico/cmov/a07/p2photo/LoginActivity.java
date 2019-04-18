@@ -18,7 +18,6 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -34,16 +33,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,15 +48,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private static final String USERNAME_EXTRA = "username";
     private static final String PASSWORD_EXTRA = "password";
 
-    //server response types to login attempt TODO this strings should correspond to the ones sent by the server after login attempt
-    private static final String LOGIN_SUCCESS = "Success";
-    private static final String LOGIN_UNKNOWN_USER = "UnknownUser";
-    private static final String LOGIN_INCORRECT_PASSWORD = "IncorrectPassword";
-    private static final String LOGIN_ERROR = "Error";
-
-    //Storage filename
-    private static final String TOKEN_FILENAME = "AuthToken";
-
 
     /**
      * Id to identity READ_CONTACTS permission request.
@@ -81,7 +61,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     public static String[] DUMMY_CREDENTIALS = new String[]{
             "Marco:Silva1_", "Matilde:Ramos1_", "João:Sousa1_", "", "", "", "", "", "", "", "", "", "", "", ""
     };
-
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */

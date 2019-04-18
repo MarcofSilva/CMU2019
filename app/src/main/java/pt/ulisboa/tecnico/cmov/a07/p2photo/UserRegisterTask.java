@@ -21,7 +21,7 @@ public class UserRegisterTask extends AsyncTask<Void, Void, String> {
 
     private final String mUsername;
     private final String mPassword;
-    private RegisterActivity _act;
+    private RegisterActivity _activity;
     private static final int REQUEST_REGISTER_CODE = 1;
     private static final String USERNAME_EXTRA = "username";
     private static final String PASSWORD_EXTRA = "password";
@@ -34,7 +34,7 @@ public class UserRegisterTask extends AsyncTask<Void, Void, String> {
     UserRegisterTask(String username, String password, RegisterActivity act) {
         mUsername = username;
         mPassword = password;
-        _act = act;
+        _activity = act;
     }
 
     @Override
@@ -101,32 +101,32 @@ public class UserRegisterTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onPostExecute(final String response) {
-        _act.setmAuthTask(null);
-        _act.showProgress(false);
+        _activity.setmAuthTask(null);
+        _activity.showProgress(false);
 
         //TODO
-        Toast.makeText(_act, response, Toast.LENGTH_LONG).show();
+        Toast.makeText(_activity, response, Toast.LENGTH_LONG).show();
 
         if (response == null || response.equals(REGISTER_ERROR)){ //REGISTER_ERROR is returned or something else not expected
-            Toast.makeText(_act, "Something went wrong, try again later", Toast.LENGTH_LONG);
+            Toast.makeText(_activity, "Something went wrong, try again later", Toast.LENGTH_LONG);
         }
         else if (response.equals(REGISTER_SUCCESS)) {
             //TODO send the information to the login page and make login automaticly
             Intent accountData = new Intent();
             accountData.putExtra(USERNAME_EXTRA, mUsername);
             accountData.putExtra(PASSWORD_EXTRA, mPassword);
-            _act.setResult(_act.RESULT_OK, accountData);
-            _act.finish();
+            _activity.setResult(_activity.RESULT_OK, accountData);
+            _activity.finish();
         }
         else if(response.equals(REGISTER_USERNAME_ALREADY_EXISTS)) {
-            _act.getmUsernameView().setError(_act.getApplicationContext().getString(R.string.error_username_taken));
-            _act.getmUsernameView().requestFocus();
+            _activity.getmUsernameView().setError(_activity.getString(R.string.error_username_taken));
+            _activity.getmUsernameView().requestFocus();
         }
     }
 
     @Override
     protected void onCancelled() {
-        _act.setmAuthTask(null);
-        _act.showProgress(false);
+        _activity.setmAuthTask(null);
+        _activity.showProgress(false);
     }
 }

@@ -42,4 +42,7 @@
     <string name="prompt_search">Search</string>
     <string name="findUser_title">Choose Friends</string>
     <string name="okText">Done</string>
+
+    <!-- DropBox -->
+    <string name="dropbox_app_key">lvafanmxyivo6dq</string>
 </resources>

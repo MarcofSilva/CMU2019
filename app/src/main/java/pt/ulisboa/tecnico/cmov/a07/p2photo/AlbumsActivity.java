@@ -2,12 +2,9 @@ package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -21,30 +18,16 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 public class AlbumsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     //Intent extra tag
     private static final String USERNAME_EXTRA = "username";
 
-    //server response types to login attempt
-    private static final String SUCCESS = "Success";
-    private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
-
-    //Storage filename
-    private static final String TOKEN_FILENAME = "AuthToken";
     private static final String DUMMYURL = "www.pornhub.com";
 
     private UserLogoutTask mLogout = null;
-    private UserCreateAlbumTask mCreateAlb = null;
+    private CreateAlbumTask mCreateAlb = null;
 
     // UI references.
     private TextView mUsernameView;
@@ -73,9 +56,9 @@ public class AlbumsActivity extends AppCompatActivity
                                 if(TextUtils.isEmpty(albumName)) {
                                     Toast.makeText(AlbumsActivity.this, getString(R.string.error_albumName_required), Toast.LENGTH_SHORT).show();
                                 }
-                                else{
+                                else {
                                     String url = DUMMYURL;
-                                    mCreateAlb = new UserCreateAlbumTask(albumName, url, AlbumsActivity.this);
+                                    mCreateAlb = new CreateAlbumTask(albumName, url, AlbumsActivity.this);
                                     mCreateAlb.execute((Void) null);
                                 }
                                 //startActivity(new Intent(getApplicationContext(), InsideAlbumActivity.class));
@@ -173,11 +156,11 @@ public class AlbumsActivity extends AppCompatActivity
         this.mLogout = mLogout;
     }
 
-    public UserCreateAlbumTask getmCreateAlb() {
+    public CreateAlbumTask getmCreateAlb() {
         return mCreateAlb;
     }
 
-    public void setmCreateAlb(UserCreateAlbumTask mCreateAlb) {
+    public void setmCreateAlb(CreateAlbumTask mCreateAlb) {
         this.mCreateAlb = mCreateAlb;
     }
 }

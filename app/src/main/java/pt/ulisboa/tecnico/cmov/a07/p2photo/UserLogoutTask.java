@@ -15,15 +15,16 @@ import java.net.URL;
 
 public class UserLogoutTask extends AsyncTask<Void, Void, Boolean> {
 
-    private final String mUsername;
-    private AlbumsActivity _act ;
+    //server response types to login attempt
     private static final String SUCCESS = "Success";
     private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
 
+    private final String mUsername;
+    private AlbumsActivity _activity;
 
     UserLogoutTask(String username, AlbumsActivity act) {
         mUsername = username;
-        _act = act;
+        _activity = act;
     }
 
     @Override
@@ -44,7 +45,7 @@ public class UserLogoutTask extends AsyncTask<Void, Void, Boolean> {
             //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
             conn.setDoOutput(true);
 
-            conn.setRequestProperty("Authorization", NetworkHandler.readToken(_act));
+            conn.setRequestProperty("Authorization", NetworkHandler.readToken(_activity));
 
             OutputStream os = conn.getOutputStream();
             os.write(postDataParams.toString().getBytes());
@@ -54,7 +55,7 @@ public class UserLogoutTask extends AsyncTask<Void, Void, Boolean> {
             String response = NetworkHandler.convertStreamToString(in);
 
             if(response != null && response.equals(SUCCESS) || response.equals(NEED_AUTHENTICATION)){
-                NetworkHandler.writeTokenFile("", _act);
+                NetworkHandler.writeTokenFile("", _activity);
                 return true;
             }
             return false;
@@ -67,19 +68,19 @@ public class UserLogoutTask extends AsyncTask<Void, Void, Boolean> {
 
     @Override
     protected void onPostExecute(final Boolean success) {
-        _act.setmLogout(null);
+        _activity.setmLogout(null);
 
         if(success){
-            Toast.makeText(_act, "Logout successful", Toast.LENGTH_LONG);
-            Intent logoutData = new Intent(_act.getApplicationContext(), LoginActivity.class);
-            _act.startActivity(logoutData);
-            _act.finish();
+            Toast.makeText(_activity, "Logout successful", Toast.LENGTH_LONG);
+            Intent logoutData = new Intent(_activity.getApplicationContext(), LoginActivity.class);
+            _activity.startActivity(logoutData);
+            _activity.finish();
         }
     }
 
     @Override
     protected void onCancelled() {
-        _act.setmLogout(null);
+        _activity.setmLogout(null);
     }
 
 }

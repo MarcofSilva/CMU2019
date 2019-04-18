@@ -11,10 +11,10 @@ import java.net.URL;
 
 public class GetUsersTask extends AsyncTask<Void, Void, String> {
 
-    private FindUsersActivity _act;
+    private FindUsersActivity _activity;
 
-    public GetUsersTask(FindUsersActivity act){
-        _act = act;
+    public GetUsersTask(FindUsersActivity activity){
+        _activity = activity;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class GetUsersTask extends AsyncTask<Void, Void, String> {
             //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
             conn.setDoOutput(false);
 
-            conn.setRequestProperty("Authorization", NetworkHandler.readToken(_act));
+            conn.setRequestProperty("Authorization", NetworkHandler.readToken(_activity));
 
             InputStream in = new BufferedInputStream(conn.getInputStream());
             response = NetworkHandler.convertStreamToString(in);
@@ -53,12 +53,12 @@ public class GetUsersTask extends AsyncTask<Void, Void, String> {
     @Override
     protected void onPostExecute(final String usersStr) {
         if(usersStr == null){
-            Toast.makeText(_act, "Error: Getting users from server", Toast.LENGTH_SHORT).show();
+            Toast.makeText(_activity, "Error: Getting users from server", Toast.LENGTH_SHORT).show();
         }
         for(String s : usersStr.split(";")){
-            _act.addUsers(s);
+            _activity.addUsers(s);
         }
-        _act.addAllusersCustom();
+        _activity.addAllusersCustom();
     }
 
     @Override

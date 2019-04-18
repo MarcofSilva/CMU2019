@@ -5,6 +5,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.dropbox.core.android.Auth;
+
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -19,20 +21,22 @@ import java.net.URL;
  */
 
 public class UserLoginTask extends AsyncTask<Void, Void, String> {
+    //server response types to login attempt TODO this strings should correspond to the ones sent by the server after login attempt
     private static final String LOGIN_SUCCESS = "Success";
     private static final String LOGIN_UNKNOWN_USER = "UnknownUser";
     private static final String LOGIN_INCORRECT_PASSWORD = "IncorrectPassword";
     private static final String LOGIN_ERROR = "Error";
+
     private static final String USERNAME_EXTRA = "username";
 
     private final String mUsername;
     private final String mPassword;
-    private LoginActivity _act;
+    private LoginActivity _activity;
 
     UserLoginTask(String username, String password, LoginActivity act) {
         mUsername = username;
         mPassword = password;
-        _act = act;
+        _activity = act;
     }
 
     @Override
@@ -94,7 +98,7 @@ public class UserLoginTask extends AsyncTask<Void, Void, String> {
             response = NetworkHandler.convertStreamToString(in);
 
             String token = response.split(" ")[1];
-            NetworkHandler.writeTokenFile(token, _act);
+            NetworkHandler.writeTokenFile(token, _activity);
 
             response = response.split(" ")[0];
 
@@ -107,35 +111,41 @@ public class UserLoginTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onPostExecute(final String response) {
-        _act.setmAuthTask(null);
-        _act.showProgress(false);
+        _activity.setmAuthTask(null);
+        _activity.showProgress(false);
 
         //TODO
-        Toast.makeText(_act, response, Toast.LENGTH_LONG).show();
+        Toast.makeText(_activity, response, Toast.LENGTH_LONG).show();
 
 
         if (response == null || response.equals(LOGIN_ERROR)) { //LOGIN_ERROR is returned or something else not expected
-            Toast.makeText(_act, "Something went wrong, try again later", Toast.LENGTH_LONG);
+            Toast.makeText(_activity, "Something went wrong, try again later", Toast.LENGTH_LONG);
         }
         else if(response.equals(LOGIN_SUCCESS)) {
-            Intent loginData = new Intent(_act.getApplicationContext(), AlbumsActivity.class);
+            Intent loginData = new Intent(_activity.getApplicationContext(), AlbumsActivity.class);
             loginData.putExtra(USERNAME_EXTRA, mUsername);
-            _act.startActivity(loginData);
-            _act.finish();
+
+            //Authenticate in dropbox account
+                //if(!hasToken()) { TODO
+                        Auth.startOAuth2Authentication(_activity, _activity.getString(R.string.dropbox_app_key));
+                //}
+
+            _activity.startActivity(loginData);
+            _activity.finish();
         }
         else if(response.equals(LOGIN_UNKNOWN_USER)) {
-            _act.getmUsernameView().setError(_act.getApplicationContext().getString(R.string.error_unknown_username));
-            _act.getmUsernameView().requestFocus();
+            _activity.getmUsernameView().setError(_activity.getString(R.string.error_unknown_username));
+            _activity.getmUsernameView().requestFocus();
         }
         else if(response.equals(LOGIN_INCORRECT_PASSWORD)) {
-            _act.getmPasswordView().setError(_act.getApplicationContext().getString(R.string.error_incorrect_password));
-            _act.getmPasswordView().requestFocus();
+            _activity.getmPasswordView().setError(_activity.getString(R.string.error_incorrect_password));
+            _activity.getmPasswordView().requestFocus();
         }
     }
 
     @Override
     protected void onCancelled() {
-        _act.setmAuthTask(null);
-        _act.showProgress(false);
+        _activity.setmAuthTask(null);
+        _activity.showProgress(false);
     }
 }
