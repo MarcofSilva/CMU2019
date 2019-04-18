@@ -17,7 +17,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,7 +44,7 @@ public class AlbumsActivity extends AppCompatActivity
     private static final String DUMMYURL = "www.pornhub.com";
 
     private UserLogoutTask mLogout = null;
-    private UserCreateAlbum mCreateAlb = null;
+    private CreateAlbumTask mCreateAlb = null;
 
     // UI references.
     private TextView mUsernameView;
@@ -76,7 +75,7 @@ public class AlbumsActivity extends AppCompatActivity
                                 }
                                 else {
                                     String url = DUMMYURL;
-                                    mCreateAlb = new UserCreateAlbum(albumName, url);
+                                    mCreateAlb = new CreateAlbumTask(albumName, url);
                                     mCreateAlb.execute((Void) null);
                                 }
                                 //startActivity(new Intent(getApplicationContext(), InsideAlbumActivity.class));
@@ -233,12 +232,12 @@ public class AlbumsActivity extends AppCompatActivity
     }
 
 
-    public class UserCreateAlbum extends AsyncTask<Void, Void, String> {
+    public class CreateAlbumTask extends AsyncTask<Void, Void, String> {
 
         private final String _albumName;
         private final String _url;
 
-        UserCreateAlbum(String albumName, String url) {
+        CreateAlbumTask(String albumName, String url) {
             _albumName = albumName;
             _url = url;
         }
