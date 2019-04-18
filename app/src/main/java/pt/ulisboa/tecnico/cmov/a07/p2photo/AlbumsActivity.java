@@ -44,7 +44,7 @@ public class AlbumsActivity extends AppCompatActivity
     private static final String DUMMYURL = "www.pornhub.com";
 
     private UserLogoutTask mLogout = null;
-    private CreateAlbumTask mCreateAlb = null;
+    private UserCreateAlbumTask mCreateAlb = null;
 
     // UI references.
     private TextView mUsernameView;
@@ -73,9 +73,9 @@ public class AlbumsActivity extends AppCompatActivity
                                 if(TextUtils.isEmpty(albumName)) {
                                     Toast.makeText(AlbumsActivity.this, getString(R.string.error_albumName_required), Toast.LENGTH_SHORT).show();
                                 }
-                                else {
+                                else{
                                     String url = DUMMYURL;
-                                    mCreateAlb = new CreateAlbumTask(albumName, url);
+                                    mCreateAlb = new UserCreateAlbumTask(albumName, url, AlbumsActivity.this);
                                     mCreateAlb.execute((Void) null);
                                 }
                                 //startActivity(new Intent(getApplicationContext(), InsideAlbumActivity.class));
@@ -157,7 +157,7 @@ public class AlbumsActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_logout) {
             String username = getIntent().getStringExtra("username");
-            mLogout = new UserLogoutTask(username);
+            mLogout = new UserLogoutTask(username, this);
             mLogout.execute((Void) null);
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -165,142 +165,19 @@ public class AlbumsActivity extends AppCompatActivity
         return true;
     }
 
-    public class UserLogoutTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mUsername;
-
-        UserLogoutTask(String username) {
-            mUsername = username;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            try {
-                URL url = new URL("http://sigma03.ist.utl.pt:8350/logout");
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-
-                JSONObject postDataParams = new JSONObject();
-                postDataParams.put("username", mUsername);
-
-                //TODO see what each of this properties do
-                //conn.setRequestProperty("accept", "*/*");
-                conn.setRequestProperty("Content-Type", "application/json");
-                //conn.setRequestProperty("Accept", "application/json");
-                //conn.setRequestProperty("connection", "Keep-Alive");
-                //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
-                conn.setDoOutput(true);
-
-                conn.setRequestProperty("Authorization", NetworkHandler.readToken(AlbumsActivity.this));
-
-                OutputStream os = conn.getOutputStream();
-                os.write(postDataParams.toString().getBytes());
-                os.close();
-
-                InputStream in = new BufferedInputStream(conn.getInputStream());
-                String response = NetworkHandler.convertStreamToString(in);
-
-                if(response != null && response.equals(SUCCESS)){
-                    NetworkHandler.writeTokenFile("", AlbumsActivity.this);
-                    return true;
-                }
-                return false;
-
-            } catch (Exception e) {
-                Log.e("MyDebug", "Exception: " + e.getMessage());
-            }
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mLogout= null;
-
-            if(success){
-                Toast.makeText(AlbumsActivity.this, "Logout successful", Toast.LENGTH_LONG);
-                Intent logoutData = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(logoutData);
-                finish();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mLogout = null;
-        }
-
+    public UserLogoutTask getmLogout() {
+        return mLogout;
     }
 
+    public void setmLogout(UserLogoutTask mLogout) {
+        this.mLogout = mLogout;
+    }
 
-    public class CreateAlbumTask extends AsyncTask<Void, Void, String> {
+    public UserCreateAlbumTask getmCreateAlb() {
+        return mCreateAlb;
+    }
 
-        private final String _albumName;
-        private final String _url;
-
-        CreateAlbumTask(String albumName, String url) {
-            _albumName = albumName;
-            _url = url;
-        }
-
-        @Override
-        protected String doInBackground(Void... params) {
-            String response = null;
-            try {
-                URL url = new URL("http://sigma03.ist.utl.pt:8350/createAlbum");
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-
-                JSONObject postDataParams = new JSONObject();
-                postDataParams.put("albumName", _albumName);
-                postDataParams.put("url", _url);
-
-
-                //TODO see what each of this properties do
-                //conn.setRequestProperty("accept", "*/*");
-                conn.setRequestProperty("Content-Type", "application/json");
-                //conn.setRequestProperty("Accept", "application/json");
-                //conn.setRequestProperty("connection", "Keep-Alive");
-                //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
-                conn.setDoOutput(true);
-
-                conn.setRequestProperty("Authorization", NetworkHandler.readToken(AlbumsActivity.this));
-
-                OutputStream os = conn.getOutputStream();
-                os.write(postDataParams.toString().getBytes());
-                os.close();
-
-                InputStream in = new BufferedInputStream(conn.getInputStream());
-                response = NetworkHandler.convertStreamToString(in);
-
-            } catch (Exception e) {
-                Log.e("MyDebug", "Exception: " + e.getMessage());
-            }
-            return response;
-        }
-
-        @Override
-        protected void onPostExecute(final String response) {
-            mCreateAlb = null;
-
-            if(response != null && response.equals(SUCCESS)){
-                Toast.makeText(AlbumsActivity.this, "You created an album! Gl finding it", Toast.LENGTH_LONG).show();
-            }
-            else if(response.equals(NEED_AUTHENTICATION)) {
-                Toast.makeText(AlbumsActivity.this, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
-                //Logout and start login
-                Intent logoutData = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(logoutData);
-                finish();
-            }
-            else {
-                Toast.makeText(AlbumsActivity.this, "Error creating albums", Toast.LENGTH_LONG).show();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mCreateAlb = null;
-        }
-
+    public void setmCreateAlb(UserCreateAlbumTask mCreateAlb) {
+        this.mCreateAlb = mCreateAlb;
     }
 }

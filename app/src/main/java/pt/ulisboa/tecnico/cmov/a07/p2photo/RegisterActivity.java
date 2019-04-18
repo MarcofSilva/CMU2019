@@ -228,7 +228,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserRegisterTask(username, password2);
+            mAuthTask = new UserRegisterTask(username, password2, this);
             mAuthTask.execute((Void) null);
         }
     }
@@ -276,7 +276,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
      * Shows the progress UI and hides the login form.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
+    public void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
@@ -362,113 +362,21 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
         int IS_PRIMARY = 1;
     }
 
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserRegisterTask extends AsyncTask<Void, Void, String> {
-
-        private final String mUsername;
-        private final String mPassword;
-
-        UserRegisterTask(String username, String password) {
-            mUsername = username;
-            mPassword = password;
-        }
-
-        @Override
-        protected String doInBackground(Void... params) {
-
-
-
-            // TODO: attempt authentication against a network service. while not having server
-
-            /*try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return REGISTER_ERROR;
-            }
-
-            int i;
-            for (i = 0; i < LoginActivity.DUMMY_CREDENTIALS.length && !LoginActivity.DUMMY_CREDENTIALS[i].equals(""); i++) {
-                if(LoginActivity.DUMMY_CREDENTIALS[i].equals(mUsername)) {
-                    return REGISTER_USERNAME_ALREADY_EXISTS;
-                }
-            }
-            LoginActivity.DUMMY_CREDENTIALS[i] = "" + mUsername + ":" + mPassword;
-            return REGISTER_SUCCESS;*/
-
-
-
-            // TODO: register the new account here. For server
-
-            String response = null;
-            try {
-                URL url = new URL("http://sigma03.ist.utl.pt:8350/register");
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-
-                JSONObject postDataParams = new JSONObject();
-                postDataParams.put("username", mUsername);
-                postDataParams.put("password", mPassword);
-
-                //TODO see what each of this properties do
-                //conn.setRequestProperty("accept", "*/*");
-                conn.setRequestProperty("Content-Type", "application/json");
-                //conn.setRequestProperty("Accept", "application/json");
-                //conn.setRequestProperty("connection", "Keep-Alive");
-                //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
-                conn.setDoOutput(true);
-
-
-                OutputStream os = conn.getOutputStream();
-                os.write(postDataParams.toString().getBytes());
-                os.close();
-
-                // read the response TODO
-                InputStream in = new BufferedInputStream(conn.getInputStream());
-                response = NetworkHandler.convertStreamToString(in);
-
-            } catch (Exception e) {
-                Log.e("MYDEBUG", "Exception: " + e.getMessage());
-            }
-
-            return response;
-
-        }
-
-        @Override
-        protected void onPostExecute(final String response) {
-            mAuthTask = null;
-            showProgress(false);
-
-            //TODO
-            Toast.makeText(RegisterActivity.this, response, Toast.LENGTH_LONG).show();
-
-            if (response == null || response.equals(REGISTER_ERROR)){ //REGISTER_ERROR is returned or something else not expected
-                Toast.makeText(RegisterActivity.this, "Something went wrong, try again later", Toast.LENGTH_LONG);
-            }
-            else if (response.equals(REGISTER_SUCCESS)) {
-                //TODO send the information to the login page and make login automaticly
-                Intent accountData = new Intent();
-                accountData.putExtra(USERNAME_EXTRA, mUsername);
-                accountData.putExtra(PASSWORD_EXTRA, mPassword);
-                setResult(RESULT_OK, accountData);
-                finish();
-            }
-            else if(response.equals(REGISTER_USERNAME_ALREADY_EXISTS)) {
-                mUsernameView.setError(getString(R.string.error_username_taken));
-                mUsernameView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
+    public AutoCompleteTextView getmUsernameView() {
+        return mUsernameView;
     }
+
+    public void setmUsernameView(AutoCompleteTextView mUsernameView) {
+        this.mUsernameView = mUsernameView;
+    }
+
+    public UserRegisterTask getmAuthTask() {
+        return mAuthTask;
+    }
+
+    public void setmAuthTask(UserRegisterTask mAuthTask) {
+        this.mAuthTask = mAuthTask;
+    }
+
 }
 

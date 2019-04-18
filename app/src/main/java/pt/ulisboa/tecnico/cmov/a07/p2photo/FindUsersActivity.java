@@ -1,6 +1,5 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -37,7 +36,7 @@ public class FindUsersActivity extends AppCompatActivity {
     private ArrayList<String> allUsers = new ArrayList<>();
     private ArrayList<String> users = new ArrayList<>();
     private ArrayList<String> usersToShowList = new ArrayList<>();
-    private CostumAdapterUsers usersCostumAdapter;
+    private CostumAdapterUsers usersCustomAdapter;
     private GetUsersTask mGetTask = null;
 
     private EditText searchUserView;
@@ -51,11 +50,11 @@ public class FindUsersActivity extends AppCompatActivity {
 
         searchUserView = findViewById(R.id.findUser_search);
 
-        usersCostumAdapter = new CostumAdapterUsers(usersToShowList, this );
+        usersCustomAdapter = new CostumAdapterUsers(usersToShowList, this );
 
         ListView listView = findViewById(R.id.lvShowUsers);
 
-        listView.setAdapter(usersCostumAdapter);
+        listView.setAdapter(usersCustomAdapter);
 
         EditText text = findViewById(R.id.findUser_search);
         text.addTextChangedListener(textWatcher);
@@ -93,7 +92,7 @@ public class FindUsersActivity extends AppCompatActivity {
                 }
             }
         });
-        mGetTask = new GetUsersTask();
+        mGetTask = new GetUsersTask(this);
         mGetTask.execute((Void) null);
     }
 
@@ -103,7 +102,7 @@ public class FindUsersActivity extends AppCompatActivity {
             String nameUpdated = searchUserView.getText().toString();
             ArrayList<String> addUsers = new ArrayList<>();
 
-            usersCostumAdapter.clear();
+            usersCustomAdapter.clear();
             for(String user : allUsers){
                 //Standardize strings for ignoring case
                 String lowUser = user.toLowerCase();
@@ -114,7 +113,7 @@ public class FindUsersActivity extends AppCompatActivity {
                     addUsers.add(user);
                 }
             }
-            usersCostumAdapter.addAll(addUsers);
+            usersCustomAdapter.addAll(addUsers);
         }
 
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -125,61 +124,11 @@ public class FindUsersActivity extends AppCompatActivity {
         }
     };
 
-    public class GetUsersTask extends AsyncTask<Void, Void, String> {
+    public void addUsers(String s){
+        allUsers.add(s);
+    }
 
-        @Override
-        protected String doInBackground(Void... params) {
-            String response = "";
-            try {
-                URL url = new URL("http://sigma03.ist.utl.pt:8350/getUsers");
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-
-
-                //TODO see what each of this properties do
-                //conn.setRequestProperty("accept", "*/*");
-                //conn.setRequestProperty("Content-Type", "application/json");
-                //conn.setRequestProperty("Accept", "application/");
-                //conn.setRequestProperty("connection", "Keep-Alive");
-                //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
-                conn.setDoOutput(false);
-
-                conn.setRequestProperty("Authorization", NetworkHandler.readToken(FindUsersActivity.this));
-
-                InputStream in = new BufferedInputStream(conn.getInputStream());
-                response = NetworkHandler.convertStreamToString(in);
-
-                //TODO dummy
-                //return DUMMY_LIST
-
-            } catch (Exception e) {
-                Log.e("MYDEBUG", "Exception: " + e.getMessage());
-            }
-            return response;
-        }
-
-        @Override
-        protected void onPostExecute(final String usersStr) {
-            if(usersStr == null){
-                Toast.makeText(FindUsersActivity.this, "Error: Getting users from server", Toast.LENGTH_SHORT).show();
-            }
-            else if(usersStr.equals(NEED_AUTHENTICATION)) {
-                Toast.makeText(FindUsersActivity.this, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
-                //Logout and start login
-                Intent logoutData = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(logoutData);
-                finish();
-            }
-            else {
-                for (String s : usersStr.split(";")) {
-                    allUsers.add(s);
-                }
-                usersCostumAdapter.addAll(allUsers);
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-        }
+    public void addAllusersCustom(){
+        usersCustomAdapter.addAll(allUsers);
     }
 }

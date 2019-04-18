@@ -81,6 +81,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     public static String[] DUMMY_CREDENTIALS = new String[]{
             "Marco:Silva1_", "Matilde:Ramos1_", "João:Sousa1_", "", "", "", "", "", "", "", "", "", "", "", ""
     };
+
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -240,7 +241,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(username, password);
+            mAuthTask = new UserLoginTask(username, password, this);
             mAuthTask.execute((Void) null);
         }
     }
@@ -259,8 +260,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     /**
      * Shows the progress UI and hides the login form.
      */
+    //TODO tive de meter public por causa do userLoginTask
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
+    public void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
@@ -346,123 +348,27 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, String> {
-
-        private final String mUsername;
-        private final String mPassword;
-
-        UserLoginTask(String username, String password) {
-            mUsername = username;
-            mPassword = password;
-        }
-
-        @Override
-        protected String doInBackground(Void... params) {
-
-
-
-
-            // TODO: attempt authentication against a network service.
-
-            /*try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return LOGIN_ERROR;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mUsername)) {
-                    // Account exists, return true if the password matches.
-                    if(pieces[1].equals(mPassword))
-                        return LOGIN_SUCCESS;
-                    else
-                        return LOGIN_INCORRECT_PASSWORD;
-                }
-            }
-            return LOGIN_UNKNOWN_USER;*/
-
-
-
-
-            //TODO to use with server
-
-            String response = null;
-            try {
-                URL url = new URL("http://sigma03.ist.utl.pt:8350/login");
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-
-                JSONObject postDataParams = new JSONObject();
-                postDataParams.put("username", mUsername);
-                postDataParams.put("password", mPassword);
-
-                //TODO see what each of this properties do
-                //conn.setRequestProperty("accept", "*/*");
-                conn.setRequestProperty("Content-Type", "application/json");
-                //conn.setRequestProperty("Accept", "application/json");
-                //conn.setRequestProperty("connection", "Keep-Alive");
-                //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
-                conn.setDoOutput(true);
-
-                OutputStream os = conn.getOutputStream();
-                os.write(postDataParams.toString().getBytes());
-                os.close();
-
-                // read the response TODO
-                InputStream in = new BufferedInputStream(conn.getInputStream());
-                response = NetworkHandler.convertStreamToString(in);
-
-                String token = response.split(" ")[1];
-                NetworkHandler.writeTokenFile(token, LoginActivity.this);
-
-                response = response.split(" ")[0];
-
-            } catch (Exception e) {
-                Log.e("MYDEBUG", "Exception: " + e.getMessage());
-            }
-
-            return response;
-        }
-
-        @Override
-        protected void onPostExecute(final String response) {
-            mAuthTask = null;
-            showProgress(false);
-
-            //TODO
-            Toast.makeText(LoginActivity.this, response, Toast.LENGTH_LONG).show();
-
-
-            if (response == null || response.equals(LOGIN_ERROR)) { //LOGIN_ERROR is returned or something else not expected
-                Toast.makeText(LoginActivity.this, "Something went wrong, try again later", Toast.LENGTH_LONG);
-            }
-            else if(response.equals(LOGIN_SUCCESS)) {
-                Intent loginData = new Intent(getApplicationContext(), AlbumsActivity.class);
-                loginData.putExtra(USERNAME_EXTRA, mUsername);
-                startActivity(loginData);
-                finish();
-            }
-            else if(response.equals(LOGIN_UNKNOWN_USER)) {
-                mUsernameView.setError(getString(R.string.error_unknown_username));
-                mUsernameView.requestFocus();
-            }
-            else if(response.equals(LOGIN_INCORRECT_PASSWORD)) {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
+    public UserLoginTask getmAuthTask() {
+        return mAuthTask;
     }
+
+    public void setmAuthTask(UserLoginTask mAuthTask) {
+        this.mAuthTask = mAuthTask;
+    }
+    public EditText getmPasswordView() {
+        return mPasswordView;
+    }
+
+    public void setmPasswordView(EditText mPasswordView) {
+        this.mPasswordView = mPasswordView;
+    }
+    public AutoCompleteTextView getmUsernameView() {
+        return mUsernameView;
+    }
+
+    public void setmUsernameView(AutoCompleteTextView mUsernameView) {
+        this.mUsernameView = mUsernameView;
+    }
+
 }
 
