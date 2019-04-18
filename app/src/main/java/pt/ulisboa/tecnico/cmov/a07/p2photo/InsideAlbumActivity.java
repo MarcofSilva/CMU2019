@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -18,11 +19,14 @@ import java.util.ArrayList;
 public class InsideAlbumActivity extends AppCompatActivity {
 
     private static final String USERNAMES_EXTRA = "usernames";
+    private String myName;
 
     private static final int PICKPHOTO_REQUEST_CODE = 10;
     private static final int FIND_USERS_REQUEST_CODE = 2;
 
     private AddUsersToAlbumTask mAddUsersToAlbum = null;
+
+    private TextView mAlbumTitleView = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,13 +35,15 @@ public class InsideAlbumActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        myName = getIntent().getStringExtra("myName");
+        mAlbumTitleView = findViewById(R.id.inside_AlbumTitle);
+        mAlbumTitleView.setText(myName);
+
         FloatingActionButton fab = findViewById(R.id.fab_inside_album);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(InsideAlbumActivity.this);
-                final EditText input = new EditText(InsideAlbumActivity.this);
-                input.setHint("Album's name");
                 dialogBuilder
                         .setPositiveButton("Add Photos", new DialogInterface.OnClickListener() {
                             @Override
@@ -67,7 +73,7 @@ public class InsideAlbumActivity extends AppCompatActivity {
         }
         else if(requestCode == FIND_USERS_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             ArrayList<String> usernames = data.getStringArrayListExtra(USERNAMES_EXTRA);
-            mAddUsersToAlbum = new AddUsersToAlbumTask(usernames, this);
+            mAddUsersToAlbum = new AddUsersToAlbumTask(usernames, myName ,this);
             mAddUsersToAlbum.execute((Void) null);
         }
     }

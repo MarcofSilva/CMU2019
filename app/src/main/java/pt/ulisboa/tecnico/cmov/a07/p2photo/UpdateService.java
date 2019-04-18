@@ -100,7 +100,7 @@ public class UpdateService extends Service {
             //conn.setRequestProperty("Accept", "application/json");
             //conn.setRequestProperty("connection", "Keep-Alive");
             //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
-            conn.setDoOutput(true);
+            conn.setDoOutput(false);
 
             conn.setRequestProperty("Authorization", NetworkHandler.readToken(_activity));
 

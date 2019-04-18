@@ -44,6 +44,11 @@ public class AlbumsActivity extends AppCompatActivity implements NavigationView.
     private UserLogoutTask mLogout = null;
     private CreateAlbumTask mCreateAlb = null;
 
+    private AcceptAlbumTask mAcceptALb = null;
+    String userName = "";
+    String albumName = "";
+    String dropboxURL = "";
+
     private UpdateService myService;
     private MyBroadCastReceiver myBroadCastReceiver;
 
@@ -88,7 +93,9 @@ public class AlbumsActivity extends AppCompatActivity implements NavigationView.
                                     mCreateAlb.execute((Void) null);
                                 }
                                 //TODO apagar
-                                startActivity(new Intent(getApplicationContext(), InsideAlbumActivity.class));
+                                Intent newAlbumIntent = new Intent(getApplicationContext(), InsideAlbumActivity.class);
+                                newAlbumIntent.putExtra("myName",albumName);
+                                startActivity(newAlbumIntent);
                             }
                         })
                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -218,9 +225,36 @@ public class AlbumsActivity extends AppCompatActivity implements NavigationView.
                     AlbumsActivity.this.finish();
                 }
                 String[] responseSplit = newAlbumsIAmIn.split(";");
-                String userName = responseSplit[0];
-                String albumName = responseSplit[1];
+                userName = responseSplit[0];
+                albumName = responseSplit[1];
+                dropboxURL = "isto e um dummy shit";
                 Log.d("Debug Cenas","receiver: user: " + userName + " album " + albumName);
+
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(AlbumsActivity.this);
+                dialogBuilder.setTitle(userName + " wants you to join album " + albumName);
+                dialogBuilder
+                        .setPositiveButton("Accept", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Log.d("Debug Cenas", "Accepted invite");
+
+                                mAcceptALb = new AcceptAlbumTask(userName, albumName, dropboxURL, "true", AlbumsActivity.this);
+                                mAcceptALb.execute((Void) null);
+                            }
+                        })
+                        .setNegativeButton("Refuse", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Log.d("Debug Cenas", "Rejected invite");
+
+                                mAcceptALb = new AcceptAlbumTask(userName, albumName, dropboxURL, "false", AlbumsActivity.this);
+                                mAcceptALb.execute((Void) null);
+
+                            }
+                        });
+                AlertDialog alertDialog = dialogBuilder.create();
+                alertDialog.show();
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -260,5 +294,13 @@ public class AlbumsActivity extends AppCompatActivity implements NavigationView.
 
     public void setmCreateAlb(CreateAlbumTask mCreateAlb) {
         this.mCreateAlb = mCreateAlb;
+    }
+
+    public AcceptAlbumTask getmAcceptALb() {
+        return mAcceptALb;
+    }
+
+    public void setmAcceptALb(AcceptAlbumTask mAcceptALb) {
+        this.mAcceptALb = mAcceptALb;
     }
 }

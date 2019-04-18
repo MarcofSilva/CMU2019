@@ -12,37 +12,43 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 
-public class AddUsersToAlbumTask extends AsyncTask<Void, Void, String> {
+public class AcceptAlbumTask extends AsyncTask<Void, Void, String> {
 
-    //server response types to login attempt
+    private String _userAlbum;
+    private String _albumName;
+    private String _dropboxUrl;
+    private String _accepted;
+    private AlbumsActivity _act;
+
     private static final String SUCCESS = "Success";
     private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
     private static final String ERROR = "Error";
 
-    private final ArrayList<String > _usernamesToAdd;
-    private String _albumName;
-    private InsideAlbumActivity _activity;
+    //server response types to request attempt TODO this strings should correspond to the ones sent by the server after login attempt
 
-    public AddUsersToAlbumTask(ArrayList<String> usernames, String albumName ,InsideAlbumActivity activity) {
-        _usernamesToAdd = usernames;
+    AcceptAlbumTask(String userAlbum, String albumName, String dropboxUrl, String accepted, AlbumsActivity act) {
+        _userAlbum = userAlbum;
         _albumName = albumName;
-        _activity = activity;
+        _dropboxUrl = dropboxUrl;
+        _accepted = accepted;
+        _act = act;
     }
 
     @Override
     protected String doInBackground(Void... params) {
-        String response = "";
+
+        String response = null;
         try {
-            URL url = new URL("http://sigma03.ist.utl.pt:8350/addUsersToAlbum");
+            URL url = new URL("http://sigma03.ist.utl.pt:8350/acceptInvitation");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
 
             JSONObject postDataParams = new JSONObject();
+            postDataParams.put("userAlbum", _userAlbum);
             postDataParams.put("albumName", _albumName);
-            postDataParams.put("usernames", fixStringsInArrayList_json(_usernamesToAdd));
-
+            postDataParams.put("dropboxURL", _dropboxUrl);
+            postDataParams.put("accepted", _accepted);
 
 
             //TODO see what each of this properties do
@@ -53,7 +59,7 @@ public class AddUsersToAlbumTask extends AsyncTask<Void, Void, String> {
             //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
             conn.setDoOutput(true);
 
-            conn.setRequestProperty("Authorization", NetworkHandler.readToken(_activity));
+            conn.setRequestProperty("Authorization", NetworkHandler.readToken(_act));
 
             OutputStream os = conn.getOutputStream();
             os.write(postDataParams.toString().getBytes());
@@ -63,40 +69,33 @@ public class AddUsersToAlbumTask extends AsyncTask<Void, Void, String> {
             response = NetworkHandler.convertStreamToString(in);
 
         } catch (Exception e) {
-            Log.e("MyDebug", "Exception: " + e.getMessage());
+            Log.e("MYDEBUG", "Exception: " + e.getMessage());
         }
+
         return response;
+
     }
 
     @Override
     protected void onPostExecute(final String response) {
-        _activity.setmAddUsersToAlbum(null);
+        _act.setmAcceptALb(null);
 
         if(response != null && response.equals(SUCCESS)){
-            Toast.makeText(_activity, "Sending usernames to server", Toast.LENGTH_LONG).show();
+            Toast.makeText(_act, "Sending usernames to server", Toast.LENGTH_LONG).show();
         }
         else if(response.equals(NEED_AUTHENTICATION)) {
-            Toast.makeText(_activity, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
+            Toast.makeText(_act, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
             //Logout and start login
-            Intent logoutData = new Intent(_activity.getApplicationContext(), LoginActivity.class);
-            _activity.startActivity(logoutData);
-            _activity.finish();
+            Intent logoutData = new Intent(_act.getApplicationContext(), LoginActivity.class);
+            _act.startActivity(logoutData);
+            _act.finish();
         }
         else { //Include receiving Error message from the server
-            Toast.makeText(_activity, "Error adding users to album", Toast.LENGTH_LONG).show();
+            Toast.makeText(_act, "Error adding users to album", Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
     protected void onCancelled() {
-        _activity.setmAddUsersToAlbum(null);
-    }
-
-
-    private ArrayList<String> fixStringsInArrayList_json(ArrayList<String> usernames) {
-        for(int i = 0; i < usernames.size(); i++) {
-            usernames.set(i, "\"" + usernames.get(i) + "\"");
-        }
-        return usernames;
     }
 }
