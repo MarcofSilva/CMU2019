@@ -1,5 +1,7 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -7,6 +9,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
 
 public class InsideAlbumActivity extends AppCompatActivity {
 
@@ -22,22 +26,27 @@ public class InsideAlbumActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Add Photos", new View.OnClickListener() {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(InsideAlbumActivity.this);
+                final EditText input = new EditText(InsideAlbumActivity.this);
+                input.setHint("Album's name");
+                dialogBuilder
+                        .setPositiveButton("Add Photos", new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(View v) {
-                                //TODO start activity for adding photos
+                            public void onClick(DialogInterface dialog, int which) {
+                                Toast.makeText(InsideAlbumActivity.this,"Picker for photos needs to be implemented", Toast.LENGTH_LONG).show();
 
+                                //TODO
                             }
                         })
-                        .setAction("Add Users", new View.OnClickListener() {
+                        .setNeutralButton("Add Users", new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(View v) {
-                                Intent addUsersIntent = new Intent(getApplicationContext(), FindUsersActivity.class);
-                                startActivity(addUsersIntent);
+                            public void onClick(DialogInterface dialog, int which) {
+                                startActivity(new Intent(getApplicationContext(), FindUsersActivity.class));
                             }
                         })
-                        .show();
+                        ;
+                AlertDialog alertDialog = dialogBuilder.create();
+                alertDialog.show();
             }
         });
     }

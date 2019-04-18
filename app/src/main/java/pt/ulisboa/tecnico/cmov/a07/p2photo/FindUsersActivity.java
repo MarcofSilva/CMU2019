@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,7 +31,7 @@ import java.util.List;
 
 public class FindUsersActivity extends AppCompatActivity {
 
-    private static final String LOGIN_NEED_AUTHENTICATION = "AuthenticationRequired";
+    private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
 
 
     private ArrayList<String> allUsers = new ArrayList<>();
@@ -151,8 +152,6 @@ public class FindUsersActivity extends AppCompatActivity {
                 //TODO dummy
                 //return DUMMY_LIST
 
-                return response;
-
             } catch (Exception e) {
                 Log.e("MYDEBUG", "Exception: " + e.getMessage());
             }
@@ -164,10 +163,19 @@ public class FindUsersActivity extends AppCompatActivity {
             if(usersStr == null){
                 Toast.makeText(FindUsersActivity.this, "Error: Getting users from server", Toast.LENGTH_SHORT).show();
             }
-            for(String s : usersStr.split(";")){
-                allUsers.add(s);
+            else if(usersStr.equals(NEED_AUTHENTICATION)) {
+                Toast.makeText(FindUsersActivity.this, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
+                //Logout and start login
+                Intent logoutData = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(logoutData);
+                finish();
             }
-            usersCostumAdapter.addAll(allUsers);
+            else {
+                for (String s : usersStr.split(";")) {
+                    allUsers.add(s);
+                }
+                usersCostumAdapter.addAll(allUsers);
+            }
         }
 
         @Override

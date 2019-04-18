@@ -1,12 +1,12 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,8 +25,6 @@ import android.widget.Toast;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -38,8 +37,8 @@ public class AlbumsActivity extends AppCompatActivity
     private static final String USERNAME_EXTRA = "username";
 
     //server response types to login attempt
-    private static final String LOGOUT_SUCCESS = "Success";
-    private static final String LOGIN_NEED_AUTHENTICATION = "AuthenticationRequired";
+    private static final String SUCCESS = "Success";
+    private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
 
     //Storage filename
     private static final String TOKEN_FILENAME = "AuthToken";
@@ -71,13 +70,15 @@ public class AlbumsActivity extends AppCompatActivity
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 String albumName = input.getText().toString();
-                                if( albumName.length() == 0 ){
-                                    return;
-                                }
-                                String url = DUMMYURL;
-                                mCreateAlb = new UserCreateAlbum(albumName, url);
-                                mCreateAlb.execute((Void) null);
 
+                                if(TextUtils.isEmpty(albumName)) {
+                                    Toast.makeText(AlbumsActivity.this, getString(R.string.error_albumName_required), Toast.LENGTH_SHORT).show();
+                                }
+                                else {
+                                    String url = DUMMYURL;
+                                    mCreateAlb = new UserCreateAlbum(albumName, url);
+                                    mCreateAlb.execute((Void) null);
+                                }
                                 //startActivity(new Intent(getApplicationContext(), InsideAlbumActivity.class));
                             }
                         })
@@ -200,7 +201,7 @@ public class AlbumsActivity extends AppCompatActivity
                 InputStream in = new BufferedInputStream(conn.getInputStream());
                 String response = NetworkHandler.convertStreamToString(in);
 
-                if(response != null && response.equals(LOGOUT_SUCCESS)){
+                if(response != null && response.equals(SUCCESS)){
                     NetworkHandler.writeTokenFile("", AlbumsActivity.this);
                     return true;
                 }
@@ -222,9 +223,6 @@ public class AlbumsActivity extends AppCompatActivity
                 startActivity(logoutData);
                 finish();
             }
-            else {
-                Toast.makeText(AlbumsActivity.this, "Logout unsuccessful", Toast.LENGTH_LONG);
-            }
         }
 
         @Override
@@ -235,7 +233,7 @@ public class AlbumsActivity extends AppCompatActivity
     }
 
 
-    public class UserCreateAlbum extends AsyncTask<Void, Void, Boolean> {
+    public class UserCreateAlbum extends AsyncTask<Void, Void, String> {
 
         private final String _albumName;
         private final String _url;
@@ -246,7 +244,8 @@ public class AlbumsActivity extends AppCompatActivity
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected String doInBackground(Void... params) {
+            String response = null;
             try {
                 URL url = new URL("http://sigma03.ist.utl.pt:8350/createAlbum");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -272,26 +271,27 @@ public class AlbumsActivity extends AppCompatActivity
                 os.close();
 
                 InputStream in = new BufferedInputStream(conn.getInputStream());
-                String response = NetworkHandler.convertStreamToString(in);
-
-                if(response != null && response.equals(LOGOUT_SUCCESS)){
-                    NetworkHandler.writeTokenFile("", AlbumsActivity.this);
-                    return true;
-                }
-                return false;
+                response = NetworkHandler.convertStreamToString(in);
 
             } catch (Exception e) {
                 Log.e("MyDebug", "Exception: " + e.getMessage());
             }
-            return true;
+            return response;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(final String response) {
             mCreateAlb = null;
 
-            if(success){
+            if(response != null && response.equals(SUCCESS)){
                 Toast.makeText(AlbumsActivity.this, "You created an album! Gl finding it", Toast.LENGTH_LONG).show();
+            }
+            else if(response.equals(NEED_AUTHENTICATION)) {
+                Toast.makeText(AlbumsActivity.this, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
+                //Logout and start login
+                Intent logoutData = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(logoutData);
+                finish();
             }
             else {
                 Toast.makeText(AlbumsActivity.this, "Error creating albums", Toast.LENGTH_LONG).show();
