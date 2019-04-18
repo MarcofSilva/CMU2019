@@ -36,6 +36,8 @@ public class NetworkHandler {
         return sb.toString();
     }
 
+
+    //Swap internal storage for shared preferences
     static void writeTokenFile(String string, Activity activity) throws Exception {
         FileOutputStream fos = activity.openFileOutput(TOKEN_FILENAME, Context.MODE_PRIVATE);
         fos.write(string.getBytes());

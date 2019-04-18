@@ -29,7 +29,7 @@ import android.widget.Toast;
 
 import com.dropbox.core.android.Auth;
 
-public class AlbumsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ServiceConnection {
+public class AlbumsActivity extends DropboxActivity implements NavigationView.OnNavigationItemSelectedListener, ServiceConnection {
 
     //Intent extra tag
     private static final String USERNAME_EXTRA = "username";
@@ -58,14 +58,6 @@ public class AlbumsActivity extends AppCompatActivity implements NavigationView.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //Authenticate in dropbox account
-        //if(!hasToken()) {
-            //Auth.startOAuth2Authentication(this, getString(R.string.dropbox_app_key));
-        //}
-
-        // Launch intent to pick file for upload
-
         setContentView(R.layout.activity_albums);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -139,6 +131,20 @@ public class AlbumsActivity extends AppCompatActivity implements NavigationView.
 
         registerMyReceiver();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //Authenticate in dropbox account
+        if(!hasToken()) {
+            Auth.startOAuth2Authentication(this, getString(R.string.dropbox_app_key));
+        }
+    }
+
+    protected void loadData() {
+        //TODO
+    }
+
 
     @Override
     public void onBackPressed() {
