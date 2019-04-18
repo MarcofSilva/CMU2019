@@ -6,19 +6,16 @@ android:layout_height="wrap_content">
 
     <TextView
         android:id="@+id/find_user_text"
-        android:layout_weight="9"
-        android:layout_width="wrap_content"
+        android:layout_weight="1"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textSize="20dp"/>
+        android:textSize="20sp"/>
 
     <CheckBox
         android:id="@+id/find_user_item_checkbox"
-        android:width="0dp"
-        android:layout_weight="1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right"
         android:clickable="false"
-        android:focusable="false"/>
+        android:focusable="false" />
 
 </LinearLayout>

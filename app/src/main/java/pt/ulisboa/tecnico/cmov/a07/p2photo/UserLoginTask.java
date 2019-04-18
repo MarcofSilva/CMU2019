@@ -124,12 +124,6 @@ public class UserLoginTask extends AsyncTask<Void, Void, String> {
         else if(response.equals(LOGIN_SUCCESS)) {
             Intent loginData = new Intent(_activity.getApplicationContext(), AlbumsActivity.class);
             loginData.putExtra(USERNAME_EXTRA, mUsername);
-
-            //Authenticate in dropbox account
-                //if(!hasToken()) { TODO
-                        Auth.startOAuth2Authentication(_activity, _activity.getString(R.string.dropbox_app_key));
-                //}
-
             _activity.startActivity(loginData);
             _activity.finish();
         }

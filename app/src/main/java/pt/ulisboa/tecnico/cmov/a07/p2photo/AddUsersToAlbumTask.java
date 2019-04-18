@@ -12,34 +12,34 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
-public class CreateAlbumTask extends AsyncTask<Void, Void, String> {
+public class AddUsersToAlbumTask extends AsyncTask<Void, Void, String> {
 
     //server response types to login attempt
     private static final String SUCCESS = "Success";
     private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
+    private static final String ERROR = "Error";
 
-    private final String _albumName;
-    private final String _url;
-    private AlbumsActivity _activity;
+    private final ArrayList<String > _usernamesToAdd;
+    private InsideAlbumActivity _activity;
 
-    CreateAlbumTask(String albumName, String url, AlbumsActivity act) {
-        _albumName = albumName;
-        _url = url;
-        _activity = act;
+    public AddUsersToAlbumTask(ArrayList<String> usernames, InsideAlbumActivity activity) {
+        _usernamesToAdd = usernames;
+        _activity = activity;
     }
 
     @Override
     protected String doInBackground(Void... params) {
         String response = "";
         try {
-            URL url = new URL("http://sigma03.ist.utl.pt:8350/createAlbum");
+            URL url = new URL("http://sigma03.ist.utl.pt:8350/addUsersToAlbum");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
 
             JSONObject postDataParams = new JSONObject();
-            postDataParams.put("albumName", _albumName);
-            postDataParams.put("url", _url);
+            postDataParams.put("usernames", fixStringsInArrayList_json(_usernamesToAdd));
+
 
 
             //TODO see what each of this properties do
@@ -67,10 +67,10 @@ public class CreateAlbumTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onPostExecute(final String response) {
-        _activity.setmCreateAlb(null);
+        _activity.setmAddUsersToAlbum(null);
 
-        if(response != null && response.equals(SUCCESS)){ //TODO change this
-            Toast.makeText(_activity, "You created an album! Gl finding it", Toast.LENGTH_LONG).show();
+        if(response != null && response.equals(SUCCESS)){
+            Toast.makeText(_activity, "Sending usernames to server", Toast.LENGTH_LONG).show();
         }
         else if(response.equals(NEED_AUTHENTICATION)) {
             Toast.makeText(_activity, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
@@ -79,14 +79,21 @@ public class CreateAlbumTask extends AsyncTask<Void, Void, String> {
             _activity.startActivity(logoutData);
             _activity.finish();
         }
-        else {
-            Toast.makeText(_activity, "Error creating albums", Toast.LENGTH_LONG).show();
+        else { //Include receiving Error message from the server
+            Toast.makeText(_activity, "Error adding users to album", Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
     protected void onCancelled() {
-        _activity.setmCreateAlb(null);
+        _activity.setmAddUsersToAlbum(null);
     }
 
+
+    private ArrayList<String> fixStringsInArrayList_json(ArrayList<String> usernames) {
+        for(int i = 0; i < usernames.size(); i++) {
+            usernames.set(i, "\"" + usernames.get(i) + "\"");
+        }
+        return usernames;
+    }
 }

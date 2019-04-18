@@ -2,7 +2,9 @@ package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.text.TextUtils;
 import android.view.View;
@@ -18,12 +20,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dropbox.core.android.Auth;
+
 public class AlbumsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     //Intent extra tag
     private static final String USERNAME_EXTRA = "username";
 
+    //TODO cuidado
     private static final String DUMMYURL = "www.pornhub.com";
 
     private UserLogoutTask mLogout = null;
@@ -35,6 +40,14 @@ public class AlbumsActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //Authenticate in dropbox account
+        //if(!hasToken()) {
+            //Auth.startOAuth2Authentication(this, getString(R.string.dropbox_app_key));
+        //}
+
+        // Launch intent to pick file for upload
+
         setContentView(R.layout.activity_albums);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -61,7 +74,8 @@ public class AlbumsActivity extends AppCompatActivity
                                     mCreateAlb = new CreateAlbumTask(albumName, url, AlbumsActivity.this);
                                     mCreateAlb.execute((Void) null);
                                 }
-                                //startActivity(new Intent(getApplicationContext(), InsideAlbumActivity.class));
+                                //TODO apagar
+                                startActivity(new Intent(getApplicationContext(), InsideAlbumActivity.class));
                             }
                         })
                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

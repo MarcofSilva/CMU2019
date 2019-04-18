@@ -1,46 +1,39 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
-import android.os.AsyncTask;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Toast;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class FindUsersActivity extends AppCompatActivity {
 
     private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
+    private static final String USERNAMES_EXTRA = "usernames";
+
+    private static final int FIND_USERS_REQUEST_CODE = 2;
 
 
     private ArrayList<String> allUsers = new ArrayList<>();
-    private ArrayList<String> users = new ArrayList<>();
+    private ArrayList<String> usersToAdd = new ArrayList<>();
     private ArrayList<String> usersToShowList = new ArrayList<>();
     private CostumAdapterUsers usersCustomAdapter;
     private GetUsersTask mGetTask = null;
 
     private EditText searchUserView;
 
+    //TODO
     private String DUMMY_LIST = "Marco123;Joao1;Matilde2";
 
     @Override
@@ -59,11 +52,14 @@ public class FindUsersActivity extends AppCompatActivity {
         EditText text = findViewById(R.id.findUser_search);
         text.addTextChangedListener(textWatcher);
 
-        TextView doneAlbum = findViewById(R.id.done_btn);
-        doneAlbum.setOnClickListener(new View.OnClickListener() {
+        TextView doneLink = findViewById(R.id.done_btn);
+        doneLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //done button behaviour
+                Intent usernamesIntent = new Intent();
+                usernamesIntent.putStringArrayListExtra(USERNAMES_EXTRA, usersToAdd);
+                setResult(RESULT_OK, usernamesIntent);
+                finish();
             }
         });
 
@@ -77,15 +73,15 @@ public class FindUsersActivity extends AppCompatActivity {
                 boolean checked = cb.isChecked();
                 if(!checked){
                     cb.setChecked(true);
-                    users.add(tv.getText().toString());
+                    usersToAdd.add(tv.getText().toString());
                 }
                 else {
                     cb.setChecked(false);
                     String name = (tv.getText().toString());
 
-                    for(String u : users){
+                    for(String u : usersToAdd){
                         if(u.equals(name)){
-                            users.remove(u);
+                            usersToAdd.remove(u);
                             break;
                         }
                     }
