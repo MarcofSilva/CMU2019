@@ -71,6 +71,8 @@ public class UserLogoutTask extends AsyncTask<Void, Void, Boolean> {
         _activity.setmLogout(null);
 
         if(success){
+            Log.d("Debug Cenas", "Should stop my service" );
+            _activity.stopService();
             Toast.makeText(_activity, "Logout successful", Toast.LENGTH_LONG);
             Intent logoutData = new Intent(_activity.getApplicationContext(), LoginActivity.class);
             _activity.startActivity(logoutData);

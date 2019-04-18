@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
@@ -12,6 +13,9 @@ import java.net.URL;
 public class GetUsersTask extends AsyncTask<Void, Void, String> {
 
     private FindUsersActivity _activity;
+
+    private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
+
 
     public GetUsersTask(FindUsersActivity activity){
         _activity = activity;
@@ -55,10 +59,19 @@ public class GetUsersTask extends AsyncTask<Void, Void, String> {
         if(usersStr == null){
             Toast.makeText(_activity, "Error: Getting users from server", Toast.LENGTH_SHORT).show();
         }
-        for(String s : usersStr.split(";")){
-            _activity.addUsers(s);
+        else if(usersStr.equals(NEED_AUTHENTICATION)){
+            Toast.makeText(_activity, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
+            //Logout and start login
+            Intent logoutData = new Intent(_activity.getApplicationContext(), LoginActivity.class);
+            _activity.startActivity(logoutData);
+            _activity.finish();
         }
-        _activity.addAllusersCustom();
+        else {
+            for(String s : usersStr.split(";")){
+                _activity.addUsers(s);
+            }
+            _activity.addAllusersCustom();
+        }
     }
 
     @Override

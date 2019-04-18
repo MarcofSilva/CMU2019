@@ -1,12 +1,19 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -22,8 +29,7 @@ import android.widget.Toast;
 
 import com.dropbox.core.android.Auth;
 
-public class AlbumsActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class AlbumsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ServiceConnection {
 
     //Intent extra tag
     private static final String USERNAME_EXTRA = "username";
@@ -31,8 +37,15 @@ public class AlbumsActivity extends AppCompatActivity
     //TODO cuidado
     private static final String DUMMYURL = "www.pornhub.com";
 
+    public static final String BROADCAST_ACTION = "pt.ulisboa.tecnico.updating";
+
+    private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
+
     private UserLogoutTask mLogout = null;
     private CreateAlbumTask mCreateAlb = null;
+
+    private UpdateService myService;
+    private MyBroadCastReceiver myBroadCastReceiver;
 
     // UI references.
     private TextView mUsernameView;
@@ -106,6 +119,18 @@ public class AlbumsActivity extends AppCompatActivity
         mUsernameView = headerView.findViewById(R.id.tabUsername);
         String username = getIntent().getStringExtra(USERNAME_EXTRA);
         mUsernameView.setText(username);
+
+
+        myBroadCastReceiver = new MyBroadCastReceiver();
+
+        Intent intent= new Intent(this, UpdateService.class);
+
+        Log.d("Debug Cenas", "oncreate: trying to bind service");
+        UpdateService._activity = this;
+        bindService(intent, this, Context.BIND_AUTO_CREATE);
+        Log.d("Debug Cenas", "oncreate: binded service");
+
+        registerMyReceiver();
     }
 
     @Override
@@ -162,6 +187,63 @@ public class AlbumsActivity extends AppCompatActivity
         return true;
     }
 
+    public void stopService(){
+        Log.d("Debug Cenas", "Stop: unbiding" );
+        unbindService(this);
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder binder) {
+        Log.d("Debug Cenas", "onServiceConnected");
+        UpdateService.MyBinder b = (UpdateService.MyBinder) binder;
+        myService = b.getService();
+    }
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+
+    }
+
+    class MyBroadCastReceiver extends BroadcastReceiver{
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            try {
+                String newAlbumsIAmIn = intent.getStringExtra("data");
+                if(newAlbumsIAmIn.equals(NEED_AUTHENTICATION)){
+                    Toast.makeText(AlbumsActivity.this, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
+                    //Logout and start login
+                    Intent logoutData = new Intent(AlbumsActivity.this.getApplicationContext(), LoginActivity.class);
+                    AlbumsActivity.this.startActivity(logoutData);
+                    AlbumsActivity.this.finish();
+                }
+                String[] responseSplit = newAlbumsIAmIn.split(";");
+                String userName = responseSplit[0];
+                String albumName = responseSplit[1];
+                Log.d("Debug Cenas","receiver: user: " + userName + " album " + albumName);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void registerMyReceiver() {
+        Log.d("Debug Cenas", "RegisterReceiver: registering MyReceiver");
+
+        try{
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(BROADCAST_ACTION);
+            registerReceiver(myBroadCastReceiver, intentFilter);
+        }
+        catch (Exception ex){
+            ex.printStackTrace();
+        }
+
+    }
+
+    @Override
+    protected void onDestroy(){
+        unregisterReceiver(myBroadCastReceiver);
+        super.onDestroy();
+    }
     public UserLogoutTask getmLogout() {
         return mLogout;
     }
