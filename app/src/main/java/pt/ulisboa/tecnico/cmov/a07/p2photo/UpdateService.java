@@ -54,7 +54,6 @@ public class UpdateService extends Service {
             broadCastIntent.setAction(BROADCAST_ACTION);
             broadCastIntent.putExtra("data", dataToSend);
             sendBroadcast(broadCastIntent);
-
         }
         catch (Exception ex){
             ex.printStackTrace();
@@ -107,7 +106,7 @@ public class UpdateService extends Service {
             InputStream in = new BufferedInputStream(conn.getInputStream());
             String response = NetworkHandler.convertStreamToString(in);
 
-            if(response.equals("EMPTY")){
+            if(response.equals("Empty")){
                 return;
             }
             else if(response.equals(NEED_AUTHENTICATION)){

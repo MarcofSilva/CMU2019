@@ -49,6 +49,7 @@ public class AcceptAlbumTask extends AsyncTask<Void, Void, String> {
             postDataParams.put("albumName", _albumName);
             postDataParams.put("dropboxURL", _dropboxUrl);
             postDataParams.put("accepted", _accepted);
+            Log.d("Debug Cenas","JSONArgs: user: " + _userAlbum + " album " + _albumName + " dropbox " + _dropboxUrl + " accepted " + _accepted);
 
 
             //TODO see what each of this properties do

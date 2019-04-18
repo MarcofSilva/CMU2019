@@ -233,8 +233,8 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
                 String[] responseSplit = newAlbumsIAmIn.split(";");
                 userName = responseSplit[0];
                 albumName = responseSplit[1];
-                dropboxURL = "isto e um dummy shit";
-                Log.d("Debug Cenas","receiver: user: " + userName + " album " + albumName);
+                dropboxURL = "dummyShit";
+                Log.d("Debug Cenas","receiver: user: " + userName + " album " + albumName + " dropbox " + dropboxURL);
 
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(AlbumsActivity.this);
                 dialogBuilder.setTitle(userName + " wants you to join album " + albumName);
