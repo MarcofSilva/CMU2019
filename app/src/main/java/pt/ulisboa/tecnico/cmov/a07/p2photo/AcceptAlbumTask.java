@@ -82,7 +82,8 @@ public class AcceptAlbumTask extends AsyncTask<Void, Void, String> {
         _act.setmAcceptALb(null);
 
         if(response != null && response.equals(SUCCESS)){
-            Toast.makeText(_act, "Sending usernames to server", Toast.LENGTH_LONG).show();
+
+            Toast.makeText(_act, "Sending catalog URL for album " + _albumName, Toast.LENGTH_LONG).show();
         }
         else if(response.equals(NEED_AUTHENTICATION)) {
             Toast.makeText(_act, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
