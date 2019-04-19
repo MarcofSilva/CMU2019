@@ -77,7 +77,9 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
                                 String albumName = input.getText().toString();
 
                                 if(TextUtils.isEmpty(albumName)) {
-                                    Toast.makeText(AlbumsActivity.this, getString(R.string.error_albumName_required), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(AlbumsActivity.this, getString(R.string.error_albumName_required), Toast.LENGTH_LONG).show();
+                                    //TODO check if this work as a way to not let de box disappear
+                                    //dialogBuilder.create().show();
                                 }
                                 else {
                                     String url = DUMMYURL;
@@ -139,8 +141,13 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
         if(!hasToken()) {
             Auth.startOAuth2Authentication(this, getString(R.string.dropbox_app_key));
         }
+        else {
+            //TODO change this as a way to show the info about the account already logged in dropbox
+            //Toast.makeText(AlbumsActivity.this, "", Toast.LENGTH_SHORT).show();
+        }
     }
 
+    //TODO still understanding what to do here
     protected void loadData() {
         //TODO
     }
@@ -216,6 +223,7 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
 
     }
 
+    //TODO probably get this class in a file, review its name and if it works to make all necessary activities use it...maybe a superclass?
     class MyBroadCastReceiver extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -233,6 +241,8 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
                 String[] responseSplit = newAlbumsIAmIn.split(";");
                 userName = responseSplit[0];
                 albumName = responseSplit[1];
+                
+                //TODO eventually to delete
                 dropboxURL = "dummyShit";
                 Log.d("Debug Cenas","receiver: user: " + userName + " album " + albumName + " dropbox " + dropboxURL);
 
