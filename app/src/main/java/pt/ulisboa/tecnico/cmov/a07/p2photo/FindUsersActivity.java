@@ -148,10 +148,7 @@ public class FindUsersActivity extends AppCompatActivity {
     }
 }
 
-
-
-
-class CustomAdapterUsers extends BaseAdapter {
+/*class CustomAdapterUsers extends BaseAdapter {
 
     private final List<String> _users;
     private final Activity _activity;
@@ -217,3 +214,4 @@ class UsersViewHolder {
         name = view.findViewById(R.id.find_user_text);
     }
 }
+*/

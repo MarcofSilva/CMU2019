@@ -10,13 +10,13 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CostumAdapterUsers extends BaseAdapter {
+public class CustomAdapterUsers extends BaseAdapter {
 
     private final List<String> _permittedUsers = new ArrayList<>();
     private final List<String> _users;
     private final Activity _act;
 
-    public CostumAdapterUsers(ArrayList<String> users, Activity act) {
+    public CustomAdapterUsers(ArrayList<String> users, Activity act) {
         this._users = users;
         this._act = act;
     }
