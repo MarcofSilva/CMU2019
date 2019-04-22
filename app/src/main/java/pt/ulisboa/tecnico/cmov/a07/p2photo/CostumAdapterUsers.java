@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -11,12 +12,13 @@ import java.util.List;
 
 public class CostumAdapterUsers extends BaseAdapter {
 
+    private final List<String> _permittedUsers = new ArrayList<>();
     private final List<String> _users;
-    private final Activity act;
+    private final Activity _act;
 
     public CostumAdapterUsers(ArrayList<String> users, Activity act) {
         this._users = users;
-        this.act = act;
+        this._act = act;
     }
 
     @Override
@@ -30,11 +32,15 @@ public class CostumAdapterUsers extends BaseAdapter {
     }
 
     public void clear() {
+        _permittedUsers.clear();
         _users.clear();
         notifyDataSetChanged();
     }
 
-    public void addAll(ArrayList<String> users){
+    public void addAllPermitted(ArrayList<String> users){
+        _permittedUsers.addAll(users);
+    }
+    public void addAllUsers(ArrayList<String> users){
         _users.addAll(users);
     }
 
@@ -46,12 +52,18 @@ public class CostumAdapterUsers extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        View view = act.getLayoutInflater().inflate(R.layout.activity_find_users_item, parent, false);
+        View view = _act.getLayoutInflater().inflate(R.layout.activity_find_users_item, parent, false);
 
         String name = _users.get(position);
 
         TextView nameView = view.findViewById(R.id.find_user_text);
+        CheckBox boxView = view.findViewById(R.id.find_user_item_checkbox);
 
+        if(_permittedUsers.contains(name)) {
+            boxView.setChecked(true);
+            boxView.setEnabled(false);
+            boxView.setClickable(false);
+        }
         nameView.setText(name);
 
         return view;

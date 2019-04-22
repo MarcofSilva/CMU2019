@@ -13,19 +13,22 @@ import java.net.URL;
 public class GetUsersTask extends AsyncTask<Void, Void, String> {
 
     private FindUsersActivity _activity;
+    private String _albumName;
 
     private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
 
 
-    public GetUsersTask(FindUsersActivity activity){
+    public GetUsersTask(FindUsersActivity activity, String albumName){
+
         _activity = activity;
+        _albumName = albumName;
     }
 
     @Override
     protected String doInBackground(Void... params) {
         String response = "";
         try {
-            URL url = new URL("http://sigma03.ist.utl.pt:8350/getUsers");
+            URL url = new URL("http://sigma03.ist.utl.pt:8350/getUsers?albumName=" + _albumName);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
@@ -67,10 +70,22 @@ public class GetUsersTask extends AsyncTask<Void, Void, String> {
             _activity.finish();
         }
         else {
-            for(String s : usersStr.split(";")){
-                _activity.addUsers(s);
+            String[] response = usersStr.split(",");
+            String permitted = response[0];
+            String notPermitted = response[1];
+            for(String s : permitted.split(";")) {
+                if (!s.equals("")) {
+                    _activity.addUsersPermitted(s);
+                    _activity.addUser(s);
+                }
+            }
+            for(String s : notPermitted.split(";")) {
+                if (!s.equals("")) {
+                    _activity.addUser(s);
+                }
             }
             _activity.addAllusersCustom();
+
         }
     }
 
