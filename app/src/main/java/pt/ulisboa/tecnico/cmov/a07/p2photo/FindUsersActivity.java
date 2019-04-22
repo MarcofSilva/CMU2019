@@ -30,10 +30,12 @@ public class FindUsersActivity extends AppCompatActivity {
     private static final int FIND_USERS_REQUEST_CODE = 2;
 
 
+    private ArrayList<String> permittedUsers = new ArrayList<>();
     private ArrayList<String> allUsers = new ArrayList<>();
     private ArrayList<String> usersToAdd = new ArrayList<>();
     private ArrayList<String> usersToShowList = new ArrayList<>();
     private CustomAdapterUsers usersCustomAdapter;
+    String albumName = "";
     private GetUsersTask mGetTask = null;
 
     private EditText searchUserView;
@@ -76,24 +78,32 @@ public class FindUsersActivity extends AppCompatActivity {
                 CheckBox cb= (CheckBox)ll.getChildAt(1);
 
                 boolean checked = cb.isChecked();
-                if(!checked){
-                    cb.setChecked(true);
-                    usersToAdd.add(tv.getText().toString());
-                }
-                else {
-                    cb.setChecked(false);
-                    String name = (tv.getText().toString());
+                boolean enabled = cb.isEnabled();
+                if(enabled) {
+                    if (!checked) {
+                        cb.setChecked(true);
+                        usersToAdd.add(tv.getText().toString());
+                    } else {
+                        cb.setChecked(false);
+                        String name = (tv.getText().toString());
 
-                    for(String u : usersToAdd){
-                        if(u.equals(name)){
-                            usersToAdd.remove(u);
-                            break;
+                        for (String u : usersToAdd) {
+                            if (u.equals(name)) {
+                                usersToAdd.remove(u);
+                                break;
+                            }
                         }
+                    }
+                }
+                else{
+                    if (!checked){
+                        cb.setChecked(true);
                     }
                 }
             }
         });
-        mGetTask = new GetUsersTask(this);
+        albumName = getIntent().getStringExtra("albumName");
+        mGetTask = new GetUsersTask(this, albumName);
         mGetTask.execute((Void) null);
     }
 
@@ -114,7 +124,7 @@ public class FindUsersActivity extends AppCompatActivity {
                     addUsers.add(user);
                 }
             }
-            usersCustomAdapter.addAll(addUsers);
+            usersCustomAdapter.addAllUsers(addUsers);
         }
 
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -125,12 +135,16 @@ public class FindUsersActivity extends AppCompatActivity {
         }
     };
 
-    public void addUsers(String s){
+    public void addUsersPermitted(String s){
+        permittedUsers.add(s);
+    }
+    public void addUser(String s){
         allUsers.add(s);
     }
 
     public void addAllusersCustom(){
-        usersCustomAdapter.addAll(allUsers);
+        usersCustomAdapter.addAllUsers(allUsers);
+        usersCustomAdapter.addAllPermitted(permittedUsers);
     }
 }
 

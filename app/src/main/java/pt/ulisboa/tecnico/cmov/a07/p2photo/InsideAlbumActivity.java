@@ -111,6 +111,7 @@ public class InsideAlbumActivity extends DropboxActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 Intent addUsersIntent = new Intent(getApplicationContext(), FindUsersActivity.class);
+                                addUsersIntent.putExtra("albumName", myName);
                                 startActivityForResult(addUsersIntent, FIND_USERS_REQUEST_CODE);
                             }
                         })
