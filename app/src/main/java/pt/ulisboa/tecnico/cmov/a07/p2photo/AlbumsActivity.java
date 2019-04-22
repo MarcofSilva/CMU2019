@@ -78,7 +78,7 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
     private static final String USERNAME_EXTRA = "username";
 
     //TODO cuidado
-    private static final String DUMMYURL = "www.pornhub.com";
+    private static final String DUMMYURL = "dummyAddress";
 
     public static final String BROADCAST_ACTION = "pt.ulisboa.tecnico.updating";
 
