@@ -97,13 +97,54 @@ def getUsers():
 	if not user:
 		return "AuthenticationRequired"
 	print(user)
+	#get users with permission
+	print(request.args)
+	albumName = request.args.get('albumName')
+	#print(albumName)
+	album = albumManager.getAlbum(user, albumName)
+	albumPermissions = list(album.getPermissions())
 	users = User.query.all()
 	usernames = []
 	for u in users:
+		print(u.username)
+		print(u.username not in albumPermissions)
 		if u.username != user.username:
-			usernames += [u.username]
-	res = ";".join(usernames)
-	return res +";"
+			if (u.username not in albumPermissions):
+				usernames += [u.username]
+	print(usernames)
+	albumPermissions.remove(user.username)
+	print("permissions:")
+	print(albumPermissions)
+	#TODO proibir users de usar virgula
+	res = ";".join(albumPermissions) + ";" + "," + ";".join(usernames) + ";"
+	print(res)
+	return res
+
+@app.route('/getCatalogUrls', methods=['GET'])
+def getCatalogUrls():
+	user = getToken()
+	#if not user:
+		#return "AuthenticationRequired"
+	user = User.query.filter_by(username="Joao").first()
+	print(user)
+	#get users with permission
+	albumName = request.args.get('albumName', None)
+	album = albumManager.getAlbum(user, albumName)
+	albumPermissions = album.getPermissionsAndUrl()
+	print("permissions:")
+	print(albumPermissions)
+	permittedUrls = []
+	for p in albumPermissions:
+		if not (p == user.username):
+			permittedUrls += [albumPermissions[p]]
+	permittedUrls = tuple(permittedUrls)
+	print(permittedUrls)
+	#TODO ver se é possível haver None
+	if None in permittedUrls:
+		print("Error")
+		return "Error"
+	return permittedUrls
+
 
 @app.route('/addUsersToAlbum', methods=['POST'])
 def addUsersToAlbum():
@@ -114,6 +155,7 @@ def addUsersToAlbum():
 	albumName = request.json.get('albumName', None)
 	print(albumName)
 	usernames = request.json.get('usernames', None)
+	print("usernames:")
 	print(usernames)
 	usernames = ast.literal_eval(usernames)
 	for u in usernames:
@@ -130,7 +172,10 @@ def addUsersToAlbum():
 			print("Already pending invites for " + bdUser.username)
 			data = bdUser.pendingInvites
 			if (user.username in data):
-				data[user.username] += [albumName]
+				if albumName not in data[user.username]:
+					data[user.username] += [albumName]
+				else:
+					print(bdUser.username + " was already invited to " + albumName)
 			else:
 				data[user.username] = [albumName]
 			bdUser.pendingInvites = None
@@ -188,22 +233,23 @@ def acceptInvitation():
 	print(creator)
 	albumName = request.json.get('albumName', None)
 	print(albumName)
-	success = request.json.get('success', None) #TODO
+	success = request.json.get('accepted', None) #TODO
 	print(success)
-	creatorUser = User.query.filter_by(username=creator).first()
-	userAlbum = albumManager.addUsersToAlbum(creatorUser, albumName, [user.username], sliceUrl)
-	if (userAlbum):
-		user.albums = None
-		db.session.commit()
-		user = User.query.filter_by(username=user.username).first()
-		user.albums = userAlbum
-		db.session.commit()
-		return "Success"
-	return "Error"
+	if(success == "true"):
+		creatorUser = User.query.filter_by(username=creator).first()
+		userAlbum = albumManager.addUsersToAlbum(creatorUser, albumName, [user.username], sliceUrl)
+		if (userAlbum):
+			user.albums = None
+			db.session.commit()
+			user = User.query.filter_by(username=user.username).first()
+			user.albums = userAlbum
+			db.session.commit()
+			return "Success"
+		return "Error"
+	return "Success"
 
 def getToken():
 	token = request.headers.get('authorization')
-	print(token)
 	if not token:
 		print("No Token Received")
 		return False
@@ -232,7 +278,7 @@ class User(UserMixin, db.Model):
 	password = db.Column(db.String(50), unique=False, nullable = False)
 	token = db.Column(db.String(150))
 	albums = db.Column(types.PickleType)
-	pendingInvites = db.Column(types.PickleType)
+	pendingInvites = db.Column(types.PickleType) #{Username:[albuns]}
 
 	def __repr__(self):
 		return '<User %r %r>' % (self.id, self.username)
@@ -254,3 +300,4 @@ def validateArgs(username, password):
 	if user.password != password:
 		return 'IncorrectPassword'
 	return 'Success'
+

@@ -12,3 +12,6 @@ class Album:
 
 	def getPermissions(self):
 		return self.membership.keys()
+
+	def getPermissionsAndUrl(self):
+		return self.membership

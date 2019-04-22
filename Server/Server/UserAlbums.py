@@ -12,7 +12,6 @@ class UserAlbums:
 
 	def getAlbum(self, albumName):
 		for a in self.albums:
-			print(a.name)
 			if a.name == albumName:
 				return a
 		print("Album not found")

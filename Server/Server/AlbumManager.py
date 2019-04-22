@@ -20,19 +20,25 @@ class AlbumManager:
 
 	def addUsersToAlbum(self, user, albumName, usernames, userUrl=None):
 		userAlbums = user.albums
+		album = self.getAlbum(user, albumName)
+		for u in usernames:
+			album.addUser(u, userUrl)
+		return userAlbums
+
+	def getAlbum(self, user, albumName):
+		userAlbums = user.albums
 		if not userAlbums:
 			print("No albums yet")
 			return False
 		album = userAlbums.getAlbum(albumName)
 		if not album:
 			return False
-		for u in usernames:
-			album.addUser(u, userUrl)
-		return userAlbums
+		return album
 
 
 
 
 
 	
+
 
