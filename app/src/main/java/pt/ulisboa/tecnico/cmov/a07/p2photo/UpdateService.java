@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -24,7 +25,7 @@ public class UpdateService extends Service {
     private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
 
 
-    public static AlbumsActivity _activity = null;
+    public static Activity _activity = null;
 
     public class MyBinder extends Binder {
         UpdateService getService() {
@@ -43,16 +44,15 @@ public class UpdateService extends Service {
         timer = new Timer();
         initializeTimerTask();
         //after 2secs execute and then 10s perioud
-        timer.schedule(timerTask, 10000, 5000);
+        timer.schedule(timerTask, 3000, 5000);
         return mBinder;
     }
 
-    private void sendMyBroadCast(String dataToSend){
+    private void sendMyBroadCast(){
         try{
             Log.d("Debug Cenas", "sendMyBroadCast");
             Intent broadCastIntent = new Intent();
             broadCastIntent.setAction(BROADCAST_ACTION);
-            broadCastIntent.putExtra("data", dataToSend);
             sendBroadcast(broadCastIntent);
         }
         catch (Exception ex){
@@ -110,9 +110,17 @@ public class UpdateService extends Service {
                 return;
             }
             else if(response.equals(NEED_AUTHENTICATION)){
-                response = NEED_AUTHENTICATION;
+                response = NEED_AUTHENTICATION + ";" + NEED_AUTHENTICATION;
             }
-            sendMyBroadCast(response);
+
+            String[] resSplit = response.split(";");
+            Invite invite = new Invite(resSplit[0], resSplit[1]);
+
+            ContextClass context = (ContextClass) getApplicationContext();
+            context.addInvite(invite);
+
+            //sending ping for him to update himself
+            sendMyBroadCast();
 
         } catch (Exception e) {
             Log.e("MYDEBUG", "Exception: " + e.getMessage());

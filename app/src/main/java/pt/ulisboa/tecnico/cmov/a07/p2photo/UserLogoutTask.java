@@ -78,7 +78,7 @@ public class UserLogoutTask extends AsyncTask<Void, Void, Boolean> {
 
         if(success){
             Log.d("Debug Cenas", "Should stop my service" );
-            _activity.stopService();
+            //_activity.stopService();
             Toast.makeText(_activity, "Logout successful", Toast.LENGTH_LONG);
 
             //Remove dropbox token, as a way to make every user that is login in to login to their dropbox account, instead of already having a dropbox account associated from previous logins

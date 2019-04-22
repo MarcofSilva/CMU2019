@@ -19,7 +19,7 @@ public class AcceptAlbumTask extends AsyncTask<Void, Void, String> {
     private String _albumName;
     private String _dropboxUrl;
     private String _accepted;
-    private AlbumsActivity _act;
+    private AlbumsInvitationsActivity _act;
 
     private static final String SUCCESS = "Success";
     private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
@@ -27,7 +27,7 @@ public class AcceptAlbumTask extends AsyncTask<Void, Void, String> {
 
     //server response types to request attempt TODO this strings should correspond to the ones sent by the server after login attempt
 
-    AcceptAlbumTask(String userAlbum, String albumName, String dropboxUrl, String accepted, AlbumsActivity act) {
+    AcceptAlbumTask(String userAlbum, String albumName, String dropboxUrl, String accepted, AlbumsInvitationsActivity act) {
         _userAlbum = userAlbum;
         _albumName = albumName;
         _dropboxUrl = dropboxUrl;
@@ -82,12 +82,12 @@ public class AcceptAlbumTask extends AsyncTask<Void, Void, String> {
         _act.setmAcceptALb(null);
 
         if(response != null && response.equals(SUCCESS)){
-
-            Toast.makeText(_act, "Sending catalog URL for album " + _albumName, Toast.LENGTH_LONG).show();
+            Toast.makeText(_act, "Action succeed ", Toast.LENGTH_LONG).show();
         }
         else if(response.equals(NEED_AUTHENTICATION)) {
             Toast.makeText(_act, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
             //Logout and start login
+            //nao deve ser preciso por causa do ondestroy da activity_act.stopService();
             Intent logoutData = new Intent(_act.getApplicationContext(), LoginActivity.class);
             _act.startActivity(logoutData);
             _act.finish();

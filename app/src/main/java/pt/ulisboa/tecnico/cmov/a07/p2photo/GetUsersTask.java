@@ -19,7 +19,6 @@ public class GetUsersTask extends AsyncTask<Void, Void, String> {
 
 
     public GetUsersTask(FindUsersActivity activity, String albumName){
-
         _activity = activity;
         _albumName = albumName;
     }

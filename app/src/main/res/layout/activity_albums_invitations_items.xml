@@ -1,0 +1,34 @@
+<!--Layout for a row in the listView of users, needed for the custom adapter for this list because of the username and checkbox-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/invitation_text"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:textSize="15sp"/>
+
+    <Button
+        android:id="@+id/invitation_accept"
+        style="?android:textAppearanceSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/action_accept"
+        android:textStyle="bold"
+        android:minHeight="0dp"
+        android:minWidth="0dp"/>
+
+    <Button
+        android:id="@+id/invitation_refuse"
+        style="?android:textAppearanceSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/action_refuse"
+        android:textStyle="bold"
+        android:minHeight="0dp"
+        android:minWidth="0dp"/>
+
+</LinearLayout>

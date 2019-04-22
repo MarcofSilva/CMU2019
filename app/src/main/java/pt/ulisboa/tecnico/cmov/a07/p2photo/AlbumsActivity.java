@@ -12,7 +12,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -63,6 +62,10 @@ import java.util.ArrayList;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
+
 public class AlbumsActivity extends DropboxActivity implements NavigationView.OnNavigationItemSelectedListener, ServiceConnection {
 
     private static final int REQUEST_READ_EXTERNAL_STORAGE = 0;
@@ -83,11 +86,6 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
 
     private UserLogoutTask mLogout = null;
     private CreateAlbumTask mCreateAlb = null;
-
-    private AcceptAlbumTask mAcceptALb = null;
-    String userName = "";
-    String albumName = "";
-    String dropboxURL = "";
 
     private UpdateService myService;
     private MyBroadCastReceiver myBroadCastReceiver;
@@ -194,7 +192,7 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
         Log.d("Debug Cenas", "oncreate: binded service");
 
         registerMyReceiver();
-    }
+}
 
     @Override
     protected void onResume() {
@@ -299,7 +297,9 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.nav_invitation_albums) {
+            Intent albumsInvitations = new Intent(AlbumsActivity.this.getApplicationContext(), AlbumsInvitationsActivity.class);
+            this.startActivity(albumsInvitations);
 
         } else if (id == R.id.nav_logout) {
             String username = getIntent().getStringExtra("username");
@@ -314,6 +314,7 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
     public void stopService(){
         Log.d("Debug Cenas", "Stop: unbiding" );
         unbindService(this);
+        stopService(new Intent(this, UpdateService.class));
     }
 
     @Override
@@ -331,52 +332,28 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
     class MyBroadCastReceiver extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
-            try {
-                String newAlbumsIAmIn = intent.getStringExtra("data");
-                Log.d("Debug Cenas","receiver: " +  newAlbumsIAmIn);
+            Toast.makeText(AlbumsActivity.this, "You have a new invite. Go to Invites Tab", Toast.LENGTH_LONG).show();
 
-                if(newAlbumsIAmIn.equals(NEED_AUTHENTICATION)){
-                    Toast.makeText(AlbumsActivity.this, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
-                    //Logout and start login
-                    Intent logoutData = new Intent(AlbumsActivity.this.getApplicationContext(), LoginActivity.class);
-                    AlbumsActivity.this.startActivity(logoutData);
-                    AlbumsActivity.this.finish();
+            ContextClass contextClass = (ContextClass) getApplicationContext();
+            boolean logout = false;
+            ArrayList<Integer> indextoRemove = new ArrayList<>();
+            for(int i = 0; i < contextClass.getInvites().size(); i++){
+                Invite inv = contextClass.getInvite(i);
+                if(inv.get_albumName().equals(NEED_AUTHENTICATION) && inv.get_userAlbum().equals(NEED_AUTHENTICATION)){
+                    logout = true;
+                    indextoRemove.add(i);
                 }
-                String[] responseSplit = newAlbumsIAmIn.split(";");
-                userName = responseSplit[0];
-                albumName = responseSplit[1];
-                
-                //TODO eventually to delete
-                dropboxURL = "dummyShit";
-                Log.d("Debug Cenas","receiver: user: " + userName + " album " + albumName + " dropbox " + dropboxURL);
-
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(AlbumsActivity.this);
-                dialogBuilder.setTitle(userName + " wants you to join album " + albumName);
-                dialogBuilder
-                        .setPositiveButton("Accept", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Log.d("Debug Cenas", "Accepted invite");
-
-                                mAcceptALb = new AcceptAlbumTask(userName, albumName, dropboxURL, "true", AlbumsActivity.this);
-                                mAcceptALb.execute((Void) null);
-                            }
-                        })
-                        .setNegativeButton("Refuse", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Log.d("Debug Cenas", "Rejected invite");
-
-                                mAcceptALb = new AcceptAlbumTask(userName, albumName, dropboxURL, "false", AlbumsActivity.this);
-                                mAcceptALb.execute((Void) null);
-
-                            }
-                        });
-                AlertDialog alertDialog = dialogBuilder.create();
-                alertDialog.show();
-
-            } catch (Exception e) {
-                e.printStackTrace();
+            }
+            if(logout){
+                for(int i : indextoRemove){
+                    contextClass.removeInvite(i);
+                }
+                Toast.makeText(AlbumsActivity.this, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
+                //Logout and start login
+                stopService();
+                Intent logoutData = new Intent(getApplicationContext(), LoginActivity.class);
+                AlbumsActivity.this.startActivity(logoutData);
+                AlbumsActivity.this.finish();
             }
         }
     }
@@ -398,8 +375,11 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
     @Override
     protected void onDestroy(){
         unregisterReceiver(myBroadCastReceiver);
+        unbindService(this);
+        Log.d("Debug Cenas", "onDestroy: albums activity");
         super.onDestroy();
     }
+
     public UserLogoutTask getmLogout() {
         return mLogout;
     }
@@ -414,14 +394,6 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
 
     public void setmCreateAlb(CreateAlbumTask mCreateAlb) {
         this.mCreateAlb = mCreateAlb;
-    }
-
-    public AcceptAlbumTask getmAcceptALb() {
-        return mAcceptALb;
-    }
-
-    public void setmAcceptALb(AcceptAlbumTask mAcceptALb) {
-        this.mAcceptALb = mAcceptALb;
     }
 
     private boolean mayRequestPermission(final String permission, final int requestCode ) {

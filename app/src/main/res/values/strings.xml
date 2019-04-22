@@ -10,6 +10,8 @@
     <string name="action_sign_in">Sign in or register</string>
     <string name="action_sign_in_short">Login</string>
     <string name="action_sign_up">Register</string>
+    <string name="action_accept">Accept</string>
+    <string name="action_refuse">Refuse</string>
     <string name="action_sign_up_link">Don\'t have an account? Register</string>
     <string name="action_sign_in_link">Already have an account? Login</string>
     <string name="error_invalid_username">This username is invalid</string>

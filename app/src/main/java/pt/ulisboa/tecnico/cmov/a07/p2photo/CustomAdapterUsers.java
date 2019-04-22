@@ -17,8 +17,8 @@ public class CustomAdapterUsers extends BaseAdapter {
     private final Activity _act;
 
     public CustomAdapterUsers(ArrayList<String> users, Activity act) {
-        this._users = users;
-        this._act = act;
+        _users = users;
+        _act = act;
     }
 
     @Override
