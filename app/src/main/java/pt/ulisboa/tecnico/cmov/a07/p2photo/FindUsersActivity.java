@@ -1,20 +1,25 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class FindUsersActivity extends AppCompatActivity {
@@ -28,7 +33,7 @@ public class FindUsersActivity extends AppCompatActivity {
     private ArrayList<String> allUsers = new ArrayList<>();
     private ArrayList<String> usersToAdd = new ArrayList<>();
     private ArrayList<String> usersToShowList = new ArrayList<>();
-    private CostumAdapterUsers usersCustomAdapter;
+    private CustomAdapterUsers usersCustomAdapter;
     private GetUsersTask mGetTask = null;
 
     private EditText searchUserView;
@@ -43,7 +48,7 @@ public class FindUsersActivity extends AppCompatActivity {
 
         searchUserView = findViewById(R.id.findUser_search);
 
-        usersCustomAdapter = new CostumAdapterUsers(usersToShowList, this );
+        usersCustomAdapter = new CustomAdapterUsers(usersToShowList, this );
 
         ListView listView = findViewById(R.id.lvShowUsers);
 
@@ -126,5 +131,75 @@ public class FindUsersActivity extends AppCompatActivity {
 
     public void addAllusersCustom(){
         usersCustomAdapter.addAll(allUsers);
+    }
+}
+
+
+
+
+class CustomAdapterUsers extends BaseAdapter {
+
+    private final List<String> _users;
+    private final Activity _activity;
+
+    public CustomAdapterUsers(ArrayList<String> users, Activity act) {
+        this._users = users;
+        this._activity = act;
+    }
+
+    @Override
+    public int getCount() {
+        return _users.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return _users.get(position);
+    }
+
+    public void clear() {
+        _users.clear();
+        notifyDataSetChanged();
+    }
+
+    public void addAll(ArrayList<String> users){
+        _users.addAll(users);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return 0;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+
+        View view;
+        UsersViewHolder holder;
+
+        if( convertView == null) {
+            view = _activity.getLayoutInflater().inflate(R.layout.activity_find_users_item, parent, false);
+            holder = new UsersViewHolder(view);
+            view.setTag(holder);
+        } else {
+            view = convertView;
+            holder = (UsersViewHolder) view.getTag();
+        }
+
+        String name = _users.get(position);
+
+        holder.name.setText(name);
+
+        return view;
+    }
+}
+
+
+class UsersViewHolder {
+
+    final TextView name;
+
+    public UsersViewHolder(View view) {
+        name = view.findViewById(R.id.find_user_text);
     }
 }

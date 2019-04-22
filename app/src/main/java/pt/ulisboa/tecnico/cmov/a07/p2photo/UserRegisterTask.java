@@ -66,7 +66,7 @@ public class UserRegisterTask extends AsyncTask<Void, Void, String> {
 
         String response = null;
         try {
-            URL url = new URL("http://sigma03.ist.utl.pt:8350/register");
+            URL url = new URL(_activity.getString(R.string.serverAddress) + "/register");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
 

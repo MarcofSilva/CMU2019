@@ -5,8 +5,6 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.dropbox.core.android.Auth;
-
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -28,6 +26,14 @@ public class UserLoginTask extends AsyncTask<Void, Void, String> {
     private static final String LOGIN_ERROR = "Error";
 
     private static final String USERNAME_EXTRA = "username";
+
+    /**
+     * A dummy authentication store containing known user names and passwords.
+     * TODO: remove after connecting to a real authentication system.
+     */
+    public static String[] DUMMY_CREDENTIALS = new String[]{
+            "Marco:Si1_", "Matilde:Ramos1_", "João:Sousa1_", "", "", "", "", "", "", "", "", "", "", "", ""
+    };
 
     private final String mUsername;
     private final String mPassword;
@@ -73,7 +79,7 @@ public class UserLoginTask extends AsyncTask<Void, Void, String> {
 
         String response = null;
         try {
-            URL url = new URL("http://sigma03.ist.utl.pt:8350/login");
+            URL url = new URL(_activity.getString(R.string.serverAddress) + "/login");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
 
@@ -98,7 +104,7 @@ public class UserLoginTask extends AsyncTask<Void, Void, String> {
             response = NetworkHandler.convertStreamToString(in);
 
             String token = response.split(" ")[1];
-            NetworkHandler.writeTokenFile(token, _activity);
+            NetworkHandler.writeTokenAndUsername(token, mUsername,_activity);
 
             response = response.split(" ")[0];
 
@@ -123,7 +129,6 @@ public class UserLoginTask extends AsyncTask<Void, Void, String> {
         }
         else if(response.equals(LOGIN_SUCCESS)) {
             Intent loginData = new Intent(_activity.getApplicationContext(), AlbumsActivity.class);
-            loginData.putExtra(USERNAME_EXTRA, mUsername);
             _activity.startActivity(loginData);
             _activity.finish();
         }

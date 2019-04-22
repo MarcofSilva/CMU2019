@@ -43,6 +43,10 @@
     <string name="findUser_title">Choose Friends</string>
     <string name="okText">Done</string>
 
+    <!-- Constants -->
+    <!-- TODO get them here, to avoid the repetition-->
+    <string name="serverAddress">http://sigma03.ist.utl.pt:8350</string>
+
     <!-- DropBox -->
     <string name="dropbox_app_key">lvafanmxyivo6dq</string>
 </resources>

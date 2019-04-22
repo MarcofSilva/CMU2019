@@ -35,7 +35,7 @@ public class AddUsersToAlbumTask extends AsyncTask<Void, Void, String> {
     protected String doInBackground(Void... params) {
         String response = "";
         try {
-            URL url = new URL("http://sigma03.ist.utl.pt:8350/addUsersToAlbum");
+            URL url = new URL(_activity.getString(R.string.serverAddress) + "/addUsersToAlbum");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
 

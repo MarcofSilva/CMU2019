@@ -88,7 +88,7 @@ public class UpdateService extends Service {
         Log.d("Debug Cenas", "poolserver: Pooling server");
 
         try {
-            URL url = new URL("http://sigma03.ist.utl.pt:8350/askForInvite");
+            URL url = new URL(_activity.getString(R.string.serverAddress) + "/askForInvite");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 

@@ -1,6 +1,8 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
@@ -14,6 +16,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class UserLogoutTask extends AsyncTask<Void, Void, Boolean> {
+
+    private static final String DROPBOX_CREDENTIALS_STORAGE = "dropbox_credentials";
+    private static final String DROPBOX_ACCESS_TOKEN = "dropbox_access_token";
+    private static final String DROPBOX_USER_ID = "dropbox_user_id";
 
     //server response types to login attempt
     private static final String SUCCESS = "Success";
@@ -30,7 +36,7 @@ public class UserLogoutTask extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected Boolean doInBackground(Void... params) {
         try {
-            URL url = new URL("http://sigma03.ist.utl.pt:8350/logout");
+            URL url = new URL(_activity.getString(R.string.serverAddress) + "/logout");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
 
@@ -55,7 +61,7 @@ public class UserLogoutTask extends AsyncTask<Void, Void, Boolean> {
             String response = NetworkHandler.convertStreamToString(in);
 
             if(response != null && response.equals(SUCCESS) || response.equals(NEED_AUTHENTICATION)){
-                NetworkHandler.writeTokenFile("", _activity);
+                NetworkHandler.writeTokenAndUsername("", "", _activity);
                 return true;
             }
             return false;
@@ -74,6 +80,11 @@ public class UserLogoutTask extends AsyncTask<Void, Void, Boolean> {
             Log.d("Debug Cenas", "Should stop my service" );
             _activity.stopService();
             Toast.makeText(_activity, "Logout successful", Toast.LENGTH_LONG);
+
+            //Remove dropbox token, as a way to make every user that is login in to login to their dropbox account, instead of already having a dropbox account associated from previous logins
+            SharedPreferences prefs = _activity.getSharedPreferences(DROPBOX_CREDENTIALS_STORAGE, Context.MODE_PRIVATE);
+            prefs.edit().remove(DROPBOX_ACCESS_TOKEN).apply();
+
             Intent logoutData = new Intent(_activity.getApplicationContext(), LoginActivity.class);
             _activity.startActivity(logoutData);
             _activity.finish();

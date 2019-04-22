@@ -40,7 +40,7 @@ public class AcceptAlbumTask extends AsyncTask<Void, Void, String> {
 
         String response = null;
         try {
-            URL url = new URL("http://sigma03.ist.utl.pt:8350/acceptInvitation");
+            URL url = new URL(_act.getString(R.string.serverAddress) + "/acceptInvitation");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
 

@@ -33,7 +33,7 @@ public class CreateAlbumTask extends AsyncTask<Void, Void, String> {
     protected String doInBackground(Void... params) {
         String response = "";
         try {
-            URL url = new URL("http://sigma03.ist.utl.pt:8350/createAlbum");
+            URL url = new URL(_activity.getString(R.string.serverAddress) + "/createAlbum");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
 
