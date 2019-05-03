@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+//TODO Use View Holder Pattern
 public class CustomAdapterInvites extends BaseAdapter {
 
     private final ArrayList<Invite> _invites;
@@ -70,11 +71,21 @@ public class CustomAdapterInvites extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 Invite invite = _invites.get(position);
-                _invites.remove(position);
-                notifyDataSetChanged();
-                _act.removeItem(position);
-                _act.setmAcceptALb(new AcceptAlbumTask(invite.get_userAlbum(), invite.get_albumName(), invite.get_dropboxUrl(), "true", _act));
-                _act.getmAcceptALb().execute((Void) null);
+
+                //Create slice of album for which user as been invited
+                DropboxCreateFolderTask createDropboxFolderTask = new DropboxCreateFolderTask(_act, DropboxClientFactory.getClient(), new DropboxCreateFolderTask.Callback() {
+                    @Override
+                    public void onFolderCreated(String catalogURL) {
+                        Invite invite = _invites.get(position);
+                        _invites.remove(position);
+                        notifyDataSetChanged();
+                        _act.removeItem(position);
+                        invite.set_dropboxUrl(catalogURL);
+                        _act.setmAcceptALb(new AcceptAlbumTask(invite.get_userAlbum(), invite.get_albumName(), invite.get_dropboxUrl(), "true", _act));
+                        _act.getmAcceptALb().execute((Void) null);
+                    }
+                });
+                createDropboxFolderTask.execute(invite.get_albumName(), invite.get_userAlbum()); //Pass the album name and its creator
             }
         });
         refuseBtn.setOnClickListener(new View.OnClickListener(){

@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -13,6 +14,7 @@ import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.renderscript.ScriptGroup;
@@ -32,6 +34,7 @@ import android.widget.Toast;
 
 import com.dropbox.core.DbxDownloader;
 import com.dropbox.core.DbxException;
+import com.dropbox.core.http.HttpRequestor;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.ListFolderResult;
@@ -39,15 +42,26 @@ import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.ThumbnailFormat;
 import com.dropbox.core.v2.files.ThumbnailSize;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File; //TODO nudar para o File do dropbox
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.file.Files;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class InsideAlbumActivity extends DropboxActivity {
 
@@ -64,6 +78,7 @@ public class InsideAlbumActivity extends DropboxActivity {
     private CustomPhotosAdapter mPhotosAdapter;
 
     protected String myName;
+    protected String creatorName;
     private String mDropPath;
     private AddUsersToAlbumTask mAddUsersToAlbum = null;
     private TextView mAlbumTitleView = null;
@@ -78,7 +93,8 @@ public class InsideAlbumActivity extends DropboxActivity {
 
         Intent albumIntent = getIntent();
         myName = albumIntent.getStringExtra("myName");
-        mDropPath = "/" + myName;
+        creatorName = albumIntent.getStringExtra("albumCreator");
+        mDropPath = "/" + myName + ":" + creatorName;
         mAlbumTitleView = findViewById(R.id.inside_AlbumTitle);
         mAlbumTitleView.setText(myName);
 
@@ -130,7 +146,7 @@ public class InsideAlbumActivity extends DropboxActivity {
         dialog.setMessage("Loading");
         dialog.show();
 
-        new ListDropboxPhotosTask(DropboxClientFactory.getClient(), new ListDropboxPhotosTask.Callback() {
+        new ListDropboxPhotosTask(DropboxClientFactory.getClient(), this, new ListDropboxPhotosTask.Callback() {
             @Override
             public void onDataLoaded(ArrayList<String> paths) {
                 dialog.dismiss();
@@ -403,6 +419,7 @@ class ImageViewHolder {
 class ListDropboxPhotosTask extends AsyncTask<String, Void, ArrayList<String>> {
 
     private final DbxClientV2 mDbxClient;
+    private final InsideAlbumActivity mActivity;
     private final Callback mCallback;
     private Exception mException;
 
@@ -412,8 +429,9 @@ class ListDropboxPhotosTask extends AsyncTask<String, Void, ArrayList<String>> {
         void onError(Exception e);
     }
 
-    public ListDropboxPhotosTask(DbxClientV2 dbxClient, Callback callback) {
+    public ListDropboxPhotosTask(DbxClientV2 dbxClient, InsideAlbumActivity act, Callback callback) {
         mDbxClient = dbxClient;
+        mActivity = act;
         mCallback = callback;
     }
 
@@ -428,35 +446,119 @@ class ListDropboxPhotosTask extends AsyncTask<String, Void, ArrayList<String>> {
         }
     }
 
+    @SuppressLint("NewApi")
     @Override
     protected ArrayList<String> doInBackground(String... params) {
+        //TODO inside threads should downloading and parsing catalogs at the same time that this thread would returning the images to the UI that already as been downloaded
+        //In continuation of this idea the thread should return the images one by one as their are downloaded, instead of at the end (onProgress)
         DbxDownloader<FileMetadata> downloader = null;
-        ArrayList<String> thumbnailsPaths = new ArrayList<>();
+        ArrayList<String> imagesPaths = new ArrayList<>();
+        ArrayList<String> photosUrls = new ArrayList<>();
         try {
             //Path were the thumbnails downloaded will be stored
-            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/P2PHOTO/Thumbnails" + params[0]; //Get the albums name from the path in the drop
+            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/P2PHOTO" + params[0]; //Get the albums name from the path in the drop
             File folderPath = new File(path);
             if(!folderPath.exists()) {
                 folderPath.mkdirs();
             }
             ListFolderResult listFiles = mDbxClient.files().listFolder(params[0]);
-            for(Metadata fileMetadata : listFiles.getEntries()) {
+            for(Metadata metadata : listFiles.getEntries()) {
+                FileMetadata fileMetadata = (FileMetadata) metadata;
                 File file = new File(path, fileMetadata.getName());
                 if(fileMetadata.getName().contains("PhotosCatalog")) {
+                    /*if(mActivity.creatorName == null) {TODO apagar?
+                        //fileMetadata.getPropertyGroups();
+                        mDbxClient.files().download(fileMetadata.getPathLower(), fileMetadata.getRev()).download(new ByteArrayOutputStream(4048)).getPropertyGroups().get(0).getFields().get(0).getValue();
+                    }*/
                     continue;
                 }
                 else if(!file.exists()) {
                     file.createNewFile();
-                    downloader = mDbxClient.files().getThumbnailBuilder(fileMetadata.getPathLower())
-                            .withFormat(ThumbnailFormat.JPEG)
-                            .withSize(ThumbnailSize.W480H320)
-                            .start();
                     OutputStream outputStream = new FileOutputStream(file);
-                    downloader.download(outputStream);
+                    /*downloader = mDbxClient.files().getThumbnailBuilder(fileMetadata.getPathLower())
+                            .withFormat(ThumbnailFormat.JPEG)
+                            .withSize(ThumbnailSize.W256H256)
+                            .start();
+                    downloader.download(outputStream);*/
+                    // Download the file.
+                    mDbxClient.files().download(fileMetadata.getPathLower(), fileMetadata.getRev()).download(outputStream);
+
                 }
-                thumbnailsPaths.add(file.getPath());
+                imagesPaths.add(file.getPath());
             }
-            return thumbnailsPaths;
+
+            //Ask the server for the other users catalog addresses
+            URL url = new URL(mActivity.getString(R.string.serverAddress) + "/getCatalogUrls?albumName=" + mActivity.myName + "&albumUser=" + mActivity.creatorName);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setDoOutput(false);
+            conn.setRequestProperty("Authorization", NetworkHandler.readToken(mActivity));
+            InputStream in = new BufferedInputStream(conn.getInputStream());
+            String response = NetworkHandler.convertStreamToString(in);
+
+            String[] catalogUrls = response.split(";");
+            for(String index : catalogUrls) {
+                URL indexUrl = new URL(index);
+                HttpsURLConnection connection = (HttpsURLConnection) indexUrl.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setDoOutput(false);
+                InputStream input = new BufferedInputStream(connection.getInputStream());
+
+                File catalogFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/P2PHOTO/RemoteTemporaryCatalogs", "RemotePhotosCatalog.txt");
+                File folder = new File(catalogFile.getParent());
+                if(!folder.exists()) {
+                    folder.mkdirs();
+                }
+                catalogFile.createNewFile();
+                OutputStream output = new FileOutputStream(catalogFile);
+
+                // Copy the bits from instream to outstream
+                byte[] buf = new byte[4096000];
+                int len;
+                while ((len = input.read(buf)) > 0) {
+                    output.write(buf, 0, len);
+                }
+                input.close();
+                output.close();
+
+                //Get the creator name from metadata TODO
+
+                //Read urls
+                BufferedReader reader = new BufferedReader(new FileReader(catalogFile));
+                photosUrls.add(reader.readLine());
+                reader.close();
+            }
+
+
+            for(String photoUrl : photosUrls) {
+                URL indexUrl = new URL(photoUrl);
+                HttpsURLConnection connection = (HttpsURLConnection) indexUrl.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setDoOutput(false);
+                InputStream inputStream = new BufferedInputStream(connection.getInputStream());
+
+                //Get file name
+                String[] urlSplitted = photoUrl.split("\\?")[0].split("/");
+                String imageName = urlSplitted[urlSplitted.length - 1];
+
+                File imageFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/P2PHOTO" + params[0], imageName);
+                if(!imageFile.exists()) {
+                    imageFile.createNewFile();
+                    OutputStream output = new FileOutputStream(imageFile);
+
+                    // Copy the bits from instream to outstream
+                    byte[] buf = new byte[1024];
+                    int len;
+                    while ((len = inputStream.read(buf)) > 0) {
+                        output.write(buf, 0, len);
+                    }
+                    inputStream.close();
+                    output.close();
+                }
+                imagesPaths.add(imageFile.getPath());
+            }
+
+            return imagesPaths;
         } catch (Exception e) {
             mException = e;
         }

@@ -77,9 +77,6 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
     //Intent extra tag
     private static final String USERNAME_EXTRA = "username";
 
-    //TODO cuidado
-    private static final String DUMMYURL = "dummyAddress";
-
     public static final String BROADCAST_ACTION = "pt.ulisboa.tecnico.updating";
 
     private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
@@ -114,7 +111,9 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
 
                 AlbumInfoViewHolder holder = (AlbumInfoViewHolder) view.getTag();
                 String clickedAlbum = holder.albumTitle.getText().toString();
+                String creator = mAlbumsAdapter.getCreator(position);
                 newAlbumIntent.putExtra("myName", clickedAlbum);
+                newAlbumIntent.putExtra("albumCreator", creator);
 
                 startActivity(newAlbumIntent);
             }
@@ -132,7 +131,7 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
                         .setPositiveButton("Create", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                String albumName = input.getText().toString();
+                                final String albumName = input.getText().toString();
 
                                 if(TextUtils.isEmpty(albumName)) {
                                     Toast.makeText(AlbumsActivity.this, getString(R.string.error_albumName_required), Toast.LENGTH_LONG).show();
@@ -141,13 +140,16 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
                                     Toast.makeText(AlbumsActivity.this, "That Album already exists", Toast.LENGTH_LONG).show();
                                 }
                                 else {
-                                    mDropboxCreateAlbumTask = new DropboxCreateFolderTask(AlbumsActivity.this, AlbumsActivity.this, DropboxClientFactory.getClient());
-                                    mDropboxCreateAlbumTask.execute(albumName);
+                                    mDropboxCreateAlbumTask = new DropboxCreateFolderTask(AlbumsActivity.this, DropboxClientFactory.getClient(), new DropboxCreateFolderTask.Callback() {
+                                        @Override
+                                        public void onFolderCreated(String catalogUrl) {
+                                            mCreateAlb = new CreateAlbumTask(albumName, catalogUrl, AlbumsActivity.this);
+                                            mCreateAlb.execute((Void) null);
+                                        }
+                                    });
+                                    mDropboxCreateAlbumTask.execute(albumName, NetworkHandler.readTUsername(AlbumsActivity.this));
+                                    //mDropboxCreateAlbumTask.execute(albumName, NetworkHandler.readTUsername(AlbumsActivity.this));
                                     //createAlbumInStorage(albumName);
-
-                                    String url = DUMMYURL;
-                                    mCreateAlb = new CreateAlbumTask(albumName, url, AlbumsActivity.this);
-                                    mCreateAlb.execute((Void) null);
                                 }
                                 loadData();
                             }
@@ -214,25 +216,26 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
     //TODO still understanding what to do here
     protected void loadData() {
 
-        final ProgressDialog dialog = new ProgressDialog(this);
+        /*final ProgressDialog dialog = new ProgressDialog(this);
         dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         dialog.setCancelable(false);
         dialog.setMessage("Loading");
-        dialog.show();
+        dialog.show();*/
 
         new ListDropboxFolderTask(DropboxClientFactory.getClient(), new ListDropboxFolderTask.Callback() {
             @Override
             public void onDataLoaded(ListFolderResult result) {
-                dialog.dismiss();
+                //dialog.dismiss();
                 mAlbumsAdapter.clear();
                 for (Metadata folder : result.getEntries()) {
+
                     mAlbumsAdapter.add(folder.getName());
                 }
             }
 
             @Override
             public void onError(Exception e) {
-                dialog.dismiss();
+                //dialog.dismiss();
 
                 Log.e("Error", "Failed to list folder.", e);
                 Toast.makeText(AlbumsActivity.this, "An error has occurred", Toast.LENGTH_SHORT).show();
@@ -445,17 +448,25 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
 class CustomAlbumsAdapter extends BaseAdapter {
 
     private final ArrayList<String> _albumTitle;
+    private final ArrayList<String> _albumCreator;
 
     private final Activity _activity;
 
-    public CustomAlbumsAdapter(Activity act, ArrayList<String> albumTitle) {
+    public CustomAlbumsAdapter(Activity act, ArrayList<String> albumInfo) {
         this._activity = act;
-        _albumTitle = albumTitle;
+        _albumTitle = new ArrayList<>();
+        _albumCreator = new ArrayList<>();
+        for (String info : albumInfo) {
+            String[] albumInfos = info.split(":");
+            _albumTitle.add(albumInfos[0]);
+            _albumCreator.add(albumInfos[1]);
+        }
     }
 
     public CustomAlbumsAdapter(Activity act) {
         this._activity = act;
         _albumTitle = new ArrayList<>();
+        _albumCreator = new ArrayList<>();
     }
 
     public boolean containsAlbumName(String albumName) {
@@ -472,18 +483,30 @@ class CustomAlbumsAdapter extends BaseAdapter {
         return _albumTitle.get(position);
     }
 
+    public String getCreator(int position) {
+        return _albumCreator.get(position);
+    }
+
     public void clear() {
         _albumTitle.clear();
+        _albumCreator.clear();
         notifyDataSetChanged();
     }
 
-    public void addAll(ArrayList<String> albumTitle) {
-        _albumTitle.addAll(albumTitle);
+    public void addAll(ArrayList<String> albumInfo) {
+        for (String info : albumInfo) {
+            String[] albumInfos = info.split(":");
+            _albumTitle.add(albumInfos[0]);
+            _albumCreator.add(albumInfos[1]);
+        }
         notifyDataSetChanged();
     }
 
-    public void add(String albumTitle){
-        _albumTitle.add(albumTitle);
+    //argument: albumInfo = album name and album creator
+    public void add(String albumInfo){
+        String[] albumInfos = albumInfo.split(":");
+        _albumTitle.add(albumInfos[0]);
+        _albumCreator.add(albumInfos[1]);
         notifyDataSetChanged();
     }
 
@@ -565,77 +588,6 @@ class ListDropboxFolderTask extends AsyncTask<String, Void, ListFolderResult> {
             mException = e;
         }
 
-        return null;
-    }
-}
-
-
-
-
-
-class DropboxCreateFolderTask extends AsyncTask<String, Void, FolderMetadata> {
-
-    private final AlbumsActivity mActivity;
-    private final Context mContext;
-    private final DbxClientV2 mDbxClient;
-    private Exception mException;
-    private final ProgressDialog dialog;
-
-    DropboxCreateFolderTask(AlbumsActivity act, Context context, DbxClientV2 dbxClient) {
-        mActivity = act;
-        mContext = context;
-        mDbxClient = dbxClient;
-        dialog = new ProgressDialog(mActivity);
-    }
-
-    @Override
-    protected void onPreExecute() {
-        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        dialog.setCancelable(false);
-        dialog.setMessage("Uploading");
-        dialog.show();
-    }
-
-    @Override
-    protected void onPostExecute(FolderMetadata result) {
-        super.onPostExecute(result);
-        if (mException != null) { //onError with exception
-            onError(mException);
-        } else if (result == null) { //onError no exception
-            onError(null);
-        } else { //onUploadComplete;
-            dialog.dismiss();
-
-            String message = result.getName() + " created in the cloud";
-            Toast.makeText(mActivity, message, Toast.LENGTH_SHORT).show();
-
-            // Reload the folder
-            mActivity.loadData();
-        }
-    }
-
-    private void onError(Exception e) {
-        dialog.dismiss();
-
-        Log.e("Error", "Failed to upload file.", e);
-        Toast.makeText(mActivity, "An error has occurred", Toast.LENGTH_SHORT).show();
-    }
-
-    //Already have checked if name os album exist
-    @Override
-    protected FolderMetadata doInBackground(String... params) {
-        try {
-            String remoteFolder = "/" + params[0];
-            CreateFolderResult folderResult = mDbxClient.files().createFolderV2(remoteFolder);
-            //InputStream inputStream = new FileInputStream("");
-            InputStream inputStream = new ByteArrayInputStream("".getBytes());
-            mDbxClient.files().uploadBuilder(remoteFolder + "/" + "PhotosCatalog.txt")
-                    .withMode(WriteMode.OVERWRITE)
-                    .uploadAndFinish(inputStream);
-            return folderResult.getMetadata();
-        } catch (DbxException | IOException e) {
-            mException = e;
-        }
         return null;
     }
 }

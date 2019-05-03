@@ -26,12 +26,6 @@ public class DropboxDowloadFileTask extends AsyncTask<FileMetadata, Void, File> 
     private Exception mException;
     final ProgressDialog dialog;
 
-
-    public interface Callback {
-        void onDownloadComplete(File result);
-        void onError(Exception e);
-    }
-
     DropboxDowloadFileTask(InsideAlbumActivity act, Context context, DbxClientV2 dbxClient) {
         mActivity = act;
         mContext = context;

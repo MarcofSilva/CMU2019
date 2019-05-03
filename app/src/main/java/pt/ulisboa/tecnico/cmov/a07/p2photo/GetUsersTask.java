@@ -31,13 +31,6 @@ public class GetUsersTask extends AsyncTask<Void, Void, String> {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
-
-            //TODO see what each of this properties do
-            //conn.setRequestProperty("accept", "*/*");
-            //conn.setRequestProperty("Content-Type", "application/json");
-            //conn.setRequestProperty("Accept", "application/");
-            //conn.setRequestProperty("connection", "Keep-Alive");
-            //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
             conn.setDoOutput(false);
 
             conn.setRequestProperty("Authorization", NetworkHandler.readToken(_activity));

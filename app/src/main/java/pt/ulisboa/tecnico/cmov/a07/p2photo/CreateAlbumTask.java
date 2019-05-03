@@ -39,7 +39,7 @@ public class CreateAlbumTask extends AsyncTask<Void, Void, String> {
 
             JSONObject postDataParams = new JSONObject();
             postDataParams.put("albumName", _albumName);
-            postDataParams.put("url", _url);
+            postDataParams.put("albumUrl", _url);
 
 
             //TODO see what each of this properties do
@@ -70,7 +70,7 @@ public class CreateAlbumTask extends AsyncTask<Void, Void, String> {
         _activity.setmCreateAlb(null);
 
         if(response != null && response.equals(SUCCESS)){ //TODO change this
-            Toast.makeText(_activity, "You created an album! Gl finding it", Toast.LENGTH_LONG).show();
+            Toast.makeText(_activity, "You created an album!", Toast.LENGTH_SHORT).show();
         }
         else if(response.equals(NEED_AUTHENTICATION)) {
             Toast.makeText(_activity, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
