@@ -7,7 +7,18 @@ import java.util.ArrayList;
 
 public class ContextClass extends Application {
 
+    private String appMode;
+
     private ArrayList<Invite> newInvites = new ArrayList<>();
+
+
+    public String getAppMode() {
+        return appMode;
+    }
+    public void setAppMode(String mode) {
+        appMode = mode;
+    }
+
 
     public void addInvite(Invite i){
         newInvites.add(i);

@@ -13,7 +13,8 @@ import java.io.InputStreamReader;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class NetworkHandler {
+//TODO Rename this class to SessionHandler
+public class SessionHandler {
 
     private static final String CREDENTIALS_STORAGE = "credentials";
     private static final String ACCESS_TOKEN = "access_token";
@@ -22,7 +23,7 @@ public class NetworkHandler {
     //Storage filename
     private static final String TOKEN_FILENAME = "AuthToken";
 
-    static String convertStreamToString(InputStream is) {
+    public static String convertStreamToString(InputStream is) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         StringBuilder sb = new StringBuilder();
 
@@ -51,7 +52,7 @@ public class NetworkHandler {
         prefs.edit().putString(USER_ID, username).apply();
     }
 
-    static String readToken(Activity activity) {
+    public static String readToken(Activity activity) {
         //TODO missing security
         SharedPreferences prefs = activity.getSharedPreferences(CREDENTIALS_STORAGE, MODE_PRIVATE);
         String token = prefs.getString(ACCESS_TOKEN, null);
@@ -61,7 +62,7 @@ public class NetworkHandler {
             return token;
     }
 
-    static String readTUsername(Activity activity) {
+    public static String readTUsername(Activity activity) {
         //TODO missing security
         SharedPreferences prefs = activity.getSharedPreferences(CREDENTIALS_STORAGE, MODE_PRIVATE);
         String username = prefs.getString(USER_ID, null);
@@ -69,5 +70,11 @@ public class NetworkHandler {
             return "";
         else
             return username;
+    }
+
+    public static void cleanSessionCredentials(Activity activity) {
+        //Remove session token of storage
+        SharedPreferences prefs = activity.getSharedPreferences(CREDENTIALS_STORAGE, Context.MODE_PRIVATE);
+        prefs.edit().remove(ACCESS_TOKEN).apply();
     }
 }

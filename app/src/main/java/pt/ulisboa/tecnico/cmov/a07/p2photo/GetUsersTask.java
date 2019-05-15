@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxAuthenticationHandler;
+
 public class GetUsersTask extends AsyncTask<Void, Void, String> {
 
     private FindUsersActivity _activity;
@@ -18,7 +20,7 @@ public class GetUsersTask extends AsyncTask<Void, Void, String> {
     private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
 
 
-    public GetUsersTask(FindUsersActivity activity, String albumName){
+    GetUsersTask(FindUsersActivity activity, String albumName){
         _activity = activity;
         _albumName = albumName;
     }
@@ -33,10 +35,10 @@ public class GetUsersTask extends AsyncTask<Void, Void, String> {
 
             conn.setDoOutput(false);
 
-            conn.setRequestProperty("Authorization", NetworkHandler.readToken(_activity));
+            conn.setRequestProperty("Authorization", SessionHandler.readToken(_activity));
 
             InputStream in = new BufferedInputStream(conn.getInputStream());
-            response = NetworkHandler.convertStreamToString(in);
+            response = SessionHandler.convertStreamToString(in);
 
             //TODO dummy
             //return DUMMY_LIST
@@ -56,6 +58,21 @@ public class GetUsersTask extends AsyncTask<Void, Void, String> {
         }
         else if(usersStr.equals(NEED_AUTHENTICATION)){
             Toast.makeText(_activity, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
+
+
+            //------Clean session tokens before logging out----------
+            //App account session
+            SessionHandler.cleanSessionCredentials(_activity);
+
+            // Check if appMode is the dropbox one and if so remove the token
+            ContextClass contextClass = (ContextClass) _activity.getApplicationContext();
+            String appModeDropbox = _activity.getString(R.string.AppModeDropBox);
+            if(contextClass.getAppMode().equals(appModeDropbox)) {
+                //Dropbox specific code(removing dropbox token from storage)
+                DropboxAuthenticationHandler.cleanDropboxCredentials(_activity);
+            }
+
+
             //Logout and start login
             Intent logoutData = new Intent(_activity.getApplicationContext(), LoginActivity.class);
             _activity.startActivity(logoutData);

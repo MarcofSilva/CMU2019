@@ -1,4 +1,4 @@
-package pt.ulisboa.tecnico.cmov.a07.p2photo;
+package pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -25,7 +25,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-class DropboxCreateFolderTask extends AsyncTask<String, Void, String> {
+import pt.ulisboa.tecnico.cmov.a07.p2photo.AlbumsActivity;
+
+public class DropboxCreateFolderTask extends AsyncTask<String, Void, String> {
 
     private final AppCompatActivity mActivity;
     private final DbxClientV2 mDbxClient;
@@ -33,7 +35,7 @@ class DropboxCreateFolderTask extends AsyncTask<String, Void, String> {
     private Exception mException;
     private final ProgressDialog dialog;
 
-    DropboxCreateFolderTask(AppCompatActivity act, DbxClientV2 dbxClient, Callback callback) {
+    public DropboxCreateFolderTask(AppCompatActivity act, DbxClientV2 dbxClient, Callback callback) {
         mActivity = act;
         mDbxClient = dbxClient;
         mCallback = callback;

@@ -13,6 +13,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxAuthenticationHandler;
+
 public class AcceptAlbumTask extends AsyncTask<Void, Void, String> {
 
     private String _userAlbum;
@@ -60,14 +62,14 @@ public class AcceptAlbumTask extends AsyncTask<Void, Void, String> {
             //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
             conn.setDoOutput(true);
 
-            conn.setRequestProperty("Authorization", NetworkHandler.readToken(_act));
+            conn.setRequestProperty("Authorization", SessionHandler.readToken(_act));
 
             OutputStream os = conn.getOutputStream();
             os.write(postDataParams.toString().getBytes());
             os.close();
 
             InputStream in = new BufferedInputStream(conn.getInputStream());
-            response = NetworkHandler.convertStreamToString(in);
+            response = SessionHandler.convertStreamToString(in);
 
         } catch (Exception e) {
             Log.e("MYDEBUG", "Exception: " + e.getMessage());
@@ -86,9 +88,24 @@ public class AcceptAlbumTask extends AsyncTask<Void, Void, String> {
         }
         else if(response.equals(NEED_AUTHENTICATION)) {
             Toast.makeText(_act, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
+
+
+            //------Clean session tokens before logging out----------
+            //App account session
+            SessionHandler.cleanSessionCredentials(_act);
+
+            // Check if appMode is the dropbox one and if so remove the token
+            ContextClass contextClass = (ContextClass) _act.getApplicationContext();
+            String appModeDropbox = _act.getString(R.string.AppModeDropBox);
+            if(contextClass.getAppMode().equals(appModeDropbox)) {
+                //Dropbox specific code(removing dropbox token from storage)
+                DropboxAuthenticationHandler.cleanDropboxCredentials(_act);
+            }
+
             //Logout and start login
             //nao deve ser preciso por causa do ondestroy da activity_act.stopService();
             Intent logoutData = new Intent(_act.getApplicationContext(), LoginActivity.class);
+
             _act.startActivity(logoutData);
             _act.finish();
         }

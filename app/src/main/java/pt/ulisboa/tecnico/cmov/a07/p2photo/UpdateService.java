@@ -27,7 +27,7 @@ public class UpdateService extends Service {
 
     public static Activity _activity = null;
 
-    public class MyBinder extends Binder {
+    class MyBinder extends Binder {
         UpdateService getService() {
             return UpdateService.this;
         }
@@ -101,16 +101,17 @@ public class UpdateService extends Service {
             //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
             conn.setDoOutput(false);
 
-            conn.setRequestProperty("Authorization", NetworkHandler.readToken(_activity));
+            conn.setRequestProperty("Authorization", SessionHandler.readToken(_activity));
 
             InputStream in = new BufferedInputStream(conn.getInputStream());
-            String response = NetworkHandler.convertStreamToString(in);
+            String response = SessionHandler.convertStreamToString(in);
 
             if(response.equals("Empty")){
                 return;
             }
             else if(response.equals(NEED_AUTHENTICATION)){
                 response = NEED_AUTHENTICATION + ";" + NEED_AUTHENTICATION;
+                stoptimertask();
             }
 
             String[] resSplit = response.split(";");

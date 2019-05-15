@@ -2,12 +2,9 @@ package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -17,11 +14,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.text.TextUtils;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.util.Pair;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -33,65 +28,42 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.dropbox.core.DbxDownloader;
-import com.dropbox.core.DbxException;
-import com.dropbox.core.android.Auth;
-import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.CreateFolderResult;
-import com.dropbox.core.v2.files.FileMetadata;
-import com.dropbox.core.v2.files.FolderMetadata;
-import com.dropbox.core.v2.files.ListFolderResult;
-import com.dropbox.core.v2.files.Metadata;
-import com.dropbox.core.v2.files.ThumbnailFormat;
-import com.dropbox.core.v2.files.ThumbnailSize;
-import com.dropbox.core.v2.files.WriteMode;
-
-import java.io.ByteArrayInputStream;
+import org.json.JSONObject;
+import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+
+import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxAuthenticationHandler;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 
-
-public class AlbumsActivity extends DropboxActivity implements NavigationView.OnNavigationItemSelectedListener, ServiceConnection {
+public abstract class AlbumsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ServiceConnection {
 
     private static final int REQUEST_READ_EXTERNAL_STORAGE = 0;
     private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 1;
-
-    private static final String ALBUM_BASE_FOLDER = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/P2PHOTO";
-
-
-    //Intent extra tag
-    private static final String USERNAME_EXTRA = "username";
-
     public static final String BROADCAST_ACTION = "pt.ulisboa.tecnico.updating";
-
     private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
 
+    protected CreateAlbumTask mCreateAlb = null;
     private UserLogoutTask mLogout = null;
-    private CreateAlbumTask mCreateAlb = null;
-
     private UpdateService myService;
     private MyBroadCastReceiver myBroadCastReceiver;
 
+    protected CustomAlbumsAdapter mAlbumsAdapter;
+
     // UI references.
     private TextView mUsernameView;
-    private CustomAlbumsAdapter mAlbumsAdapter;
     private GridView mAlbumsGridView;
-    private DropboxCreateFolderTask mDropboxCreateAlbumTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,67 +76,8 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
 
         mAlbumsGridView = findViewById(R.id.photoGrid_Albums);
         mAlbumsGridView.setAdapter(mAlbumsAdapter);
-        mAlbumsGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent newAlbumIntent = new Intent(getApplicationContext(), InsideAlbumActivity.class);
 
-                AlbumInfoViewHolder holder = (AlbumInfoViewHolder) view.getTag();
-                String clickedAlbum = holder.albumTitle.getText().toString();
-                String creator = mAlbumsAdapter.getCreator(position);
-                newAlbumIntent.putExtra("myName", clickedAlbum);
-                newAlbumIntent.putExtra("albumCreator", creator);
-
-                startActivity(newAlbumIntent);
-            }
-        });
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_albums);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(AlbumsActivity.this);
-                final EditText input = new EditText(AlbumsActivity.this);
-                input.setHint("Album's name"); //TODO security issue, se escreverem um nome tipo ../cenas podem explorar diretorias que nao deveriam, pelo menos na storage no smartphone
-                dialogBuilder.setTitle("Create New Album")
-                        .setView(input)
-                        .setPositiveButton("Create", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                final String albumName = input.getText().toString();
-
-                                if(TextUtils.isEmpty(albumName)) {
-                                    Toast.makeText(AlbumsActivity.this, getString(R.string.error_albumName_required), Toast.LENGTH_LONG).show();
-                                }
-                                else if (mAlbumsAdapter.containsAlbumName(albumName)) {
-                                    Toast.makeText(AlbumsActivity.this, "That Album already exists", Toast.LENGTH_LONG).show();
-                                }
-                                else {
-                                    mDropboxCreateAlbumTask = new DropboxCreateFolderTask(AlbumsActivity.this, DropboxClientFactory.getClient(), new DropboxCreateFolderTask.Callback() {
-                                        @Override
-                                        public void onFolderCreated(String catalogUrl) {
-                                            mCreateAlb = new CreateAlbumTask(albumName, catalogUrl, AlbumsActivity.this);
-                                            mCreateAlb.execute((Void) null);
-                                        }
-                                    });
-                                    mDropboxCreateAlbumTask.execute(albumName, NetworkHandler.readTUsername(AlbumsActivity.this));
-                                    //mDropboxCreateAlbumTask.execute(albumName, NetworkHandler.readTUsername(AlbumsActivity.this));
-                                    //createAlbumInStorage(albumName);
-                                }
-                                loadData();
-                            }
-                        })
-                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-
-                            }
-                        });
-                AlertDialog alertDialog = dialogBuilder.create();
-                alertDialog.show();
-            }
-        });
+        // The setOnItemClickListener defined in dropbox and wifidirect subclasses...they call a method in this class as a way of start the right insideAlbumActivity (Dropbox or wifiDirect)
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -180,11 +93,10 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
 
         //Put the username in the nav tab
         mUsernameView = headerView.findViewById(R.id.tabUsername);
-        String username = NetworkHandler.readTUsername(this);
+        String username = SessionHandler.readTUsername(this);
         mUsernameView.setText(username);
 
-
-        myBroadCastReceiver = new MyBroadCastReceiver();
+        myBroadCastReceiver = new MyBroadCastReceiver(this);
 
         Intent intent= new Intent(this, UpdateService.class);
 
@@ -194,7 +106,29 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
         Log.d("Debug Cenas", "oncreate: binded service");
 
         registerMyReceiver();
-}
+    }
+
+    protected void setOnItemClickListenerForAppMode(final Class<?> insideAlbumActivity) {
+        //Clicked one album
+        if(mAlbumsGridView != null) {
+            mAlbumsGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Intent newAlbumIntent;
+
+                    newAlbumIntent = new Intent(getApplicationContext(), insideAlbumActivity);
+                    AlbumInfoViewHolder mAlbumInfoViewHolder = (AlbumInfoViewHolder) view.getTag();
+                    String clickedAlbum = mAlbumInfoViewHolder.albumTitle.getText().toString();
+                    String creator = mAlbumsAdapter.getCreator(position);
+                    newAlbumIntent.putExtra("myName", clickedAlbum);
+                    newAlbumIntent.putExtra("albumCreator", creator);
+
+                    startActivity(newAlbumIntent);
+                }
+            });
+        }
+    }
+
 
     @Override
     protected void onResume() {
@@ -202,59 +136,6 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
         mayRequestPermission(WRITE_EXTERNAL_STORAGE, REQUEST_WRITE_EXTERNAL_STORAGE);
 
         super.onResume();
-
-        //Authenticate in dropbox account
-        if(!hasToken()) {
-            Auth.startOAuth2Authentication(this, getString(R.string.dropbox_app_key));
-        }
-        else {
-            //TODO change this as a way to show the info about the account already logged in dropbox
-            //Toast.makeText(AlbumsActivity.this, "", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    //TODO still understanding what to do here
-    protected void loadData() {
-
-        /*final ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        dialog.setCancelable(false);
-        dialog.setMessage("Loading");
-        dialog.show();*/
-
-        new ListDropboxFolderTask(DropboxClientFactory.getClient(), new ListDropboxFolderTask.Callback() {
-            @Override
-            public void onDataLoaded(ListFolderResult result) {
-                //dialog.dismiss();
-                mAlbumsAdapter.clear();
-                for (Metadata folder : result.getEntries()) {
-
-                    mAlbumsAdapter.add(folder.getName());
-                }
-            }
-
-            @Override
-            public void onError(Exception e) {
-                //dialog.dismiss();
-
-                Log.e("Error", "Failed to list folder.", e);
-                Toast.makeText(AlbumsActivity.this, "An error has occurred", Toast.LENGTH_SHORT).show();
-            }
-        }).execute(""); //Send "" as the path because we want the base directory, that contains the albums folders
-
-
-/* using smartphone storage
-        File baseDirectory = new File(ALBUM_BASE_FOLDER);
-
-        if(baseDirectory.exists()) {
-            File[] files = baseDirectory.listFiles();
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    mAlbumsAdapter.add(file.getName());
-                }
-            }
-        }
-*/
     }
 
 
@@ -301,8 +182,8 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_invitation_albums) {
-            Intent albumsInvitations = new Intent(AlbumsActivity.this.getApplicationContext(), AlbumsInvitationsActivity.class);
-            this.startActivity(albumsInvitations);
+            Intent albumsInvitations = new Intent(getApplicationContext(), AlbumsInvitationsActivity.class);
+            startActivity(albumsInvitations);
 
         } else if (id == R.id.nav_logout) {
             String username = getIntent().getStringExtra("username");
@@ -313,6 +194,11 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    //Make both appModes implement this
+    public abstract void loadData();
+
+    //Service for invitations
 
     public void stopService(){
         Log.d("Debug Cenas", "Stop: unbiding" );
@@ -333,10 +219,15 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
 
     //TODO probably get this class in a file, review its name and if it works to make all necessary activities use it...maybe a superclass?
     class MyBroadCastReceiver extends BroadcastReceiver{
+
+        private AlbumsActivity _activity;
+
+        public MyBroadCastReceiver(AlbumsActivity act) {
+            _activity = act;
+        }
+
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(AlbumsActivity.this, "You have a new invite. Go to Invites Tab", Toast.LENGTH_LONG).show();
-
             ContextClass contextClass = (ContextClass) getApplicationContext();
             boolean logout = false;
             ArrayList<Integer> indextoRemove = new ArrayList<>();
@@ -345,18 +236,35 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
                 if(inv.get_albumName().equals(NEED_AUTHENTICATION) && inv.get_userAlbum().equals(NEED_AUTHENTICATION)){
                     logout = true;
                     indextoRemove.add(i);
+                    Toast.makeText(getApplicationContext(), "Not properly authenticated. Login again", Toast.LENGTH_LONG).show();
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "You have a new invite. Go to Invites Tab", Toast.LENGTH_LONG).show();
                 }
             }
             if(logout){
                 for(int i : indextoRemove){
                     contextClass.removeInvite(i);
                 }
-                Toast.makeText(AlbumsActivity.this, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
+
+
+                //------Clean session tokens before logging out----------
+                //App account session
+                SessionHandler.cleanSessionCredentials(_activity);
+
+                // Check if appMode is the dropbox one and if so remove the token
+                String appModeDropbox = getString(R.string.AppModeDropBox);
+                if(contextClass.getAppMode().equals(appModeDropbox)) {
+                    //Dropbox specific code(removing dropbox token from storage)
+                    DropboxAuthenticationHandler.cleanDropboxCredentials(_activity);
+                }
+
                 //Logout and start login
                 stopService();
                 Intent logoutData = new Intent(getApplicationContext(), LoginActivity.class);
-                AlbumsActivity.this.startActivity(logoutData);
-                AlbumsActivity.this.finish();
+                startActivity(logoutData);
+                finish();
             }
         }
     }
@@ -377,10 +285,9 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
 
     @Override
     protected void onDestroy(){
-        unregisterReceiver(myBroadCastReceiver);
-        unbindService(this);
-        Log.d("Debug Cenas", "onDestroy: albums activity");
         super.onDestroy();
+        unregisterReceiver(myBroadCastReceiver);
+        Log.d("Debug Cenas", "onDestroy: albums activity");
     }
 
     public UserLogoutTask getmLogout() {
@@ -439,158 +346,199 @@ public class AlbumsActivity extends DropboxActivity implements NavigationView.On
             Log.d("MyDebug", "Exception " + e + ": " + e.getMessage());
         }
     }
-}
 
 
+    protected class CustomAlbumsAdapter extends BaseAdapter {
 
+        private final ArrayList<String> _albumTitle;
+        private final ArrayList<String> _albumCreator;
 
+        private final Activity _activity;
 
-class CustomAlbumsAdapter extends BaseAdapter {
+        public CustomAlbumsAdapter(Activity act, ArrayList<String> albumInfo) {
+            this._activity = act;
+            _albumTitle = new ArrayList<>();
+            _albumCreator = new ArrayList<>();
+            for (String info : albumInfo) {
+                String[] albumInfos = info.split(":");
+                _albumTitle.add(albumInfos[0]);
+                _albumCreator.add(albumInfos[1]);
+            }
+        }
 
-    private final ArrayList<String> _albumTitle;
-    private final ArrayList<String> _albumCreator;
+        public CustomAlbumsAdapter(Activity act) {
+            this._activity = act;
+            _albumTitle = new ArrayList<>();
+            _albumCreator = new ArrayList<>();
+        }
 
-    private final Activity _activity;
+        public boolean containsAlbumName(String albumName) {
+            return _albumTitle.contains(albumName);
+        }
 
-    public CustomAlbumsAdapter(Activity act, ArrayList<String> albumInfo) {
-        this._activity = act;
-        _albumTitle = new ArrayList<>();
-        _albumCreator = new ArrayList<>();
-        for (String info : albumInfo) {
-            String[] albumInfos = info.split(":");
+        @Override
+        public int getCount() {
+            return _albumTitle.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return _albumTitle.get(position);
+        }
+
+        public String getCreator(int position) {
+            return _albumCreator.get(position);
+        }
+
+        public void clear() {
+            _albumTitle.clear();
+            _albumCreator.clear();
+            notifyDataSetChanged();
+        }
+
+        public void addAll(ArrayList<String> albumInfo) {
+            for (String info : albumInfo) {
+                String[] albumInfos = info.split(":");
+                _albumTitle.add(albumInfos[0]);
+                _albumCreator.add(albumInfos[1]);
+            }
+            notifyDataSetChanged();
+        }
+
+        //argument: albumInfo = album name and album creator
+        public void add(String albumInfo){
+            String[] albumInfos = albumInfo.split(":");
             _albumTitle.add(albumInfos[0]);
             _albumCreator.add(albumInfos[1]);
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+
+            View view;
+            AlbumInfoViewHolder viewHolder;
+
+            if( convertView == null) {
+                view = _activity.getLayoutInflater().inflate(R.layout.albums_item, parent, false);
+                viewHolder = new AlbumInfoViewHolder(view);
+                view.setTag(viewHolder); //Store the view holder in the view
+            } else {
+                view = convertView;
+                viewHolder = (AlbumInfoViewHolder) view.getTag();//In this case a view is being "aproveitada" and we can get the view holder from de view
+            }
+
+            String title = _albumTitle.get(position);
+            viewHolder.albumTitle.setText(title);
+
+            return view;
         }
     }
 
-    public CustomAlbumsAdapter(Activity act) {
-        this._activity = act;
-        _albumTitle = new ArrayList<>();
-        _albumCreator = new ArrayList<>();
-    }
+    protected class AlbumInfoViewHolder {
 
-    public boolean containsAlbumName(String albumName) {
-        return _albumTitle.contains(albumName);
-    }
+        final TextView albumTitle;
 
-    @Override
-    public int getCount() {
-        return _albumTitle.size();
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return _albumTitle.get(position);
-    }
-
-    public String getCreator(int position) {
-        return _albumCreator.get(position);
-    }
-
-    public void clear() {
-        _albumTitle.clear();
-        _albumCreator.clear();
-        notifyDataSetChanged();
-    }
-
-    public void addAll(ArrayList<String> albumInfo) {
-        for (String info : albumInfo) {
-            String[] albumInfos = info.split(":");
-            _albumTitle.add(albumInfos[0]);
-            _albumCreator.add(albumInfos[1]);
+        public AlbumInfoViewHolder(View view) {
+            albumTitle = view.findViewById(R.id.album_title);
         }
-        notifyDataSetChanged();
-    }
-
-    //argument: albumInfo = album name and album creator
-    public void add(String albumInfo){
-        String[] albumInfos = albumInfo.split(":");
-        _albumTitle.add(albumInfos[0]);
-        _albumCreator.add(albumInfos[1]);
-        notifyDataSetChanged();
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return 0;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-
-        View view;
-        AlbumInfoViewHolder viewHolder;
-
-        if( convertView == null) {
-            view = _activity.getLayoutInflater().inflate(R.layout.albums_item, parent, false);
-            viewHolder = new AlbumInfoViewHolder(view);
-            view.setTag(viewHolder); //Store the view holder in the view
-        } else {
-            view = convertView;
-            viewHolder = (AlbumInfoViewHolder) view.getTag();//In this case a view is being "aproveitada" and we can get the view holder from de view
-        }
-
-        String title = _albumTitle.get(position);
-        viewHolder.albumTitle.setText(title);
-
-        return view;
-    }
-}
-
-class AlbumInfoViewHolder {
-
-    final TextView albumTitle;
-
-    public AlbumInfoViewHolder(View view) {
-        albumTitle = view.findViewById(R.id.album_title);
     }
 }
 
 
+class UserLogoutTask extends AsyncTask<Void, Void, Boolean> {
 
+    private static final String DROPBOX_CREDENTIALS_STORAGE = "dropbox_credentials";
+    private static final String DROPBOX_ACCESS_TOKEN = "dropbox_access_token";
+    private static final String DROPBOX_USER_ID = "dropbox_user_id";
 
-/*
- * Async task to list items in a folder
- */
-class ListDropboxFolderTask extends AsyncTask<String, Void, ListFolderResult> {
+    //server response types to login attempt
+    private static final String SUCCESS = "Success";
+    private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
 
-    private final DbxClientV2 mDbxClient;
-    private final Callback mCallback;
-    private Exception mException;
+    private final String mUsername;
+    private AlbumsActivity _activity;
 
-    public interface Callback {
-        void onDataLoaded(ListFolderResult result);
-
-        void onError(Exception e);
-    }
-
-    public ListDropboxFolderTask(DbxClientV2 dbxClient, Callback callback) {
-        mDbxClient = dbxClient;
-        mCallback = callback;
+    UserLogoutTask(String username, AlbumsActivity act) {
+        mUsername = username;
+        _activity = act;
     }
 
     @Override
-    protected void onPostExecute(ListFolderResult result) {
-        super.onPostExecute(result);
-
-        if (mException != null) {
-            mCallback.onError(mException);
-        } else {
-            mCallback.onDataLoaded(result);
-        }
-    }
-
-    @Override
-    protected ListFolderResult doInBackground(String... params) {
+    protected Boolean doInBackground(Void... params) {
         try {
-            return mDbxClient.files().listFolder(params[0]);
-        } catch (DbxException e) {
-            mException = e;
-        }
+            URL url = new URL(_activity.getString(R.string.serverAddress) + "/logout");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
 
-        return null;
+            JSONObject postDataParams = new JSONObject();
+            postDataParams.put("username", mUsername);
+
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoOutput(true);
+
+            conn.setRequestProperty("Authorization", SessionHandler.readToken(_activity));
+
+            OutputStream os = conn.getOutputStream();
+            os.write(postDataParams.toString().getBytes());
+            os.close();
+
+            InputStream in = new BufferedInputStream(conn.getInputStream());
+            String response = SessionHandler.convertStreamToString(in);
+
+            if(response != null && response.equals(SUCCESS) || response.equals(NEED_AUTHENTICATION)){
+                SessionHandler.writeTokenAndUsername("", "", _activity);
+                return true;
+            }
+            return false;
+
+        } catch (Exception e) {
+            Log.e("MyDebug", "Exception: " + e.getMessage());
+        }
+        return true;
     }
+
+    @Override
+    protected void onPostExecute(final Boolean success) {
+        _activity.setmLogout(null);
+
+        if(success){
+            Log.d("Debug Cenas", "Should stop my service" );
+            _activity.stopService();
+            Toast.makeText(_activity, "Logout successful", Toast.LENGTH_LONG);
+
+
+            //------Clean session tokens before logging out----------
+            //App account session
+            SessionHandler.cleanSessionCredentials(_activity);
+
+            // Check if appMode is the dropbox one and if so remove the token
+            ContextClass contextClass = (ContextClass) _activity.getApplicationContext();
+            String appModeDropbox = _activity.getString(R.string.AppModeDropBox);
+            if(contextClass.getAppMode().equals(appModeDropbox)) {
+                //Dropbox specific code(removing dropbox token from storage)
+                DropboxAuthenticationHandler.cleanDropboxCredentials(_activity);
+            }
+
+
+            Intent logoutData = new Intent(_activity.getApplicationContext(), MainEmptyActivity.class);
+            _activity.startActivity(logoutData);
+            _activity.finish();
+        }
+    }
+
+    @Override
+    protected void onCancelled() {
+        _activity.setmLogout(null);
+    }
+
 }
+
 
 
 

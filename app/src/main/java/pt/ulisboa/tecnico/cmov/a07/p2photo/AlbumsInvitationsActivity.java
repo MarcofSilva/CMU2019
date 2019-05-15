@@ -10,9 +10,9 @@ import android.util.Log;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.dropbox.core.android.Auth;
-
 import java.util.ArrayList;
+
+import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxAuthenticationHandler;
 
 public class AlbumsInvitationsActivity extends AppCompatActivity {
 
@@ -43,6 +43,19 @@ public class AlbumsInvitationsActivity extends AppCompatActivity {
                 context.removeInvite(i);
                 Toast.makeText(AlbumsInvitationsActivity.this, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
                 //stopService();
+
+                //------Clean session tokens before logging out----------
+                //App account session
+                SessionHandler.cleanSessionCredentials(this);
+
+                // Check if appMode is the dropbox one and if so remove the token
+                ContextClass contextClass = (ContextClass) getApplicationContext();
+                String appModeDropbox = getString(R.string.AppModeDropBox);
+                if(contextClass.getAppMode().equals(appModeDropbox)) {
+                    //Dropbox specific code(removing dropbox token from storage)
+                    DropboxAuthenticationHandler.cleanDropboxCredentials(this);
+                }
+
                 Intent logoutData = new Intent(getApplicationContext(), LoginActivity.class);
                 AlbumsInvitationsActivity.this.startActivity(logoutData);
                 AlbumsInvitationsActivity.this.finish();

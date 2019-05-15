@@ -14,6 +14,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
+import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxAuthenticationHandler;
+
 public class AddUsersToAlbumTask extends AsyncTask<Void, Void, String> {
 
     //server response types to login attempt
@@ -53,14 +55,14 @@ public class AddUsersToAlbumTask extends AsyncTask<Void, Void, String> {
             //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
             conn.setDoOutput(true);
 
-            conn.setRequestProperty("Authorization", NetworkHandler.readToken(_activity));
+            conn.setRequestProperty("Authorization", SessionHandler.readToken(_activity));
 
             OutputStream os = conn.getOutputStream();
             os.write(postDataParams.toString().getBytes());
             os.close();
 
             InputStream in = new BufferedInputStream(conn.getInputStream());
-            response = NetworkHandler.convertStreamToString(in);
+            response = SessionHandler.convertStreamToString(in);
 
         } catch (Exception e) {
             Log.e("MyDebug", "Exception: " + e.getMessage());
@@ -70,13 +72,27 @@ public class AddUsersToAlbumTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onPostExecute(final String response) {
-        _activity.setmAddUsersToAlbum(null);
+        _activity.setAddUsersToAlbum(null);
 
         if(response != null && response.equals(SUCCESS)){
             Toast.makeText(_activity, "Sending usernames to server", Toast.LENGTH_LONG).show();
         }
         else if(response.equals(NEED_AUTHENTICATION)) {
             Toast.makeText(_activity, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();
+
+
+            //------Clean session tokens before logging out----------
+            //App account session
+            SessionHandler.cleanSessionCredentials(_activity);
+
+            // Check if appMode is the dropbox one and if so remove the token
+            ContextClass contextClass = (ContextClass) _activity.getApplicationContext();
+            String appModeDropbox = _activity.getString(R.string.AppModeDropBox);
+            if(contextClass.getAppMode().equals(appModeDropbox)) {
+                //Dropbox specific code(removing dropbox token from storage)
+                DropboxAuthenticationHandler.cleanDropboxCredentials(_activity);
+            }
+
             //Logout and start login
             Intent logoutData = new Intent(_activity.getApplicationContext(), LoginActivity.class);
             _activity.startActivity(logoutData);
@@ -89,7 +105,7 @@ public class AddUsersToAlbumTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onCancelled() {
-        _activity.setmAddUsersToAlbum(null);
+        _activity.setAddUsersToAlbum(null);
     }
 
 

@@ -49,6 +49,12 @@
     <!-- TODO get them here, to avoid the repetition-->
     <string name="serverAddress">http://sigma03.ist.utl.pt:8350</string>
 
+    <!-- IntentExtraLabels -->
+    <string name="AppMode">AppMode</string>
+    <string name="AppModeDropBox">AppMode_Dropbox</string>
+    <string name="AppModeWifiDirect">AppMode_WifiDirect</string>
+
+
     <!-- DropBox -->
     <string name="dropbox_app_key">lvafanmxyivo6dq</string>
 </resources>

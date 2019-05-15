@@ -1,4 +1,4 @@
-package pt.ulisboa.tecnico.cmov.a07.p2photo;
+package pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox;
 
 import com.dropbox.core.DbxHost;
 import com.dropbox.core.DbxRequestConfig;
@@ -11,7 +11,7 @@ public class DropboxClientFactory {
 
     private static DbxClientV2 sDbxClient;
 
-    public static void init(String accessToken) {
+    static void init(String accessToken) {
         if (sDbxClient == null) {
             DbxRequestConfig requestConfig = DbxRequestConfig.newBuilder("client").build();
                     //.withHttpRequestor(new OkHttpRequestor(OkHttpRequestor.defaultOkHttpClient()))

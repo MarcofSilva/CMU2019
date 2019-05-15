@@ -5,9 +5,9 @@ package pt.ulisboa.tecnico.cmov.a07.p2photo;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -33,8 +33,20 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.Dropbox_AlbumsActivity;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.wifi_direct.WifiDirect_AlbumsActivity;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -214,7 +226,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(username, password, this);
+
+            ContextClass context = (ContextClass) getApplicationContext();
+            String appMode = context.getAppMode();
+            mAuthTask = new UserLoginTask(username, password, appMode,this);
             mAuthTask.execute((Void) null);
         }
     }
@@ -342,6 +357,115 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     public void setmUsernameView(AutoCompleteTextView mUsernameView) {
         this.mUsernameView = mUsernameView;
     }
+}
 
+
+/**
+ * Represents an asynchronous login/registration task used to authenticate
+ * the user.
+ */
+
+class UserLoginTask extends AsyncTask<Void, Void, String> {
+    //server response types to login attempt
+    private static final String LOGIN_SUCCESS = "Success";
+    private static final String LOGIN_UNKNOWN_USER = "UnknownUser";
+    private static final String LOGIN_INCORRECT_PASSWORD = "IncorrectPassword";
+    private static final String LOGIN_ERROR = "Error";
+
+    private static final String USERNAME_EXTRA = "username"; //TODO se nao for usado apagar
+
+    private final String mUsername;
+    private final String mPassword;
+    private LoginActivity _activity;
+    private String _appMode;
+
+    UserLoginTask(String username, String password, String appMode, LoginActivity act) {
+        mUsername = username;
+        mPassword = password;
+        _activity = act;
+        _appMode = appMode;
+    }
+
+    @Override
+    protected String doInBackground(Void... params) {
+        //TODO to use with server
+
+        String response = null;
+        try {
+            URL url = new URL(_activity.getString(R.string.serverAddress) + "/login");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+
+            JSONObject postDataParams = new JSONObject();
+            postDataParams.put("username", mUsername);
+            postDataParams.put("password", mPassword);
+
+            //TODO see what each of this properties do
+            //conn.setRequestProperty("accept", "*/*");
+            conn.setRequestProperty("Content-Type", "application/json");
+            //conn.setRequestProperty("Accept", "application/json");
+            //conn.setRequestProperty("connection", "Keep-Alive");
+            //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
+            conn.setDoOutput(true);
+
+            OutputStream os = conn.getOutputStream();
+            os.write(postDataParams.toString().getBytes());
+            os.close();
+
+            // read the response
+            InputStream in = new BufferedInputStream(conn.getInputStream());
+            response = SessionHandler.convertStreamToString(in);
+
+            String token = response.split(" ")[1];
+            SessionHandler.writeTokenAndUsername(token, mUsername,_activity);
+
+            response = response.split(" ")[0];
+
+        } catch (Exception e) {
+            Log.e("MYDEBUG", "Exception: " + e.getMessage());
+        }
+
+        return response;
+    }
+
+    @Override
+    protected void onPostExecute(final String response) {
+        _activity.setmAuthTask(null);
+        _activity.showProgress(false);
+
+        //TODO
+        Toast.makeText(_activity, response, Toast.LENGTH_LONG).show();
+
+        if (response == null || response.equals(LOGIN_ERROR)) { //LOGIN_ERROR is returned or something else not expected
+            Toast.makeText(_activity, "Something went wrong, try again later", Toast.LENGTH_LONG);
+        }
+        //Login success and starts app's main (AlbumsActivity) activity
+        else if(response.equals(LOGIN_SUCCESS)) {
+            Intent loginData;
+
+            if(_appMode.equals(_activity.getApplicationContext().getString(R.string.AppModeDropBox))) {
+                loginData = new Intent(_activity.getApplicationContext(), Dropbox_AlbumsActivity.class); //TODO subclass dropbox
+            }
+            else { //wifiDirect
+                loginData = new Intent(_activity.getApplicationContext(), WifiDirect_AlbumsActivity.class); //TODO subclass wifiDirect
+            }
+            _activity.startActivity(loginData);
+            _activity.finish();
+        }
+        else if(response.equals(LOGIN_UNKNOWN_USER)) {
+            _activity.getmUsernameView().setError(_activity.getString(R.string.error_unknown_username));
+            _activity.getmUsernameView().requestFocus();
+        }
+        else if(response.equals(LOGIN_INCORRECT_PASSWORD)) {
+            _activity.getmPasswordView().setError(_activity.getString(R.string.error_incorrect_password));
+            _activity.getmPasswordView().requestFocus();
+        }
+    }
+
+    @Override
+    protected void onCancelled() {
+        _activity.setmAuthTask(null);
+        _activity.showProgress(false);
+    }
 }
 

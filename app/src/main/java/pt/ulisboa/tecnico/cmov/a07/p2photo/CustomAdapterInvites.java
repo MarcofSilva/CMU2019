@@ -9,13 +9,16 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxClientFactory;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxCreateFolderTask;
+
 //TODO Use View Holder Pattern
 public class CustomAdapterInvites extends BaseAdapter {
 
     private final ArrayList<Invite> _invites;
     private final AlbumsInvitationsActivity _act;
 
-    public CustomAdapterInvites(ArrayList<Invite> invites, AlbumsInvitationsActivity act) {
+    CustomAdapterInvites(ArrayList<Invite> invites, AlbumsInvitationsActivity act) {
         _invites = invites;
         _act = act;
     }
@@ -30,7 +33,7 @@ public class CustomAdapterInvites extends BaseAdapter {
         return _invites.get(position);
     }
 
-    public void clear() {
+    void clear() {
         _invites.clear();
         notifyDataSetChanged();
     }

@@ -1,35 +1,26 @@
-package pt.ulisboa.tecnico.cmov.a07.p2photo;
+package pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.pm.FeatureGroupInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
-
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.CreateFolderResult;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.WriteMode;
-import com.dropbox.core.v2.paper.Folder;
-import com.dropbox.core.v2.sharing.DbxUserSharingRequests;
-import com.dropbox.core.v2.sharing.SharedLinkMetadata;
-
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.InsideAlbumActivity;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.UriHelper;
 
 public class DropboxUploadFileTask extends AsyncTask<String, Void, FileMetadata> {
 
@@ -39,7 +30,7 @@ public class DropboxUploadFileTask extends AsyncTask<String, Void, FileMetadata>
     private Exception mException;
     private final ProgressDialog dialog;
 
-    DropboxUploadFileTask(InsideAlbumActivity act, Context context, DbxClientV2 dbxClient) {
+    public DropboxUploadFileTask(InsideAlbumActivity act, Context context, DbxClientV2 dbxClient) {
         mActivity = act;
         mContext = context;
         mDbxClient = dbxClient;
@@ -100,8 +91,10 @@ public class DropboxUploadFileTask extends AsyncTask<String, Void, FileMetadata>
 
 
                 String catalogPath = remoteFolderPath + "/PhotosCatalog.txt";
-                //TODO store the catalog in cache, is instead of this
-                File localCatalogDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/P2PHOTO/" + remoteFolderPath);
+                //TODO if secure delete commented
+                //File localCatalogDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/P2PHOTO/" + remoteFolderPath);
+                File localCatalogDir = new File(mActivity.getApplicationContext().getCacheDir() + "/P2PHOTO/" + remoteFolderPath);
+
                 // Download the file for the append url and upload again
                 if(!localCatalogDir.exists()) {
                     localCatalogDir.mkdirs();
