@@ -62,48 +62,42 @@ public class CommunicationManager implements  Runnable{
             oStream = socket.getOutputStream();
             handler.obtainMessage(WiFiServiceDiscoveryActivity.MY_HANDLE, this).sendToTarget();
             //GET MY USER ALBUM
+            String userAlbums = albumsManager.listLocalAlbumsPhotos(new File(albumsManager.BASE_FOLDER_MINE));
 
             if (!isGroupOwner){
                 Log.d(TAG, "hello im peer");
-                String dummyUserAlbum = "album1:marco::foto1,foto2";
                 //enviar string de useralbums
-                write(dummyUserAlbum);
+                write(userAlbums);
                 //fica a espera de resposta do servidor com os albuns/catalogos
-                /*String serverAns = read();
+                String serverAns = read();
                 //write fotos que me faltam a mim
-                String missing = albumsManager.compareUserAlbums(dummyUserAlbum, serverAns);
-                missing = "";
+                String missing = albumsManager.compareUserAlbums(userAlbums, serverAns);
                 write(missing);
                 //read fotos que faltam ao servidor
                 String missingServer = read();
-                //read - fotos dele
-                //String photosForMe = readPhotos();
-                String photosForMe = "";
-                //write - fotos para ele
-                //albumManager.getPhotos()
-                //sendPhotos(...)*/
+                //enviar fotos para o server
+                //get pics function
+                //write(missingServer)
+                //String picsForMe = read();
 
 
             }
             else{
                 Log.d(TAG, "hi im groupowner");
-                //Toast.makeText(activity, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", Toast.LENGTH_SHORT).show();
-                String dummyUserAlbum = "album1:marco::foto1";
                 //receber user albums de cliente
                 String clientAns = read();
                 //String clientAns = "album1:marco::foto1,foto2";
-                Log.d(TAG, "gonna write my dummy");
-                /*write(dummyUserAlbum);
-                Log.d(TAG, "did it");
+                write(userAlbums);
                 //esperar por fotos que faltam ao cliente
                 String missingClient = read();
                 //ver que fotos faltam e enviar fotos que eu quero
-                String missing = albumsManager.compareUserAlbums(dummyUserAlbum, clientAns);
-                missing = "album1:marco::foto2";
+                String missing = albumsManager.compareUserAlbums(userAlbums, clientAns);
                 write(missing);
-                //read fotos que ele quer
+                //read fotos para mim
+                String picsForMe = read();
                 //write fotos para cliente
-                //read fotos para mim*/
+                //getpics(missingclient
+                //write(pics)
 
             }
 
@@ -125,30 +119,29 @@ public class CommunicationManager implements  Runnable{
         String readMessage = "";
         while (true) {
             try {
-                // Read from the InputStream (aqui recebe-se os catalogos do outro)
+                // Read from the InputStream
                 bytes = iStream.read(buffer);
 
-                // construct a string from the valid bytes in the buffer
-                if(bytes == -1) {
-                    if(readMessage.length() > 0) {
+                if(bytes == -1){
+                    if(readMessage.length() > 0){
                         break;
                     }
                 }
                 else if (bytes > 0){
                     readMessage += new String(buffer, 0, bytes);
                     Log.d(TAG, readMessage);
-
-                    if(bytes < buffer.length) {
+                    if( bytes < buffer.length){
                         break;
                     }
                 }
+
+                // Send the obtained bytes to the UI Activity
+                Log.d(TAG, "Rec:" + String.valueOf(buffer));
 
             } catch (IOException e) {
                 Log.e(TAG, "disconnected", e);
             }
         }
-        // Send the obtained bytes to the UI Activity
-        Log.d(TAG, "Rec:" + String.valueOf(buffer));
         handler.obtainMessage(WiFiServiceDiscoveryActivity.MESSAGE_READ, readMessage.getBytes().length, -1, readMessage.getBytes()).sendToTarget(); //isto chama a funçao handlemessage da atividade
         return readMessage;
     }
@@ -160,6 +153,7 @@ public class CommunicationManager implements  Runnable{
                 try {
                     Log.d(TAG , "Writing hello2");
                     oStream.write(buffer);
+                    oStream.flush();
                 } catch (IOException e) {
                     Log.e(TAG, "Exception during write", e);
                 }

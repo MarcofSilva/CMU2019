@@ -1,26 +1,31 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo.wifi_direct.service_list;
 
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
 import pt.ulisboa.tecnico.cmov.a07.p2photo.SessionHandler;
 
 public class AlbumsManager {
-    public static String BASE_FOLDER;
+    public static String BASE_FOLDER_MINE;
+    public static String BASE_FOLDER_CACHE;
 
     private AppCompatActivity activity;
 
-    public AlbumsManager(AppCompatActivity act){
+    public AlbumsManager(AppCompatActivity act) {
         this.activity = act;
-        BASE_FOLDER = this.activity.getFilesDir() + "/P2PHOTO/" + SessionHandler.readTUsername(this.activity);
+        BASE_FOLDER_MINE = this.activity.getFilesDir() + "/P2PHOTO/" + SessionHandler.readTUsername(this.activity);
+        BASE_FOLDER_CACHE = this.activity.getCacheDir() + "/P2PHOTO/" + SessionHandler.readTUsername(this.activity);
     }
 
     public String compareUserAlbums(String albumsU1, String albumsU2) {
@@ -29,12 +34,12 @@ public class AlbumsManager {
         HashMap<String, String> inCommonU1 = new HashMap<>(); //albumid, photos
         HashMap<String, String> inCommonU2 = new HashMap<>(); //albumid, photos
         String res = "";
-        for (String s1 : u1AlbumSplit){
+        for (String s1 : u1AlbumSplit) {
             String u1Id = s1.split("::")[0];
-            for(String s2 : u2AlbumSplit){
+            for (String s2 : u2AlbumSplit) {
                 String u2Id = s2.split("::")[0];
-                if (u1Id.equals(u2Id)){
-                    if(!inCommonU1.containsKey(u1Id)){
+                if (u1Id.equals(u2Id)) {
+                    if (!inCommonU1.containsKey(u1Id)) {
                         inCommonU1.put(u1Id, s1.split("::")[1]);
                         inCommonU2.put(u2Id, s2.split("::")[1]);
                     }
@@ -42,19 +47,20 @@ public class AlbumsManager {
             }
 
         }
-        for (Map.Entry<String, String> entryu1 : inCommonU1.entrySet()) {
-            String key = entryu1.getKey();
-            Object value = entryu1.getValue();
+        for (Map.Entry<String, String> entryu2 : inCommonU2.entrySet()) {
+            res += entryu2.getKey() + "::" + entryu2.getValue() + ";";
         }
-    return "";
+
+        return res;
     }
 
+    //use the mine base folder path
     //Following format =>  AlbumName1:Album1Creator::Photo1,Photo2;AlbumName2:Album2Creator::Photo1,Photo2
     public String listLocalAlbumsPhotos(File base) throws IOException {
         String name;
         String result = "";
         File[] files = base.listFiles();
-        if(files != null) {
+        if (files != null) {
             for (File file : files) {
                 if (file.isDirectory()) {
                     result += file.getName() + "::" + listLocalAlbumsPhotos(file) + ";";
@@ -64,7 +70,6 @@ public class AlbumsManager {
             }
             result = result.substring(0, result.length() - 1);
         }
-        Toast.makeText(activity, result, Toast.LENGTH_LONG).show();
         return result;
     }
 
@@ -74,10 +79,48 @@ public class AlbumsManager {
         String photos = "";
         String line;
 
-        while((line = reader.readLine()) != null) {
+        while ((line = reader.readLine()) != null) {
             photos += line + ",";
         }
         reader.close();
         return photos.substring(0, photos.length() - 1);
     }
+
+    /*@RequiresApi(api = Build.VERSION_CODES.O)
+    public String photosToShare(String photos) throws IOException {
+        String[] u1AlbumSplit = photos.split(";");
+        String res = "";
+        for (String s1 : u1AlbumSplit) {
+            String[] albumPhotosSplit = s1.split("::");
+            String photoss = "";
+            String[] photosSplit = albumPhotosSplit[1].split(",");
+            for (String foto : photosSplit) {
+                File fileImage = new File(BASE_FOLDER_MINE + "/" + albumPhotosSplit[0], foto);
+                byte[] file = Files.readAllBytes(fileImage.toPath());
+                String encodedImage = Base64.encodeToString(file, Base64.NO_WRAP);
+                photos += encodedImage + ",";
+            }
+            photos = photos.substring(0, photos.length() - 1); //remove common
+            res += albumPhotosSplit[0] + "::" + photos + ";";
+        }
+        return res.substring(0, res.length() - 1);
+    }
+
+    public void storeNewPhotos(String photosReceived) {
+        String[] u1AlbumSplit = photosReceived.split(";");
+
+        for (String s1 : u1AlbumSplit) {
+            String[] albumSplit = s1.split("::");
+            String albumFolder = BASE_FOLDER_CACHE + "/" + albumSplit[0];
+            File folder = new File(albumFolder);
+            if(!folder.exists()) {
+                folder.mkdirs();
+            }
+            String[] fotos = albumSplit[1].split(",");
+            for(String foto : fotos) {
+                byte[] imageBytes = Base64.decode(foto, Base64.NO_WRAP);
+                Files.write(imageBytes, new File());
+            }
+        }
+    }*/
 }

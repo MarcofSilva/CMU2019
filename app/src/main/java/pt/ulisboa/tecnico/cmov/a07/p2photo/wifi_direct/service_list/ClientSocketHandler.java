@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ClientSocketHandler extends Thread {
-    private static final String TAG = "ClientSocketHandler";
+    private static final String TAG = "CommunicationManager";
     private TextView statusText;
     private InetAddress mAddress;
     private Handler handler;
