@@ -450,7 +450,9 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
         public AlbumInfoViewHolder(View view) {
             albumTitle = view.findViewById(R.id.album_title);
             albumCreator = view.findViewById(R.id.album_creator);
+
         }
+
     }
 }
 

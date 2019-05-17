@@ -141,6 +141,8 @@ public class KeyManager {
             return null;
         }
         _keyManager._keypair = kp;
+        _keyManager._privateKey = _keyManager._keypair.getPrivate();
+        _keyManager._publicKey = _keyManager._keypair.getPublic();
         return _keyManager._keypair;
     }
 

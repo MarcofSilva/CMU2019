@@ -47,6 +47,7 @@
                     android:ellipsize="end"/>
                 <TextView
                     android:id="@+id/album_creator"
+
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:shadowColor="#000"
