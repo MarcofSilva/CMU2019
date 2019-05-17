@@ -1,8 +1,10 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox;
 
 import android.app.Activity;
+
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.v7.app.AppCompatActivity;
 
 import com.dropbox.core.android.Auth;
 
@@ -17,9 +19,9 @@ public class DropboxAuthenticationHandler {
     private static final String DROPBOX_ACCESS_TOKEN = "dropbox_access_token";
     private static final String DROPBOX_USER_ID = "dropbox_user_id";
 
-    private Activity mActivity;
+    private AppCompatActivity mActivity;
 
-    DropboxAuthenticationHandler(Activity activity) {
+    DropboxAuthenticationHandler(AppCompatActivity activity) {
         mActivity = activity;
     }
 
@@ -61,11 +63,11 @@ public class DropboxAuthenticationHandler {
 
     private void initAndLoadData(String accessToken) {
         DropboxClientFactory.init(accessToken);
-        if(mActivity.getClass().isInstance(Dropbox_AlbumsActivity.class)) {
+        if(mActivity.getClass().equals(Dropbox_AlbumsActivity.class)) {
             Dropbox_AlbumsActivity d_act = (Dropbox_AlbumsActivity) mActivity;
             d_act.loadData();
         }
-        else if(mActivity.getClass().isInstance(Dropbox_InsideAlbumActivity.class)) {
+        else if(mActivity.getClass().equals(Dropbox_InsideAlbumActivity.class)) {
             Dropbox_InsideAlbumActivity d_act = (Dropbox_InsideAlbumActivity) mActivity;
             d_act.loadData();
         }

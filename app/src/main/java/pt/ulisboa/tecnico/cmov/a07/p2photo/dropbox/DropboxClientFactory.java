@@ -1,8 +1,6 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox;
 
-import com.dropbox.core.DbxHost;
 import com.dropbox.core.DbxRequestConfig;
-import com.dropbox.core.http.OkHttpRequestor;
 import com.dropbox.core.v2.DbxClientV2;
 
 

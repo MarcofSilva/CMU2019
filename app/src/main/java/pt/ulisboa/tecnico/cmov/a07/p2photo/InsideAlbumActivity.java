@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -21,7 +22,8 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.dropbox.core.v2.files.FileMetadata;
+import android.widget.Toast;
+
 import java.io.File; //TODO nudar para o File do dropbox
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +34,7 @@ public abstract class InsideAlbumActivity extends AppCompatActivity {
     private static final int PICKPHOTO_REQUEST_CODE = 10;
     private static final int FIND_USERS_REQUEST_CODE = 2;
 
-    private String ALBUM_BASE_FOLDER;
 
-    private ArrayList<String> mPhotoPathsList;
     protected CustomPhotosAdapter mPhotosAdapter;
 
     protected String myName;
@@ -64,7 +64,10 @@ public abstract class InsideAlbumActivity extends AppCompatActivity {
         mPhotosGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //TODO take care of previewing the image
+                //Previewing the image
+                String imagePath = (String) mPhotosAdapter.getItem(position);
+                File imageToPreview = new File(imagePath);
+                viewFileInExternalApp(imageToPreview);
             }
         });
 
@@ -74,7 +77,7 @@ public abstract class InsideAlbumActivity extends AppCompatActivity {
             public void onClick(View view) {
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(InsideAlbumActivity.this);
                 dialogBuilder
-                        .setPositiveButton("Add Photos", new DialogInterface.OnClickListener() {
+                        .setPositiveButton("Add Photo", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 launchPhotoChooser();
@@ -83,9 +86,14 @@ public abstract class InsideAlbumActivity extends AppCompatActivity {
                         .setNeutralButton("Add Users", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                Intent addUsersIntent = new Intent(getApplicationContext(), FindUsersActivity.class);
-                                addUsersIntent.putExtra("albumName", myName);
-                                startActivityForResult(addUsersIntent, FIND_USERS_REQUEST_CODE);
+                                if(creatorName.equals(SessionHandler.readTUsername(InsideAlbumActivity.this))) {
+                                    Intent addUsersIntent = new Intent(getApplicationContext(), FindUsersActivity.class);
+                                    addUsersIntent.putExtra("albumName", myName);
+                                    startActivityForResult(addUsersIntent, FIND_USERS_REQUEST_CODE);
+                                }
+                                else {
+                                    Toast.makeText(InsideAlbumActivity.this, "Can´t add users to an album not created by you", Toast.LENGTH_SHORT).show();
+                                }
                             }
                         })
                         ;
@@ -95,24 +103,20 @@ public abstract class InsideAlbumActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
 
     public abstract void loadData();
 
     protected abstract void uploadPhotos(Intent data);
 
-    private void launchPhotoChooser() {
-        // Launch intent to pick photos for upload
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false); //Change to true if want the ability to select multiple
-        intent.setType("image/*");
-        startActivityForResult(intent, PICKPHOTO_REQUEST_CODE);
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         //Result of photo chooser
-        if (requestCode == PICKPHOTO_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+        if (requestCode == PICKPHOTO_REQUEST_CODE && resultCode == RESULT_OK && data != null && data.getData() != null) {
             //Upload to dropbox or add to storage
             uploadPhotos(data);
         }
@@ -124,14 +128,37 @@ public abstract class InsideAlbumActivity extends AppCompatActivity {
         }
     }
 
-    //TODO what to do, see this
-    public void viewFileInExternalApp(File result) {
+    private void launchPhotoChooser() {
+        // Launch intent to pick photos for upload
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false); //Change to true if want the ability to select multiple
+        intent.setType("image/*");
+        startActivityForResult(intent, PICKPHOTO_REQUEST_CODE);
+    }
+
+    private void viewFileInExternalApp(File result) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         MimeTypeMap mime = MimeTypeMap.getSingleton();
         String ext = result.getName().substring(result.getName().indexOf(".") + 1);
-        String type = mime.getMimeTypeFromExtension(ext);
+        String mimeType = mime.getMimeTypeFromExtension(ext);
 
-        intent.setDataAndType(Uri.fromFile(result), type);
+        File f = result;
+        String a = getApplicationContext().getPackageName() + ".provider";
+
+
+        Uri apkURI;
+
+        //ContextClass contextClass = (ContextClass) getApplicationContext();
+        //if(contextClass.getAppMode().equals(getString(R.string.AppModeDropBox))) {
+        //    apkURI = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".providerDropbox", result);
+        //}
+        //else { //AppMode_WifiDirect
+            apkURI = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", result);
+        //}
+        intent.setDataAndType(apkURI, mimeType);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         // Check for a handler first to avoid a crash
         PackageManager manager = getPackageManager();

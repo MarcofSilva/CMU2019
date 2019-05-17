@@ -2,6 +2,8 @@ package pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox;
 
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
+import android.os.Environment;
+import android.se.omapi.Session;
 
 import com.dropbox.core.DbxDownloader;
 import com.dropbox.core.v2.DbxClientV2;
@@ -32,7 +34,7 @@ import pt.ulisboa.tecnico.cmov.a07.p2photo.R;
 public class DropboxListPhotosTask extends AsyncTask<String, Void, ArrayList<String>> {
 
     private final DbxClientV2 mDbxClient;
-    private final InsideAlbumActivity mActivity;
+    private final Dropbox_InsideAlbumActivity mActivity;
     private final DropboxListPhotosTask.Callback mCallback;
     private Exception mException;
 
@@ -42,7 +44,7 @@ public class DropboxListPhotosTask extends AsyncTask<String, Void, ArrayList<Str
         void onError(Exception e);
     }
 
-    public DropboxListPhotosTask(DbxClientV2 dbxClient, InsideAlbumActivity act, DropboxListPhotosTask.Callback callback) {
+    public DropboxListPhotosTask(DbxClientV2 dbxClient, Dropbox_InsideAlbumActivity act, DropboxListPhotosTask.Callback callback) {
         mDbxClient = dbxClient;
         mActivity = act;
         mCallback = callback; }
@@ -72,8 +74,8 @@ public class DropboxListPhotosTask extends AsyncTask<String, Void, ArrayList<Str
 
             //Path were the thumbnails downloaded will be stored
             //TODO if secure delete commented
-            //String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/P2PHOTO" + params[0]; //Get the albums name from the path in the drop
-            String path = inCache_basePath + "/P2PHOTO" + params[0]; //Get the albums name from the path in the drop
+            //String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/P2PHOTO/" + SessionHandler.readTUsername(mActivity) + params[0]; //Get the albums name from the path in the drop
+            String path = inCache_basePath + "/P2PHOTO/" + SessionHandler.readTUsername(mActivity) + params[0]; //Get the albums name from the path in the drop
             File folderPath = new File(path);
             if(!folderPath.exists()) {
                 folderPath.mkdirs();
@@ -126,7 +128,7 @@ public class DropboxListPhotosTask extends AsyncTask<String, Void, ArrayList<Str
                 connection.setDoOutput(false);
                 InputStream input = new BufferedInputStream(connection.getInputStream());
 
-                File catalogFile = new File(inCache_basePath + "/P2PHOTO/RemoteTemporaryCatalogs", "RemotePhotosCatalog.txt");
+                File catalogFile = new File(inCache_basePath + "/P2PHOTO/" + SessionHandler.readTUsername(mActivity) + "/RemoteTemporaryCatalogs", "RemotePhotosCatalog.txt");
                 File folder = new File(catalogFile.getParent());
                 if(!folder.exists()) {
                     folder.mkdirs();
@@ -135,7 +137,7 @@ public class DropboxListPhotosTask extends AsyncTask<String, Void, ArrayList<Str
                 OutputStream output = new FileOutputStream(catalogFile);
 
                 // Copy the bits from instream to outstream
-                byte[] buf = new byte[4096000];
+                byte[] buf = new byte[1024];
                 int len;
                 while ((len = input.read(buf)) > 0) {
                     output.write(buf, 0, len);
@@ -149,8 +151,10 @@ public class DropboxListPhotosTask extends AsyncTask<String, Void, ArrayList<Str
                 reader.close();
             }
 
-
             for(String photoUrl : photosUrls) {
+                if(photoUrl == null) {
+                    break;
+                }
                 URL indexUrl = new URL(photoUrl);
                 HttpsURLConnection connection = (HttpsURLConnection) indexUrl.openConnection();
                 connection.setRequestMethod("GET");
@@ -161,7 +165,7 @@ public class DropboxListPhotosTask extends AsyncTask<String, Void, ArrayList<Str
                 String[] urlSplitted = photoUrl.split("\\?")[0].split("/");
                 String imageName = urlSplitted[urlSplitted.length - 1];
 
-                File imageFile = new File(inCache_basePath + "/P2PHOTO" + params[0], imageName);
+                File imageFile = new File(inCache_basePath + "/P2PHOTO/" + SessionHandler.readTUsername(mActivity) + params[0], imageName);
                 if(!imageFile.exists()) {
                     imageFile.createNewFile();
                     OutputStream output = new FileOutputStream(imageFile);

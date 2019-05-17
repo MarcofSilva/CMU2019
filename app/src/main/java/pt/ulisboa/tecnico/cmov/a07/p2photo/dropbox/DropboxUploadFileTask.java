@@ -1,10 +1,8 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 import com.dropbox.core.DbxException;
@@ -20,6 +18,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.InsideAlbumActivity;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.SessionHandler;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.UriHelper;
 
 public class DropboxUploadFileTask extends AsyncTask<String, Void, FileMetadata> {
@@ -28,21 +27,15 @@ public class DropboxUploadFileTask extends AsyncTask<String, Void, FileMetadata>
     private final Context mContext;
     private final DbxClientV2 mDbxClient;
     private Exception mException;
-    private final ProgressDialog dialog;
 
     public DropboxUploadFileTask(InsideAlbumActivity act, Context context, DbxClientV2 dbxClient) {
         mActivity = act;
         mContext = context;
         mDbxClient = dbxClient;
-        dialog = new ProgressDialog(mActivity);
     }
 
     @Override
     protected void onPreExecute() {
-        /*dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        dialog.setCancelable(false);
-        dialog.setMessage("Uploading");
-        dialog.show();*/
         Toast.makeText(mActivity, "Uploading your photo", Toast.LENGTH_LONG).show();
     }
 
@@ -92,8 +85,8 @@ public class DropboxUploadFileTask extends AsyncTask<String, Void, FileMetadata>
 
                 String catalogPath = remoteFolderPath + "/PhotosCatalog.txt";
                 //TODO if secure delete commented
-                //File localCatalogDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/P2PHOTO/" + remoteFolderPath);
-                File localCatalogDir = new File(mActivity.getApplicationContext().getCacheDir() + "/P2PHOTO/" + remoteFolderPath);
+                //File localCatalogDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/P2PHOTO/" + SessionHandler.readTUsername(mActivity) + "/" + remoteFolderPath);
+                File localCatalogDir = new File(mActivity.getApplicationContext().getCacheDir() + "/P2PHOTO/" + SessionHandler.readTUsername(mActivity) + "/" + remoteFolderPath);
 
                 // Download the file for the append url and upload again
                 if(!localCatalogDir.exists()) {

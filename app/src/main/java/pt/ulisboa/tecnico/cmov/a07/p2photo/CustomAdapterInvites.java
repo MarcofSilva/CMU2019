@@ -1,5 +1,7 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +13,7 @@ import java.util.ArrayList;
 
 import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxClientFactory;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxCreateFolderTask;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.wifi_direct.CreateFolderInStorageTask;
 
 //TODO Use View Holder Pattern
 public class CustomAdapterInvites extends BaseAdapter {
@@ -70,25 +73,45 @@ public class CustomAdapterInvites extends BaseAdapter {
         Button acceptBtn = view.findViewById(R.id.invitation_accept);
         Button refuseBtn = view.findViewById(R.id.invitation_refuse);
 
+        final ContextClass contextClass = (ContextClass) _act.getApplicationContext();
+
         acceptBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 Invite invite = _invites.get(position);
 
-                //Create slice of album for which user as been invited
-                DropboxCreateFolderTask createDropboxFolderTask = new DropboxCreateFolderTask(_act, DropboxClientFactory.getClient(), new DropboxCreateFolderTask.Callback() {
-                    @Override
-                    public void onFolderCreated(String catalogURL) {
-                        Invite invite = _invites.get(position);
-                        _invites.remove(position);
-                        notifyDataSetChanged();
-                        _act.removeItem(position);
-                        invite.set_dropboxUrl(catalogURL);
-                        _act.setmAcceptALb(new AcceptAlbumTask(invite.get_userAlbum(), invite.get_albumName(), invite.get_dropboxUrl(), "true", _act));
-                        _act.getmAcceptALb().execute((Void) null);
-                    }
-                });
-                createDropboxFolderTask.execute(invite.get_albumName(), invite.get_userAlbum()); //Pass the album name and its creator
+                if(contextClass.getAppMode().equals(_act.getString(R.string.AppModeDropBox))) {
+                    //Create slice of album for which user as been invited
+                    DropboxCreateFolderTask createDropboxFolderTask = new DropboxCreateFolderTask(_act, DropboxClientFactory.getClient(), new DropboxCreateFolderTask.Callback() {
+                        @Override
+                        public void onFolderCreated(String catalogURL) {
+                            Invite invite = _invites.get(position);
+                            _invites.remove(position);
+                            notifyDataSetChanged();
+                            _act.removeItem(position);
+                            invite.set_dropboxUrl(catalogURL);
+                            _act.setmAcceptALb(new AcceptAlbumTask(invite.get_userAlbum(), invite.get_albumName(), invite.get_dropboxUrl(), "true", _act));
+                            _act.getmAcceptALb().execute((Void) null);
+                        }
+                    });
+                    createDropboxFolderTask.execute(invite.get_albumName(), invite.get_userAlbum()); //Pass the album name and its creator
+                }
+                else {
+                    //Create slice of album for which user as been invited
+                    CreateFolderInStorageTask createFolderTask = new CreateFolderInStorageTask(_act, new CreateFolderInStorageTask.Callback() {
+                        @Override
+                        public void onFolderCreated() {
+                            Invite invite = _invites.get(position);
+                            _invites.remove(position);
+                            notifyDataSetChanged();
+                            _act.removeItem(position);
+                            invite.set_dropboxUrl("DummyCatalogURL");
+                            _act.setmAcceptALb(new AcceptAlbumTask(invite.get_userAlbum(), invite.get_albumName(), invite.get_dropboxUrl(), "true", _act));
+                            _act.getmAcceptALb().execute((Void) null);
+                        }
+                    });
+                    createFolderTask.execute(invite.get_albumName(), invite.get_userAlbum()); //Pass the album name and its creator
+                }
             }
         });
         refuseBtn.setOnClickListener(new View.OnClickListener(){
@@ -98,6 +121,9 @@ public class CustomAdapterInvites extends BaseAdapter {
                 _invites.remove(position);
                 notifyDataSetChanged();
                 _act.removeItem(position);
+                if(contextClass.getAppMode().equals(_act.getString(R.string.AppModeWifiDirect))) {
+                    invite.set_dropboxUrl("DummyCatalogURL");
+                }
                 _act.setmAcceptALb(new AcceptAlbumTask(invite.get_userAlbum(), invite.get_albumName(), invite.get_dropboxUrl(), "false", _act));
                 _act.getmAcceptALb().execute((Void) null);
             }

@@ -1,7 +1,7 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
+
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -10,8 +10,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
+
 import pt.ulisboa.tecnico.cmov.a07.p2photo.AlbumsActivity;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.CreateAlbumTask;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.SessionHandler;
@@ -89,16 +91,9 @@ public class Dropbox_AlbumsActivity extends AlbumsActivity {
     //Load stuff to show on screen
     public void loadData() {
 
-        final ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        dialog.setCancelable(false);
-        dialog.setMessage("Loading");
-        dialog.show();
-
         new DropboxListFolderTask(DropboxClientFactory.getClient(), new DropboxListFolderTask.Callback() {
             @Override
             public void onDataLoaded(ListFolderResult result) {
-                dialog.dismiss();
                 mAlbumsAdapter.clear();
                 for (Metadata folder : result.getEntries()) {
                     mAlbumsAdapter.add(folder.getName());
@@ -107,8 +102,6 @@ public class Dropbox_AlbumsActivity extends AlbumsActivity {
 
             @Override
             public void onError(Exception e) {
-                dialog.dismiss();
-
                 Log.e("Error", "Failed to list folder.", e);
                 Toast.makeText(Dropbox_AlbumsActivity.this, "An error has occurred", Toast.LENGTH_SHORT).show();
             }

@@ -132,10 +132,10 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
 
     @Override
     protected void onResume() {
+        super.onResume();
+
         mayRequestPermission(READ_EXTERNAL_STORAGE, REQUEST_READ_EXTERNAL_STORAGE);
         mayRequestPermission(WRITE_EXTERNAL_STORAGE, REQUEST_WRITE_EXTERNAL_STORAGE);
-
-        super.onResume();
     }
 
 
@@ -328,26 +328,6 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
         return false;
     }
 
-    //TODO different thread
-    private void createAlbumInStorage(String albumName) {
-        //Create directory if it not exist
-        File albumFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/P2PHOTO", albumName);
-        albumFolder.mkdirs();
-
-        //Add catalog to directory
-        File catalog = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/P2PHOTO/" + albumName, "PhotosCatalog.txt");
-        try {
-            boolean result = catalog.createNewFile();
-            if (!result) {
-                catalog.delete();
-            }
-        } catch (IOException e) {
-            Toast.makeText(this, "Something went wrong, when creating the catalog file", Toast.LENGTH_LONG).show();
-            Log.d("MyDebug", "Exception " + e + ": " + e.getMessage());
-        }
-    }
-
-
     protected class CustomAlbumsAdapter extends BaseAdapter {
 
         private final ArrayList<String> _albumTitle;
@@ -526,7 +506,7 @@ class UserLogoutTask extends AsyncTask<Void, Void, Boolean> {
             }
 
 
-            Intent logoutData = new Intent(_activity.getApplicationContext(), MainEmptyActivity.class);
+            Intent logoutData = new Intent(_activity.getApplicationContext(), LoginActivity.class);
             _activity.startActivity(logoutData);
             _activity.finish();
         }

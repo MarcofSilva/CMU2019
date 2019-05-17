@@ -8,11 +8,17 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+
 import pt.ulisboa.tecnico.cmov.a07.p2photo.AlbumsActivity;
-import pt.ulisboa.tecnico.cmov.a07.p2photo.InsideAlbumActivity;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.CreateAlbumTask;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.R;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.SessionHandler;
 
 public class WifiDirect_AlbumsActivity extends AlbumsActivity {
+
+    private CreateFolderInStorageTask mCreateAlbumTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,17 +47,17 @@ public class WifiDirect_AlbumsActivity extends AlbumsActivity {
                                     Toast.makeText(WifiDirect_AlbumsActivity.this, "That Album already exists", Toast.LENGTH_LONG).show();
                                 }
                                 else {
-                                    //TODO create album in storage for wifi direct
-                                    /*mDropboxCreateAlbumTask = new DropboxCreateFolderTask(WifiDirect_AlbumsActivity.this, DropboxClientFactory.getClient(), new DropboxCreateFolderTask.Callback() {
+
+                                    //Create album in storage for wifi direct
+                                    mCreateAlbumTask = new CreateFolderInStorageTask(WifiDirect_AlbumsActivity.this, new CreateFolderInStorageTask.Callback() {
                                         @Override
-                                        public void onFolderCreated(String catalogUrl) {
-                                            mCreateAlb = new CreateAlbumTask(albumName, catalogUrl, WifiDirect_AlbumsActivity.this);
+                                        public void onFolderCreated() {
+                                            //TODO importante ver a questao dos conflitos entre as duas versoes em realacao a pedidos ao servidor
+                                            mCreateAlb = new CreateAlbumTask(albumName, "DummyCatalogUrl", WifiDirect_AlbumsActivity.this);
                                             mCreateAlb.execute((Void) null);
                                         }
                                     });
-                                    mDropboxCreateAlbumTask.execute(albumName, SessionHandler.readTUsername(WifiDirect_AlbumsActivity.this));*/
-                                    //mDropboxCreateAlbumTask.execute(albumName, SessionHandler.readTUsername(AlbumsActivity.this));
-                                    //createAlbumInStorage(albumName);
+                                    mCreateAlbumTask.execute(albumName, SessionHandler.readTUsername(WifiDirect_AlbumsActivity.this));
                                 }
                                 loadData();
                             }
@@ -70,23 +76,28 @@ public class WifiDirect_AlbumsActivity extends AlbumsActivity {
 
     }
 
-    public void loadData() {
-        //TODO
-        /* using smartphone storage
-        File baseDirectory = new File(ALBUM_BASE_FOLDER);
+    @Override
+    protected void onResume() {
+        super.onResume();
 
-        if(baseDirectory.exists()) {
-            File[] files = baseDirectory.listFiles();
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    mAlbumsAdapter.add(file.getName());
-                }
-            }
-        }*/
+        loadData();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+
+    public void loadData() {
+        new ListFolderTask(this, new ListFolderTask.Callback() {
+            @Override
+            public void onDataLoaded(ArrayList<String> albumsInfo) {
+                mAlbumsAdapter.clear();
+                for (String info : albumsInfo) {
+                    mAlbumsAdapter.add(info);
+                }
+            }
+        }).execute();
     }
 }
