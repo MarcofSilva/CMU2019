@@ -71,7 +71,7 @@ public class CopyPhotoToAlbumTask extends AsyncTask<String, Void, File> {
 
             copyPhoto(originImage, copiedImage, fileName, destFolderPath);
 
-            String catalogPath = destFolderPath + "/PhotosCatalog.txt";
+            String catalogPath = destFolderPath + "/" + mActivity.getAlbumName() + ":" + mActivity.getCreatorName() + ".txt";
 
             try {
                 File catalogFile = new File(catalogPath);

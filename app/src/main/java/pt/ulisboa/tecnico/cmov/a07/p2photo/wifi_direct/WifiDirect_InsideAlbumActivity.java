@@ -1,6 +1,9 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo.wifi_direct;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -10,8 +13,6 @@ import java.util.ArrayList;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.InsideAlbumActivity;
 
 public class WifiDirect_InsideAlbumActivity extends InsideAlbumActivity {
-
-    private final int THUMBSIZE = 256;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,8 +38,8 @@ public class WifiDirect_InsideAlbumActivity extends InsideAlbumActivity {
             public void onDataLoaded(ArrayList<String> paths) {
                 mPhotosAdapter.clear();
                 for (String photoPath : paths) {
-                    //Bitmap thumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(photoPath), THUMBSIZE, THUMBSIZE);
-                    mPhotosAdapter.add(photoPath);
+                    Bitmap thumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(photoPath), THUMBSIZE, THUMBSIZE);
+                    mPhotosAdapter.add(photoPath, thumbImage);
                 }
             }
 

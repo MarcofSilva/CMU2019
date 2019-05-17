@@ -16,7 +16,25 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+
+            <ImageView
+                android:id="@+id/refresh_inside_album_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:onClick="refresh"
+                android:paddingLeft="15dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="10dp"
+                android:rotation="90"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_menu_logout"
+                android:textColor="@android:color/black"
+                android:textSize="20sp" />
+
+        </android.support.v7.widget.Toolbar>
+
 
     </android.support.design.widget.AppBarLayout>
 

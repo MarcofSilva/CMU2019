@@ -12,7 +12,6 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -43,6 +42,8 @@ import java.security.Key;
 import java.util.ArrayList;
 
 import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxAuthenticationHandler;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.wifi_direct.service_list.AlbumsManager;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.wifi_direct.service_list.WiFiServiceDiscoveryActivity;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.Security.KeyManager;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -63,6 +64,8 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
 
     protected CustomAlbumsAdapter mAlbumsAdapter;
 
+    private ContextClass contextClass;
+
     // UI references.
     private TextView mUsernameView;
     private GridView mAlbumsGridView;
@@ -73,6 +76,8 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
         setContentView(R.layout.activity_albums);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        contextClass = (ContextClass) getApplicationContext();
 
         mAlbumsAdapter = new CustomAlbumsAdapter(this);
 
@@ -89,6 +94,12 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        Menu menu = navigationView.getMenu();
+        if(contextClass.getAppMode().equals(getString(R.string.AppModeDropBox))) {
+            menu.removeItem(R.id.nav_wifiDirect_devices);
+        }
+
 
         //Get navigation view header reference
         View headerView = navigationView.getHeaderView(0);
@@ -108,7 +119,6 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
         Log.d("Debug Cenas", "oncreate: binded service");
 
         registerMyReceiver();
-
     }
 
     protected void setOnItemClickListenerForAppMode(final Class<?> insideAlbumActivity) {
@@ -167,7 +177,8 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_refresh) {
+            loadData();
             return true;
         }
 
@@ -180,11 +191,16 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        /*if (id == R.id.nav_camera) {
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
 
-        } else if (id == R.id.nav_invitation_albums) {
+        } else*/ if (id == R.id.nav_wifiDirect_devices) {
+            Intent wifiServiceDiscovery = new Intent(getApplicationContext(), WiFiServiceDiscoveryActivity.class);
+            startActivity(wifiServiceDiscovery);
+
+        }
+        else if (id == R.id.nav_invitation_albums) {
             Intent albumsInvitations = new Intent(getApplicationContext(), AlbumsInvitationsActivity.class);
             startActivity(albumsInvitations);
 
@@ -231,7 +247,6 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            ContextClass contextClass = (ContextClass) getApplicationContext();
             boolean logout = false;
             ArrayList<Integer> indextoRemove = new ArrayList<>();
             for(int i = 0; i < contextClass.getInvites().size(); i++){
@@ -418,8 +433,11 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
             }
 
             String title = _albumTitle.get(position);
+            String creator = _albumCreator.get(position);
             viewHolder.albumTitle.setText(title);
-
+            if(!creator.equals(SessionHandler.readTUsername(_activity))) {
+                viewHolder.albumCreator.setText(creator);
+            }
             return view;
         }
     }
@@ -427,9 +445,11 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
     protected class AlbumInfoViewHolder {
 
         final TextView albumTitle;
+        final TextView albumCreator;
 
         public AlbumInfoViewHolder(View view) {
             albumTitle = view.findViewById(R.id.album_title);
+            albumCreator = view.findViewById(R.id.album_creator);
         }
     }
 }

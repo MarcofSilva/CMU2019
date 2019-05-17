@@ -62,7 +62,7 @@ public class CreateFolderInStorageTask extends AsyncTask<String, Void, Void> {
                 albumFolder.mkdirs();
             }
 
-            File catalogFile = new File(albumFolder.getPath(), "PhotosCatalog.txt");
+            File catalogFile = new File(albumFolder.getPath(), albumFolderID + ".txt");
             boolean result = catalogFile.createNewFile();
             if (!result) {
                 catalogFile.delete();

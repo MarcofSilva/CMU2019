@@ -25,8 +25,7 @@ public class WiFiDirectServicesList extends ListFragment {
         public void connectP2p(WiFiP2pService wifiP2pService);
     }
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.devices_list, container, false);
     }
     @Override

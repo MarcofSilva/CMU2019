@@ -351,9 +351,10 @@ public class WiFiServiceDiscoveryActivity extends AppCompatActivity implements W
          * GroupOwnerSocketHandler}
          */
         if (p2pInfo.isGroupOwner) {
+            //Toast.makeText(this, "GROUP OWNER", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Connected as group owner");
             try {
-                handler = new GroupOwnerSocketHandler(getApplicationContext(), statusTxtView, currentPeersAddress, ((WiFiP2pService.MessageTarget) this).getHandler());
+                handler = new GroupOwnerSocketHandler(this, getApplicationContext(), statusTxtView, currentPeersAddress, ((WiFiP2pService.MessageTarget) this).getHandler());
                 handler.start();
             } catch (IOException e) {
                 Log.d(TAG,
@@ -362,7 +363,7 @@ public class WiFiServiceDiscoveryActivity extends AppCompatActivity implements W
             }
         } else {
             Log.d(TAG, "Connected as peer");
-            handler = new ClientSocketHandler(p2pInfo.groupOwnerAddress, statusTxtView, getApplicationContext(), ((WiFiP2pService.MessageTarget) this).getHandler());
+            handler = new ClientSocketHandler(p2pInfo.groupOwnerAddress, this, statusTxtView, getApplicationContext(), ((WiFiP2pService.MessageTarget) this).getHandler());
             handler.start();
         }
         statusTxtView.setVisibility(View.GONE);

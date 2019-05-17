@@ -155,7 +155,11 @@ public class DropboxListPhotosTask extends AsyncTask<String, Void, ArrayList<Str
 
                 //Read urls
                 BufferedReader reader = new BufferedReader(new FileReader(catalogFile));
-                photosUrls.add(reader.readLine());
+                String line;
+
+                while((line = reader.readLine()) != null) {
+                    photosUrls.add(line);
+                 }
                 reader.close();
             }
 

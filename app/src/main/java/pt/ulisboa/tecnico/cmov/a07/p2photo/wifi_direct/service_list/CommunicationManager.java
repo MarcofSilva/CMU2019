@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.cmov.a07.p2photo.wifi_direct.service_list;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -16,10 +17,14 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Handles reading and writing of messages with socket buffers. Uses a Handler
@@ -34,52 +39,74 @@ public class CommunicationManager implements  Runnable{
     private OutputStream oStream;
     private static final String TAG = "CommunicationManager";
     private boolean isGroupOwner;
+    private String albums;
+    private WiFiServiceDiscoveryActivity activity;
+    private AlbumsManager albumsManager;
 
-    public CommunicationManager(Socket socket, Handler handler, boolean isGroupOwner) {
+    public CommunicationManager(Socket socket, WiFiServiceDiscoveryActivity activity, Handler handler, boolean isGroupOwner, String albums) {
         this.socket = socket;
         this.handler = handler;
         this.isGroupOwner = isGroupOwner;
+        this.albums = albums;
+        this.activity = activity;
+        this.albumsManager = new AlbumsManager(activity);
     }
 
     @Override
     public void run() {
         if (android.os.Debug.isDebuggerConnected())
             android.os.Debug.waitForDebugger();
+
         try {
             iStream = socket.getInputStream();
             oStream = socket.getOutputStream();
-            byte[] buffer = new byte[1024];
-            int bytes;
             handler.obtainMessage(WiFiServiceDiscoveryActivity.MY_HANDLE, this).sendToTarget();
-            Log.d(TAG , "Writing");
-            if(!isGroupOwner){
-                sendImage(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/Camera/20181103_134455.jpg");
-            }
-            else {
-                String ip=(((InetSocketAddress) socket.getRemoteSocketAddress()).getAddress()).toString().replace("/","");
-                Log.d(TAG, "ip of peer - " + ip);
-                handler.obtainMessage(WiFiServiceDiscoveryActivity.MESSAGE_READ, ip.length() , -1, ip.getBytes()).sendToTarget();
-            }
-            while (true) {
-                try {
-                    // Read from the InputStream
-                    bytes = iStream.read(buffer);
-                    String str = "";
-                    if (bytes != -1 && isGroupOwner) {
-                        byte[] newArray = Arrays.copyOfRange(buffer, 0, bytes);
-                        str = new String(newArray, StandardCharsets.UTF_8);
-                    }
-                    if (str.endsWith("@") || bytes == -1) {
-                        break;
-                    }
-                    // Send the obtained bytes to the UI Activity
-                    Log.d(TAG, "Rec:" + String.valueOf(buffer));
-                    handler.obtainMessage(WiFiServiceDiscoveryActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+            //GET MY USER ALBUM
 
-                } catch (IOException e) {
-                    Log.e(TAG, "disconnected", e);
-                }
+            if (!isGroupOwner){
+                Log.d(TAG, "hello im peer");
+                String dummyUserAlbum = "album1:marco::foto1,foto2";
+                //enviar string de useralbums
+                write(dummyUserAlbum);
+                //fica a espera de resposta do servidor com os albuns/catalogos
+                /*String serverAns = read();
+                //write fotos que me faltam a mim
+                String missing = albumsManager.compareUserAlbums(dummyUserAlbum, serverAns);
+                missing = "";
+                write(missing);
+                //read fotos que faltam ao servidor
+                String missingServer = read();
+                //read - fotos dele
+                //String photosForMe = readPhotos();
+                String photosForMe = "";
+                //write - fotos para ele
+                //albumManager.getPhotos()
+                //sendPhotos(...)*/
+
+
             }
+            else{
+                Log.d(TAG, "hi im groupowner");
+                //Toast.makeText(activity, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", Toast.LENGTH_SHORT).show();
+                String dummyUserAlbum = "album1:marco::foto1";
+                //receber user albums de cliente
+                String clientAns = read();
+                //String clientAns = "album1:marco::foto1,foto2";
+                Log.d(TAG, "gonna write my dummy");
+                /*write(dummyUserAlbum);
+                Log.d(TAG, "did it");
+                //esperar por fotos que faltam ao cliente
+                String missingClient = read();
+                //ver que fotos faltam e enviar fotos que eu quero
+                String missing = albumsManager.compareUserAlbums(dummyUserAlbum, clientAns);
+                missing = "album1:marco::foto2";
+                write(missing);
+                //read fotos que ele quer
+                //write fotos para cliente
+                //read fotos para mim*/
+
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -90,6 +117,42 @@ public class CommunicationManager implements  Runnable{
             }
         }
     }
+
+    private String read(){
+        byte[] buffer = new byte[1024];
+        int bytes;
+        handler.obtainMessage(WiFiServiceDiscoveryActivity.MY_HANDLE, this).sendToTarget();
+        String readMessage = "";
+        while (true) {
+            try {
+                // Read from the InputStream (aqui recebe-se os catalogos do outro)
+                bytes = iStream.read(buffer);
+
+                // construct a string from the valid bytes in the buffer
+                if(bytes == -1) {
+                    if(readMessage.length() > 0) {
+                        break;
+                    }
+                }
+                else if (bytes > 0){
+                    readMessage += new String(buffer, 0, bytes);
+                    Log.d(TAG, readMessage);
+
+                    if(bytes < buffer.length) {
+                        break;
+                    }
+                }
+
+            } catch (IOException e) {
+                Log.e(TAG, "disconnected", e);
+            }
+        }
+        // Send the obtained bytes to the UI Activity
+        Log.d(TAG, "Rec:" + String.valueOf(buffer));
+        handler.obtainMessage(WiFiServiceDiscoveryActivity.MESSAGE_READ, readMessage.getBytes().length, -1, readMessage.getBytes()).sendToTarget(); //isto chama a funçao handlemessage da atividade
+        return readMessage;
+    }
+
     public void write(String msg) {
         final byte[] buffer = msg.getBytes();
         Thread thread = new Thread() {
@@ -143,5 +206,30 @@ public class CommunicationManager implements  Runnable{
 
     }
 
+    public static String getMacAddr() {
+        try {
+            List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface nif : all) {
+                if (!nif.getName().equalsIgnoreCase("wlan0")) continue;
+
+                byte[] macBytes = nif.getHardwareAddress();
+                if (macBytes == null) {
+                    return "";
+                }
+
+                StringBuilder res1 = new StringBuilder();
+                for (byte b : macBytes) {
+                    res1.append(String.format("%02X:",b));
+                }
+
+                if (res1.length() > 0) {
+                    res1.deleteCharAt(res1.length() - 1);
+                }
+                return res1.toString();
+            }
+        } catch (Exception ex) {
+        }
+        return "02:00:00:00:00:00";
+    }
 
 }

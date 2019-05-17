@@ -29,11 +29,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public abstract class InsideAlbumActivity extends AppCompatActivity {
+public abstract class InsideAlbumActivity extends AppCompatActivity{
     private static final String USERNAMES_EXTRA = "usernames";
     private static final int PICKPHOTO_REQUEST_CODE = 10;
     private static final int FIND_USERS_REQUEST_CODE = 2;
 
+    protected final int THUMBSIZE = 256;
 
     protected CustomPhotosAdapter mPhotosAdapter;
 
@@ -108,6 +109,9 @@ public abstract class InsideAlbumActivity extends AppCompatActivity {
         super.onResume();
     }
 
+    public void refresh(View view) {
+        loadData();
+    }
 
     public abstract void loadData();
 
@@ -194,20 +198,20 @@ public abstract class InsideAlbumActivity extends AppCompatActivity {
     protected class CustomPhotosAdapter extends BaseAdapter {
 
         private final List<String> _photosPaths;
-        //private final List<Bitmap> _photosThumbnails;
+        private final List<Bitmap> _photosThumbnails;
 
         private final Activity _activity;
 
         public CustomPhotosAdapter(Activity act, ArrayList<String> photoPaths, ArrayList<Bitmap> photosThumbnails) {
             this._activity = act;
             _photosPaths = photoPaths;
-            //_photosThumbnails = photosThumbnails;
+            _photosThumbnails = photosThumbnails;
         }
 
         public CustomPhotosAdapter(Activity act) {
             this._activity = act;
             _photosPaths = new ArrayList<>();
-            //_photosThumbnails = new ArrayList<>();
+            _photosThumbnails = new ArrayList<>();
         }
 
         @Override
@@ -222,19 +226,19 @@ public abstract class InsideAlbumActivity extends AppCompatActivity {
 
         public void clear() {
             _photosPaths.clear();
-            //_photosThumbnails.clear();
+            _photosThumbnails.clear();
             notifyDataSetChanged();
         }
 
-        public void addAll(ArrayList<String> photoPaths) {
+        public void addAll(ArrayList<String> photoPaths, ArrayList<Bitmap> photoThumbnails) {
             _photosPaths.addAll(photoPaths);
-            //_photosThumbnails.addAll(photoThumbnail);
+            _photosThumbnails.addAll(photoThumbnails);
             notifyDataSetChanged();
         }
 
-        public void add(String photoPath){
+        public void add(String photoPath, Bitmap photoThumbnail){
             _photosPaths.add(photoPath);
-            //_photosThumbnails.add(photoThumbnail);
+            _photosThumbnails.add(photoThumbnail);
             notifyDataSetChanged();
         }
 
@@ -258,8 +262,8 @@ public abstract class InsideAlbumActivity extends AppCompatActivity {
                 viewHolder = (ImageViewHolder) view.getTag();//In this case a view is being "aproveitada" and we can get the view holder from de view
             }
 
-            viewHolder.imageView.setImageURI(Uri.parse(_photosPaths.get(position)));
-            //viewHolder.imageView.setImageBitmap(_photosThumbnails.get(position));
+            //viewHolder.imageView.setImageURI(Uri.parse(_photosPaths.get(position)));
+            viewHolder.imageView.setImageBitmap(_photosThumbnails.get(position));
 
             return view;
         }

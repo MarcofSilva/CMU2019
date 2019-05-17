@@ -20,6 +20,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ClientSocketHandler extends Thread {
     private static final String TAG = "ClientSocketHandler";
@@ -28,23 +30,31 @@ public class ClientSocketHandler extends Thread {
     private Handler handler;
     private Context context;
     private CommunicationManager com;
-    public ClientSocketHandler(InetAddress groupOwnerAddress, View statusText, Context context, Handler handler) {
+    private WiFiServiceDiscoveryActivity activity;
+    public ClientSocketHandler(InetAddress groupOwnerAddress, WiFiServiceDiscoveryActivity activity, View statusText, Context context, Handler handler) {
         this.mAddress = groupOwnerAddress;
         this.statusText = (TextView) statusText;
         this.context = context;
         this.handler = handler;
+        this.activity = activity;
     }
 
     @Override
     public void run() {
         if (android.os.Debug.isDebuggerConnected())
             android.os.Debug.waitForDebugger();
+        //1 - fazer pedido ao servidor
+        //recebo - lista de albuns
+        //pedir catalogos de todos os albuns
+        //comparar e ver o que é preciso
+        //pedir todas de uma vez
+        String dummyResponse = "ola;bla";
         Socket socket = new Socket();
         try {
             socket.bind(null);
             socket.connect(new InetSocketAddress(mAddress.getHostAddress(), WiFiServiceDiscoveryActivity.SERVER_PORT), 5000);
             Log.d(TAG, "Launching the client handler");
-            com = new CommunicationManager(socket, handler, false);
+            com = new CommunicationManager(socket, this.activity, handler, false, dummyResponse);
             new Thread(com).start();
         } catch (IOException e) {
             e.printStackTrace();
