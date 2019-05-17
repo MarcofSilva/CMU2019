@@ -1,6 +1,9 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -41,7 +44,8 @@ public class Dropbox_InsideAlbumActivity extends InsideAlbumActivity {
             public void onDataLoaded(ArrayList<String> paths) {
                 mPhotosAdapter.clear();
                 for (String photoPath : paths) {
-                    mPhotosAdapter.add(photoPath);
+                    Bitmap thumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(photoPath), THUMBSIZE, THUMBSIZE);
+                    mPhotosAdapter.add(photoPath, thumbImage);
                 }
             }
 

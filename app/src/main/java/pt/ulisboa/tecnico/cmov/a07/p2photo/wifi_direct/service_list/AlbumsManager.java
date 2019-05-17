@@ -1,14 +1,26 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo.wifi_direct.service_list;
 
+import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AlbumsManager {
-    private WiFiServiceDiscoveryActivity activity;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.SessionHandler;
 
-    public AlbumsManager(WiFiServiceDiscoveryActivity activity){
-        this.activity = activity;
+public class AlbumsManager {
+    public static String BASE_FOLDER;
+
+    private AppCompatActivity activity;
+
+    public AlbumsManager(AppCompatActivity act){
+        this.activity = act;
+        BASE_FOLDER = this.activity.getFilesDir() + "/P2PHOTO/" + SessionHandler.readTUsername(this.activity);
     }
 
     public String compareUserAlbums(String albumsU1, String albumsU2) {
@@ -35,5 +47,37 @@ public class AlbumsManager {
             Object value = entryu1.getValue();
         }
     return "";
+    }
+
+    //Following format =>  AlbumName1:Album1Creator::Photo1,Photo2;AlbumName2:Album2Creator::Photo1,Photo2
+    public String listLocalAlbumsPhotos(File base) throws IOException {
+        String name;
+        String result = "";
+        File[] files = base.listFiles();
+        if(files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    result += file.getName() + "::" + listLocalAlbumsPhotos(file) + ";";
+                } else if ((name = file.getName()).endsWith(".jpg")) {
+                    result += name + ",";
+                }
+            }
+            result = result.substring(0, result.length() - 1);
+        }
+        Toast.makeText(activity, result, Toast.LENGTH_LONG).show();
+        return result;
+    }
+
+    private String getPhotosNamesInFolder(File catalogFile) throws IOException {
+        //Read urls
+        BufferedReader reader = new BufferedReader(new FileReader(catalogFile));
+        String photos = "";
+        String line;
+
+        while((line = reader.readLine()) != null) {
+            photos += line + ",";
+        }
+        reader.close();
+        return photos.substring(0, photos.length() - 1);
     }
 }

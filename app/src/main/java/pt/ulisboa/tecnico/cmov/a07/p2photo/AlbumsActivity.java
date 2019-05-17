@@ -12,7 +12,6 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -42,6 +41,7 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxAuthenticationHandler;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.wifi_direct.service_list.AlbumsManager;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.wifi_direct.service_list.WiFiServiceDiscoveryActivity;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -175,7 +175,8 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_refresh) {
+            loadData();
             return true;
         }
 
@@ -429,8 +430,11 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
             }
 
             String title = _albumTitle.get(position);
+            String creator = _albumCreator.get(position);
             viewHolder.albumTitle.setText(title);
-
+            if(!creator.equals(SessionHandler.readTUsername(_activity))) {
+                viewHolder.albumCreator.setText(creator);
+            }
             return view;
         }
     }
@@ -438,9 +442,11 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
     protected class AlbumInfoViewHolder {
 
         final TextView albumTitle;
+        final TextView albumCreator;
 
         public AlbumInfoViewHolder(View view) {
             albumTitle = view.findViewById(R.id.album_title);
+            albumCreator = view.findViewById(R.id.album_creator);
         }
     }
 }

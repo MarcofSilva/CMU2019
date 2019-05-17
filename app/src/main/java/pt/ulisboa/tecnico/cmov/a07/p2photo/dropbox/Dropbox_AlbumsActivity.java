@@ -103,7 +103,7 @@ public class Dropbox_AlbumsActivity extends AlbumsActivity {
             @Override
             public void onError(Exception e) {
                 Log.e("Error", "Failed to list folder.", e);
-                Toast.makeText(Dropbox_AlbumsActivity.this, "An error has occurred", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Dropbox_AlbumsActivity.this, "An error has occurred while trying to load albums", Toast.LENGTH_SHORT).show();
             }
         }).execute(""); //Send "" as the path because we want the base directory, that contains the albums folders
     }

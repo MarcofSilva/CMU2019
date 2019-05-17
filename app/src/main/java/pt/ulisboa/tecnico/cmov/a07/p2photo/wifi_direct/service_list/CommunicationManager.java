@@ -122,24 +122,34 @@ public class CommunicationManager implements  Runnable{
         byte[] buffer = new byte[1024];
         int bytes;
         handler.obtainMessage(WiFiServiceDiscoveryActivity.MY_HANDLE, this).sendToTarget();
+        String readMessage = "";
         while (true) {
             try {
                 // Read from the InputStream (aqui recebe-se os catalogos do outro)
                 bytes = iStream.read(buffer);
-                if (bytes == -1) {
-                    break;
+
+                // construct a string from the valid bytes in the buffer
+                if(bytes == -1) {
+                    if(readMessage.length() > 0) {
+                        break;
+                    }
                 }
-                // Send the obtained bytes to the UI Activity
-                Log.d(TAG, "Rec:" + String.valueOf(buffer));
-                handler.obtainMessage(WiFiServiceDiscoveryActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget(); //isto chama a funçao handlemessage da atividade
+                else if (bytes > 0){
+                    readMessage += new String(buffer, 0, bytes);
+                    Log.d(TAG, readMessage);
+
+                    if(bytes < buffer.length) {
+                        break;
+                    }
+                }
 
             } catch (IOException e) {
                 Log.e(TAG, "disconnected", e);
             }
         }
-        // construct a string from the valid bytes in the buffer
-        String readMessage = new String(buffer, 0, bytes);
-        Log.d(TAG, readMessage);
+        // Send the obtained bytes to the UI Activity
+        Log.d(TAG, "Rec:" + String.valueOf(buffer));
+        handler.obtainMessage(WiFiServiceDiscoveryActivity.MESSAGE_READ, readMessage.getBytes().length, -1, readMessage.getBytes()).sendToTarget(); //isto chama a funçao handlemessage da atividade
         return readMessage;
     }
 

@@ -39,9 +39,21 @@
                     android:layout_height="wrap_content"
                     android:shadowColor="#000"
                     android:shadowRadius="7.0"
-                    android:text="This is some"
+                    android:text=""
                     android:textColor="#ffffff"
-                    android:textSize="12sp"
+                    android:textSize="13sp"
+                    android:maxLines="1"
+                    android:scrollHorizontally="true"
+                    android:ellipsize="end"/>
+                <TextView
+                    android:id="@+id/album_creator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:shadowColor="#000"
+                    android:shadowRadius="7.0"
+                    android:text=""
+                    android:textColor="#ffffff"
+                    android:textSize="10sp"
                     android:maxLines="1"
                     android:scrollHorizontally="true"
                     android:ellipsize="end"/>
