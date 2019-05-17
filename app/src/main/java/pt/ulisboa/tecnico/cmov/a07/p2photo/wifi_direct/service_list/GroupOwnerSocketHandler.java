@@ -42,11 +42,13 @@ public class GroupOwnerSocketHandler extends Thread {
     private Context context;
     private TextView statusText;
     private HashMap<String, String> peers;
+    private WiFiServiceDiscoveryActivity activity;
 
-    public GroupOwnerSocketHandler(Context context, View statusText, HashMap<String, String> peers, Handler handler) throws IOException {
+    public GroupOwnerSocketHandler(WiFiServiceDiscoveryActivity activity, Context context, View statusText, HashMap<String, String> peers, Handler handler) throws IOException {
         this.context = context;
         this.statusText = (TextView) statusText;
         this.peers = peers;
+        this.activity = activity;
         try {
             socket = new ServerSocket(8880);
             this.handler = handler;
@@ -79,7 +81,7 @@ public class GroupOwnerSocketHandler extends Thread {
             try {
                 // A blocking operation. Initiate a ChatManager instance when
                 // there is a new connection
-                pool.execute(new CommunicationManager(socket.accept(), handler, true, dummyResponse));
+                pool.execute(new CommunicationManager(socket.accept(), this.activity, handler, true, dummyResponse));
                 Log.d(TAG, "Launching the I/O handler");
             } catch (IOException e) {
                 try {

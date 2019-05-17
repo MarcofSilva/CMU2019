@@ -30,11 +30,13 @@ public class ClientSocketHandler extends Thread {
     private Handler handler;
     private Context context;
     private CommunicationManager com;
-    public ClientSocketHandler(InetAddress groupOwnerAddress, View statusText, Context context, Handler handler) {
+    private WiFiServiceDiscoveryActivity activity;
+    public ClientSocketHandler(InetAddress groupOwnerAddress, WiFiServiceDiscoveryActivity activity, View statusText, Context context, Handler handler) {
         this.mAddress = groupOwnerAddress;
         this.statusText = (TextView) statusText;
         this.context = context;
         this.handler = handler;
+        this.activity = activity;
     }
 
     @Override
@@ -52,7 +54,7 @@ public class ClientSocketHandler extends Thread {
             socket.bind(null);
             socket.connect(new InetSocketAddress(mAddress.getHostAddress(), WiFiServiceDiscoveryActivity.SERVER_PORT), 5000);
             Log.d(TAG, "Launching the client handler");
-            com = new CommunicationManager(socket, handler, false, dummyResponse);
+            com = new CommunicationManager(socket, this.activity, handler, false, dummyResponse);
             new Thread(com).start();
         } catch (IOException e) {
             e.printStackTrace();
