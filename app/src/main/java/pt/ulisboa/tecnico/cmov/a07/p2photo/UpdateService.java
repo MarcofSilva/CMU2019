@@ -97,7 +97,6 @@ public class UpdateService extends Service {
 
             conn.setRequestProperty("Authorization", SessionHandler.readToken(_activity));
 
-            System.out.println("POOLED");
             Log.d("Debug cenas", "POOLED");
 
             InputStream in = new BufferedInputStream(conn.getInputStream());
@@ -117,7 +116,6 @@ public class UpdateService extends Service {
             ContextClass context = (ContextClass) getApplicationContext();
             context.addInvite(invite);
 
-            System.out.println("added new invite");
             Log.d("Debug cenas", "added new invite");
             //sending ping for him to update himself
             sendMyBroadCast();

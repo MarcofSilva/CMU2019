@@ -250,7 +250,6 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
             boolean logout = false;
             ArrayList<Integer> indextoRemove = new ArrayList<>();
             for(int i = 0; i < contextClass.getInvites().size(); i++){
-                System.out.println("YOU HAVE INVITE");
                 Invite inv = contextClass.getInvite(i);
                 if(inv.get_albumName().equals(NEED_AUTHENTICATION) && inv.get_userAlbum().equals(NEED_AUTHENTICATION)){
                     logout = true;

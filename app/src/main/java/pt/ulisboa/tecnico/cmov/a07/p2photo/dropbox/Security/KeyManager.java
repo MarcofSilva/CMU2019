@@ -62,7 +62,6 @@ public class KeyManager {
 
     //encrypts url with specific albumkey
     public static String encrypt(String albumName, String urlToEncrypt){
-        System.out.println("encrypting...");
         Cipher cipher = null;
         String urlEncrypted = "";
         try {
@@ -89,7 +88,6 @@ public class KeyManager {
     }
 
     public static String decrypt(String albumName, String urlToDecrypt){
-        System.out.println("decrypting...");
         String urlDecrypted = "";
         try{
             Cipher cipher = Cipher.getInstance("AES");
