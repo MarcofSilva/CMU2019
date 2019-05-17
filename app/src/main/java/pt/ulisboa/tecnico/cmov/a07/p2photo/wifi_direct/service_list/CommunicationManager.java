@@ -19,7 +19,9 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Handles reading and writing of messages with socket buffers. Uses a Handler
@@ -34,17 +36,20 @@ public class CommunicationManager implements  Runnable{
     private OutputStream oStream;
     private static final String TAG = "CommunicationManager";
     private boolean isGroupOwner;
+    private String albums;
 
-    public CommunicationManager(Socket socket, Handler handler, boolean isGroupOwner) {
+    public CommunicationManager(Socket socket, Handler handler, boolean isGroupOwner, String albums) {
         this.socket = socket;
         this.handler = handler;
         this.isGroupOwner = isGroupOwner;
+        this.albums = albums;
     }
 
     @Override
     public void run() {
         if (android.os.Debug.isDebuggerConnected())
             android.os.Debug.waitForDebugger();
+
         try {
             iStream = socket.getInputStream();
             oStream = socket.getOutputStream();
@@ -52,24 +57,43 @@ public class CommunicationManager implements  Runnable{
             int bytes;
             handler.obtainMessage(WiFiServiceDiscoveryActivity.MY_HANDLE, this).sendToTarget();
             Log.d(TAG , "Writing");
-            if(!isGroupOwner){
+            //IR BUSCAR CATALOGOS E ESCREVE-LOS AQUI
+            String dummySend = "nome1,nome2;nome3,nome4";
+            write(dummySend);
+            /*if(!isGroupOwner){
                 sendImage(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/Camera/20181103_134455.jpg");
             }
             else {
                 String ip=(((InetSocketAddress) socket.getRemoteSocketAddress()).getAddress()).toString().replace("/","");
                 Log.d(TAG, "ip of peer - " + ip);
                 handler.obtainMessage(WiFiServiceDiscoveryActivity.MESSAGE_READ, ip.length() , -1, ip.getBytes()).sendToTarget();
-            }
+            }*/
             while (true) {
                 try {
-                    // Read from the InputStream
+                    // Read from the InputStream (aqui recebe-se os catalogos do outro)
                     bytes = iStream.read(buffer);
-                    String str = "";
-                    if (bytes != -1 && isGroupOwner) {
-                        byte[] newArray = Arrays.copyOfRange(buffer, 0, bytes);
-                        str = new String(newArray, StandardCharsets.UTF_8);
+                    if (bytes == -1) {
+                        break;
                     }
-                    if (str.endsWith("@") || bytes == -1) {
+                    // Send the obtained bytes to the UI Activity
+                    Log.d(TAG, "Rec:" + String.valueOf(buffer));
+                    handler.obtainMessage(WiFiServiceDiscoveryActivity.MESSAGE_READ, bytes, -1, buffer).sendToTarget(); //isto chama a funçao handlemessage da atividade
+
+                } catch (IOException e) {
+                    Log.e(TAG, "disconnected", e);
+                }
+            }
+            String readMessage = new String(buffer, 0, bytes);
+            Log.d(TAG, "Received: " + readMessage);
+            String dummyResponse =  "nome1,nome2;nome3,nome4"; //(catalogos separados por ;)
+            //split e comparar catalogos com as fotos que ja tenho
+            //responder com fotos que me faltam (write(stuff))
+            //agora esperar resposta outra vez... esta é a parte mais complicada, mandamos as fotos todas numa mensagem...?
+            while (true) {
+                try {
+                    // Read from the InputStream (catalogs)
+                    bytes = iStream.read(buffer);
+                    if (bytes == -1) {
                         break;
                     }
                     // Send the obtained bytes to the UI Activity
@@ -80,6 +104,9 @@ public class CommunicationManager implements  Runnable{
                     Log.e(TAG, "disconnected", e);
                 }
             }
+            //handle da mensagem
+
+
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

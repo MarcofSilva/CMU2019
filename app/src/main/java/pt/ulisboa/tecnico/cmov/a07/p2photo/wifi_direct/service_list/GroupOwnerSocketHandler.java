@@ -25,7 +25,9 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -67,11 +69,17 @@ public class GroupOwnerSocketHandler extends Thread {
     public void run() {
         if (android.os.Debug.isDebuggerConnected())
             android.os.Debug.waitForDebugger();
+        //1 - fazer pedido ao servidor
+        //recebo - lista de albuns
+        //pedir catalogos de todos os albuns
+        //comparar e ver o que é preciso
+        //pedir todas de uma vez
+        String dummyResponse = "ola;bla";
         while (true) {
             try {
                 // A blocking operation. Initiate a ChatManager instance when
                 // there is a new connection
-                pool.execute(new CommunicationManager(socket.accept(), handler, true));
+                pool.execute(new CommunicationManager(socket.accept(), handler, true, dummyResponse));
                 Log.d(TAG, "Launching the I/O handler");
             } catch (IOException e) {
                 try {
