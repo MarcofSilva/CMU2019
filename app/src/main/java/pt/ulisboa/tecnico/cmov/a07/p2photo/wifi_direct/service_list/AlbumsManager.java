@@ -68,7 +68,9 @@ public class AlbumsManager {
                     result += name + ",";
                 }
             }
-            result = result.substring(0, result.length() - 1);
+            if(result.length() > 0) {
+                result = result.substring(0, result.length() - 1);
+            }
         }
         return result;
     }
@@ -83,10 +85,13 @@ public class AlbumsManager {
             photos += line + ",";
         }
         reader.close();
-        return photos.substring(0, photos.length() - 1);
+        if(photos.length() > 0) {
+            return photos.substring(0, photos.length() - 1);
+        }
+        return "";
     }
 
-    /*@RequiresApi(api = Build.VERSION_CODES.O)
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public String photosToShare(String photos) throws IOException {
         String[] u1AlbumSplit = photos.split(";");
         String res = "";
@@ -100,13 +105,19 @@ public class AlbumsManager {
                 String encodedImage = Base64.encodeToString(file, Base64.NO_WRAP);
                 photos += encodedImage + ",";
             }
-            photos = photos.substring(0, photos.length() - 1); //remove common
+            if (photos.length() > 0) {
+                photos = photos.substring(0, photos.length() - 1); //remove common
+            }
             res += albumPhotosSplit[0] + "::" + photos + ";";
         }
-        return res.substring(0, res.length() - 1);
+        if (res.length() > 0) {
+            return res.substring(0, res.length() - 1);
+        }
+        return "";
     }
 
-    public void storeNewPhotos(String photosReceived) {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void storeNewPhotos(String photosReceived) throws IOException {
         String[] u1AlbumSplit = photosReceived.split(";");
 
         for (String s1 : u1AlbumSplit) {
@@ -117,10 +128,17 @@ public class AlbumsManager {
                 folder.mkdirs();
             }
             String[] fotos = albumSplit[1].split(",");
+            int i = 0;
             for(String foto : fotos) {
                 byte[] imageBytes = Base64.decode(foto, Base64.NO_WRAP);
-                Files.write(imageBytes, new File());
+                File newImage = new File(albumFolder + "/" + (i+=1) + ".jpg");
+                try {
+                    newImage.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Files.write(newImage.toPath(), imageBytes);
             }
         }
-    }*/
+    }
 }

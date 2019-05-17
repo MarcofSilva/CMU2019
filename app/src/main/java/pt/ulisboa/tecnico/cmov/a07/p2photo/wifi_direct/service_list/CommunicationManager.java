@@ -1,7 +1,9 @@
 package pt.ulisboa.tecnico.cmov.a07.p2photo.wifi_direct.service_list;
 
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -52,6 +54,7 @@ public class CommunicationManager implements  Runnable{
         this.albumsManager = new AlbumsManager(activity);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void run() {
         if (android.os.Debug.isDebuggerConnected())
@@ -76,9 +79,11 @@ public class CommunicationManager implements  Runnable{
                 //read fotos que faltam ao servidor
                 String missingServer = read();
                 //enviar fotos para o server
-                //get pics function
-                //write(missingServer)
-                //String picsForMe = read();
+                String pics = albumsManager.photosToShare(missingServer);
+                write(pics);
+                //get my pics
+                String picsForMe = read();
+                albumsManager.storeNewPhotos(picsForMe);
 
 
             }
@@ -95,9 +100,10 @@ public class CommunicationManager implements  Runnable{
                 write(missing);
                 //read fotos para mim
                 String picsForMe = read();
+                albumsManager.storeNewPhotos(picsForMe);
                 //write fotos para cliente
-                //getpics(missingclient
-                //write(pics)
+                String pics = albumsManager.photosToShare(missingClient);
+                write(pics);
 
             }
 
