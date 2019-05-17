@@ -123,7 +123,9 @@ public abstract class InsideAlbumActivity extends AppCompatActivity {
         // Result of users chooser
         else if(requestCode == FIND_USERS_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             ArrayList<String> usernames = data.getStringArrayListExtra(USERNAMES_EXTRA);
-            mAddUsersToAlbum = new AddUsersToAlbumTask(usernames, myName ,this);
+            ContextClass context = (ContextClass) getApplicationContext();
+            String appMode = context.getAppMode();
+            mAddUsersToAlbum = new AddUsersToAlbumTask(usernames, myName , appMode,this);
             mAddUsersToAlbum.execute((Void) null);
         }
     }

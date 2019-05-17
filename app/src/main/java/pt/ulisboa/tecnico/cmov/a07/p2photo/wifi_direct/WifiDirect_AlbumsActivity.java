@@ -53,7 +53,7 @@ public class WifiDirect_AlbumsActivity extends AlbumsActivity {
                                         @Override
                                         public void onFolderCreated() {
                                             //TODO importante ver a questao dos conflitos entre as duas versoes em realacao a pedidos ao servidor
-                                            mCreateAlb = new CreateAlbumTask(albumName, "DummyCatalogUrl", WifiDirect_AlbumsActivity.this);
+                                            mCreateAlb = new CreateAlbumTask(albumName, "DummyCatalogUrl",getString(R.string.AppModeWifiDirect),WifiDirect_AlbumsActivity.this);
                                             mCreateAlb.execute((Void) null);
                                         }
                                     });

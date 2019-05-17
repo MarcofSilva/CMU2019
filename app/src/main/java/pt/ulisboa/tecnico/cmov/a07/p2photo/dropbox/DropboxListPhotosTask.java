@@ -18,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import javax.net.ssl.HttpsURLConnection;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.InsideAlbumActivity;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.SessionHandler;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.R;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.Security.KeyManager;
 
 /*
  * Async task to list items in a folder
@@ -120,7 +122,13 @@ public class DropboxListPhotosTask extends AsyncTask<String, Void, ArrayList<Str
             InputStream in = new BufferedInputStream(conn.getInputStream());
             String response = SessionHandler.convertStreamToString(in);
 
-            String[] catalogUrls = response.split(";");
+            ArrayList<String> catalogUrls = new ArrayList<>();
+            String[] encriptedUrls = response.split(";");
+            for(String s : encriptedUrls){
+                String catalogDecrypt = KeyManager.decrypt(mActivity.getAlbumName(), s);
+                catalogUrls.add(catalogDecrypt);
+            }
+
             for(String index : catalogUrls) {
                 URL indexUrl = new URL(index);
                 HttpsURLConnection connection = (HttpsURLConnection) indexUrl.openConnection();

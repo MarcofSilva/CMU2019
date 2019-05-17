@@ -11,9 +11,12 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import javax.crypto.spec.SecretKeySpec;
+
 import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxClientFactory;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxCreateFolderTask;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.wifi_direct.CreateFolderInStorageTask;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.Security.KeyManager;
 
 //TODO Use View Holder Pattern
 public class CustomAdapterInvites extends BaseAdapter {
@@ -90,7 +93,7 @@ public class CustomAdapterInvites extends BaseAdapter {
                             notifyDataSetChanged();
                             _act.removeItem(position);
                             invite.set_dropboxUrl(catalogURL);
-                            _act.setmAcceptALb(new AcceptAlbumTask(invite.get_userAlbum(), invite.get_albumName(), invite.get_dropboxUrl(), "true", _act));
+                            _act.setmAcceptALb(new AcceptAlbumTask(invite.get_userAlbum(), invite.get_albumName(), invite.get_dropboxUrl(), "true", contextClass.getAppMode() ,_act));
                             _act.getmAcceptALb().execute((Void) null);
                         }
                     });
@@ -106,7 +109,7 @@ public class CustomAdapterInvites extends BaseAdapter {
                             notifyDataSetChanged();
                             _act.removeItem(position);
                             invite.set_dropboxUrl("DummyCatalogURL");
-                            _act.setmAcceptALb(new AcceptAlbumTask(invite.get_userAlbum(), invite.get_albumName(), invite.get_dropboxUrl(), "true", _act));
+                            _act.setmAcceptALb(new AcceptAlbumTask(invite.get_userAlbum(), invite.get_albumName(), invite.get_dropboxUrl(), "true", contextClass.getAppMode(),_act));
                             _act.getmAcceptALb().execute((Void) null);
                         }
                     });
@@ -124,7 +127,7 @@ public class CustomAdapterInvites extends BaseAdapter {
                 if(contextClass.getAppMode().equals(_act.getString(R.string.AppModeWifiDirect))) {
                     invite.set_dropboxUrl("DummyCatalogURL");
                 }
-                _act.setmAcceptALb(new AcceptAlbumTask(invite.get_userAlbum(), invite.get_albumName(), invite.get_dropboxUrl(), "false", _act));
+                _act.setmAcceptALb(new AcceptAlbumTask(invite.get_userAlbum(), invite.get_albumName(), invite.get_dropboxUrl(), "false",contextClass.getAppMode() ,_act));
                 _act.getmAcceptALb().execute((Void) null);
             }
         });

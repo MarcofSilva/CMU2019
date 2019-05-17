@@ -31,7 +31,7 @@ public class DropboxCreateFolderTask extends AsyncTask<String, Void, String> {
 
 
     public interface Callback {
-        void onFolderCreated(String catalogURL);
+        void onFolderCreated(String catalogURL) throws Exception;
     }
 
     @Override
@@ -42,7 +42,11 @@ public class DropboxCreateFolderTask extends AsyncTask<String, Void, String> {
         } else if (catalogURL == null) { //onError no exception
             onError(null);
         } else { //onComplete;
-            mCallback.onFolderCreated(catalogURL);
+            try {
+                mCallback.onFolderCreated(catalogURL);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             //dialog.dismiss();
 

@@ -15,7 +15,7 @@ public class Invite implements Parcelable {
         _albumName = albumName;
     }
 
-    public Invite(String userAlbum, String albumName, String dropboxUrl){
+    public Invite(String userAlbum, String albumName, String publicKey, String dropboxUrl){
         _userAlbum = userAlbum;
         _albumName = albumName;
         _dropboxUrl = dropboxUrl;
@@ -71,6 +71,7 @@ public class Invite implements Parcelable {
     public void set_accepted(String _accepted) {
         this._accepted = _accepted;
     }
+
 
     @Override
     public int describeContents() {

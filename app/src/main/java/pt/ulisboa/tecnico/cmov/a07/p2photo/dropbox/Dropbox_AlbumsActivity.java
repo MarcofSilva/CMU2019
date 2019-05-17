@@ -15,6 +15,7 @@ import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
 
 import pt.ulisboa.tecnico.cmov.a07.p2photo.AlbumsActivity;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.ContextClass;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.CreateAlbumTask;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.SessionHandler;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.R;
@@ -57,7 +58,9 @@ public class Dropbox_AlbumsActivity extends AlbumsActivity {
                                     mDropboxCreateAlbumTask = new DropboxCreateFolderTask(Dropbox_AlbumsActivity.this, DropboxClientFactory.getClient(), new DropboxCreateFolderTask.Callback() {
                                         @Override
                                         public void onFolderCreated(String catalogUrl) {
-                                            mCreateAlb = new CreateAlbumTask(albumName, catalogUrl, Dropbox_AlbumsActivity.this);
+                                            ContextClass context = (ContextClass) getApplicationContext();
+                                            String appMode = context.getAppMode();
+                                            mCreateAlb = new CreateAlbumTask(albumName, catalogUrl, appMode ,Dropbox_AlbumsActivity.this);
                                             mCreateAlb.execute((Void) null);
                                         }
                                     });

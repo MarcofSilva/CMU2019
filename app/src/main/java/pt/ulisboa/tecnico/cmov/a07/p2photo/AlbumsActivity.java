@@ -39,9 +39,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.Key;
 import java.util.ArrayList;
 
 import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxAuthenticationHandler;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.Security.KeyManager;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -106,6 +108,7 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
         Log.d("Debug Cenas", "oncreate: binded service");
 
         registerMyReceiver();
+
     }
 
     protected void setOnItemClickListenerForAppMode(final Class<?> insideAlbumActivity) {
@@ -232,6 +235,7 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
             boolean logout = false;
             ArrayList<Integer> indextoRemove = new ArrayList<>();
             for(int i = 0; i < contextClass.getInvites().size(); i++){
+                System.out.println("YOU HAVE INVITE");
                 Invite inv = contextClass.getInvite(i);
                 if(inv.get_albumName().equals(NEED_AUTHENTICATION) && inv.get_userAlbum().equals(NEED_AUTHENTICATION)){
                     logout = true;

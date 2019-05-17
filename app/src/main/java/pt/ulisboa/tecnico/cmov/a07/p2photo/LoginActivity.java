@@ -42,10 +42,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.Key;
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 
 import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.Dropbox_AlbumsActivity;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.Security.KeyManager;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.wifi_direct.WifiDirect_AlbumsActivity;
 
 import static android.Manifest.permission.READ_CONTACTS;
@@ -218,6 +221,21 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             cancel = true;
         }
 
+        ContextClass context = (ContextClass) getApplicationContext();
+        String appMode = context.getAppMode();
+        if(appMode.equals(getApplicationContext().getString(R.string.AppModeDropBox))){
+            KeyPair kp = KeyManager.readKeyPair(username,this);
+            if(kp == null){
+                Toast.makeText(this, "You already registered on other phone. No keys here", Toast.LENGTH_LONG);
+                mUsernameView.setError("No keys for this user");
+                focusView = mUsernameView;
+                cancel = true;
+            }
+            else {
+                //TODO pedir ao servidor
+            }
+        }
+
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
@@ -227,8 +245,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // perform the user login attempt.
             showProgress(true);
 
-            ContextClass context = (ContextClass) getApplicationContext();
-            String appMode = context.getAppMode();
+            context = (ContextClass) getApplicationContext();
+            appMode = context.getAppMode();
             mAuthTask = new UserLoginTask(username, password, appMode,this);
             mAuthTask.execute((Void) null);
         }
@@ -413,13 +431,24 @@ class UserLoginTask extends AsyncTask<Void, Void, String> {
             os.close();
 
             // read the response
+            String[] responseSplit;
             InputStream in = new BufferedInputStream(conn.getInputStream());
             response = SessionHandler.convertStreamToString(in);
+            responseSplit = response.split(" ");
 
-            String token = response.split(" ")[1];
+            String token = responseSplit[1];
             SessionHandler.writeTokenAndUsername(token, mUsername,_activity);
 
-            response = response.split(" ")[0];
+            if(responseSplit.length > 2){
+                String[] nameKey = responseSplit[2].split(",");
+                for(String s : nameKey){
+                    String[] namekeySplit = s.split(";");
+                    byte[] key = KeyManager.decryptAlbumKey(KeyManager.hexStringToBytes(namekeySplit[1]));
+                    KeyManager.addAlbumKey(namekeySplit[0], key);
+                }
+            }
+
+            response = responseSplit[0];
 
         } catch (Exception e) {
             Log.e("MYDEBUG", "Exception: " + e.getMessage());

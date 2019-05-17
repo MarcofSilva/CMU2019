@@ -14,6 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxAuthenticationHandler;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.Security.KeyManager;
 
 public class CreateAlbumTask extends AsyncTask<Void, Void, String> {
 
@@ -23,11 +24,13 @@ public class CreateAlbumTask extends AsyncTask<Void, Void, String> {
 
     private final String _albumName;
     private final String _url;
+    private final String _appMode;
     private AlbumsActivity _activity;
 
-    public CreateAlbumTask(String albumName, String url, AlbumsActivity act) {
+    public CreateAlbumTask(String albumName, String url, String appMode ,AlbumsActivity act) {
         _albumName = albumName;
         _url = url;
+        _appMode = appMode;
         _activity = act;
     }
 
@@ -39,9 +42,19 @@ public class CreateAlbumTask extends AsyncTask<Void, Void, String> {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
 
+            String _urlChanged = "";
+            if(_appMode.equals(_activity.getApplicationContext().getString(R.string.AppModeDropBox))){
+                KeyManager.generateAlbumkey(_albumName);
+                _urlChanged = KeyManager.encrypt(_albumName, _url);
+            }
             JSONObject postDataParams = new JSONObject();
             postDataParams.put("albumName", _albumName);
-            postDataParams.put("albumUrl", _url);
+            postDataParams.put("albumUrl", _urlChanged);
+            String keyEncMypublic = "";
+            if(_appMode.equals(_activity.getApplicationContext().getString(R.string.AppModeDropBox))){
+                keyEncMypublic = KeyManager.encrMyPrivate(_albumName);
+            }
+            postDataParams.put("keyEncMyPublic", keyEncMypublic);
 
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setDoOutput(true);

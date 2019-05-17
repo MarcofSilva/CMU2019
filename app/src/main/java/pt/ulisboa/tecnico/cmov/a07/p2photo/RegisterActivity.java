@@ -39,8 +39,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.Key;
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
+
+import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.Dropbox_AlbumsActivity;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.Security.KeyManager;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -228,7 +233,10 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserRegisterTask(username, password2, this);
+
+            ContextClass context = (ContextClass) getApplicationContext();
+            String appMode = context.getAppMode();
+            mAuthTask = new UserRegisterTask(username, password2, appMode,this);
             mAuthTask.execute((Void) null);
         }
     }
@@ -398,16 +406,22 @@ class UserRegisterTask extends AsyncTask<Void, Void, String> {
     private static final String REGISTER_SUCCESS = "Success";
     private static final String REGISTER_USERNAME_ALREADY_EXISTS = "UsernameAlreadyExists";
     private static final String REGISTER_ERROR = "Error";
+    private String _appMode;
+    KeyPair keyPair = null;
 
-    UserRegisterTask(String username, String password, RegisterActivity act) {
+
+    UserRegisterTask(String username, String password, String appMode, RegisterActivity act) {
         mUsername = username;
         mPassword = password;
         _activity = act;
+        _appMode = appMode;
     }
 
     @Override
     protected String doInBackground(Void... params) {
-
+        if(_appMode.equals(_activity.getApplicationContext().getString(R.string.AppModeDropBox))) {
+            keyPair = KeyManager.generateKeyPair();
+        }
         // Register the new account
         String response = null;
         try {
@@ -418,6 +432,11 @@ class UserRegisterTask extends AsyncTask<Void, Void, String> {
             JSONObject postDataParams = new JSONObject();
             postDataParams.put("username", mUsername);
             postDataParams.put("password", mPassword);
+            String pk = "";
+            if(_appMode.equals(_activity.getApplicationContext().getString(R.string.AppModeDropBox))) {
+                pk = KeyManager.byteArrayToHexString(keyPair.getPublic().getEncoded());
+            }
+            postDataParams.put("publicKey",pk);
 
             //TODO see what each of this properties do
             //conn.setRequestProperty("accept", "*/*");
@@ -457,6 +476,9 @@ class UserRegisterTask extends AsyncTask<Void, Void, String> {
         }
         else if (response.equals(REGISTER_SUCCESS)) {
             // Send information to the login page and make login automatically
+            if(_appMode.equals(_activity.getApplicationContext().getString(R.string.AppModeDropBox))){
+                KeyManager.writeKeyPair(mUsername, _activity);
+            }
             Intent accountData = new Intent();
             accountData.putExtra(USERNAME_EXTRA, mUsername);
             accountData.putExtra(PASSWORD_EXTRA, mPassword);

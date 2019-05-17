@@ -14,6 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxAuthenticationHandler;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.Security.KeyManager;
 
 public class AcceptAlbumTask extends AsyncTask<Void, Void, String> {
 
@@ -21,6 +22,7 @@ public class AcceptAlbumTask extends AsyncTask<Void, Void, String> {
     private String _albumName;
     private String _dropboxUrl;
     private String _accepted;
+    private String _appMode;
     private AlbumsInvitationsActivity _act;
 
     private static final String SUCCESS = "Success";
@@ -29,11 +31,12 @@ public class AcceptAlbumTask extends AsyncTask<Void, Void, String> {
 
     //server response types to request attempt TODO this strings should correspond to the ones sent by the server after login attempt
 
-    AcceptAlbumTask(String userAlbum, String albumName, String dropboxUrl, String accepted, AlbumsInvitationsActivity act) {
+    AcceptAlbumTask(String userAlbum, String albumName, String dropboxUrl, String accepted, String appMode ,AlbumsInvitationsActivity act) {
         _userAlbum = userAlbum;
         _albumName = albumName;
         _dropboxUrl = dropboxUrl;
         _accepted = accepted;
+        _appMode = appMode;
         _act = act;
     }
 
@@ -42,16 +45,52 @@ public class AcceptAlbumTask extends AsyncTask<Void, Void, String> {
 
         String response = null;
         try {
-            URL url = new URL(_act.getString(R.string.serverAddress) + "/acceptInvitation");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            URL url;
+            HttpURLConnection conn;
+            if(_appMode.equals(_act.getApplicationContext().getString(R.string.AppModeDropBox)) && _accepted.equals("true")){
+                url = new URL(_act.getString(R.string.serverAddress) + "/requestAlbumKey");
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+
+                JSONObject postDataParams = new JSONObject();
+                postDataParams.put("userAlbum", _userAlbum);
+                postDataParams.put("albumName", _albumName);
+                Log.d("Debug Cenas","JSONArgs: user: " + _userAlbum + " album " + _albumName );
+
+
+                //TODO see what each of this properties do
+                //conn.setRequestProperty("accept", "*/*");
+                conn.setRequestProperty("Content-Type", "application/json");
+                //conn.setRequestProperty("Accept", "application/json");
+                //conn.setRequestProperty("connection", "Keep-Alive");
+                //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
+                conn.setDoOutput(true);
+
+                conn.setRequestProperty("Authorization", SessionHandler.readToken(_act));
+
+                OutputStream os = conn.getOutputStream();
+                os.write(postDataParams.toString().getBytes());
+                os.close();
+
+                InputStream in = new BufferedInputStream(conn.getInputStream());
+                response = SessionHandler.convertStreamToString(in);
+
+                byte[] albumKey = KeyManager.decryptAlbumKey(KeyManager.hexStringToBytes(response));
+                KeyManager.addAlbumKey(_albumName, albumKey);
+                _dropboxUrl = KeyManager.encrypt(_albumName, _dropboxUrl);
+            }
+
+            url = new URL(_act.getString(R.string.serverAddress) + "/acceptInvitation");
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
 
             JSONObject postDataParams = new JSONObject();
             postDataParams.put("userAlbum", _userAlbum);
             postDataParams.put("albumName", _albumName);
+
             postDataParams.put("dropboxURL", _dropboxUrl);
             postDataParams.put("accepted", _accepted);
-            Log.d("Debug Cenas","JSONArgs: user: " + _userAlbum + " album " + _albumName + " dropbox " + _dropboxUrl + " accepted " + _accepted);
+            Log.d("Debug Cenas","JSONArgs: user: " + _userAlbum + " album " + _albumName + " dropbox " + _dropboxUrl +" accepted " + _accepted);
 
 
             //TODO see what each of this properties do

@@ -44,7 +44,7 @@ public class UpdateService extends Service {
         timer = new Timer();
         initializeTimerTask();
         //after 2secs execute and then 10s perioud
-        timer.schedule(timerTask, 3000, 5000);
+        timer.schedule(timerTask, 5000, 15000);
         return mBinder;
     }
 
@@ -103,6 +103,9 @@ public class UpdateService extends Service {
 
             conn.setRequestProperty("Authorization", SessionHandler.readToken(_activity));
 
+            System.out.println("POOLED");
+            Log.d("Debug cenas", "POOLED");
+
             InputStream in = new BufferedInputStream(conn.getInputStream());
             String response = SessionHandler.convertStreamToString(in);
 
@@ -120,6 +123,8 @@ public class UpdateService extends Service {
             ContextClass context = (ContextClass) getApplicationContext();
             context.addInvite(invite);
 
+            System.out.println("added new invite");
+            Log.d("Debug cenas", "added new invite");
             //sending ping for him to update himself
             sendMyBroadCast();
 

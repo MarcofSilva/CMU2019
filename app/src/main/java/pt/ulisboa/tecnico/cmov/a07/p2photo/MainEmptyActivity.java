@@ -6,7 +6,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
+import java.security.Key;
+import java.security.KeyPair;
+import java.security.PublicKey;
+
+import javax.crypto.spec.SecretKeySpec;
+
 import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.Dropbox_AlbumsActivity;
+import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.Security.KeyManager;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.wifi_direct.WifiDirect_AlbumsActivity;
 
 /**
