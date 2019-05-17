@@ -40,8 +40,10 @@ public class AlbumsManager {
                 String u2Id = s2.split("::")[0];
                 if (u1Id.equals(u2Id)) {
                     if (!inCommonU1.containsKey(u1Id)) {
-                        inCommonU1.put(u1Id, s1.split("::")[1]);
-                        inCommonU2.put(u2Id, s2.split("::")[1]);
+                        if(s1.split("::").length > 1)
+                            inCommonU1.put(u1Id, s1.split("::")[1]);
+                        if(s2.split("::").length > 1)
+                            inCommonU2.put(u2Id, s2.split("::")[1]);
                     }
                 }
             }

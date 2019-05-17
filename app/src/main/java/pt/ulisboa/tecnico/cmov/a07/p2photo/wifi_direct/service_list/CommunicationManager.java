@@ -129,7 +129,7 @@ public class CommunicationManager implements  Runnable{
                 bytes = iStream.read(buffer);
 
                 if(bytes == -1){
-                    if(readMessage.length() > 0){
+                    if(readMessage.length() >= 0){
                         break;
                     }
                 }
