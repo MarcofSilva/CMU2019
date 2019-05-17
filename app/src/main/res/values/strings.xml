@@ -45,6 +45,9 @@
     <string name="findUser_title">Choose Friends</string>
     <string name="okText">Done</string>
 
+    <!-- Wifi Direct -->
+    <string name="finding_service">Finding local services</string>
+
     <!-- Constants -->
     <!-- TODO get them here, to avoid the repetition-->
     <string name="serverAddress">http://sigma03.ist.utl.pt:8351</string>

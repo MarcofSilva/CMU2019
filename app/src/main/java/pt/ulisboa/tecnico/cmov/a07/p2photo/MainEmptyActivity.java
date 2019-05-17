@@ -51,7 +51,8 @@ public class MainEmptyActivity extends AppCompatActivity {
     //Check for login session token already in phone's storage
     private boolean isLoggedIn() {
         try {
-            if (SessionHandler.readToken(MainEmptyActivity.this).equals("")) {
+            String token = SessionHandler.readToken(MainEmptyActivity.this);
+            if (token == null || token.equals("")) {
                 return false;
             }
         } catch (Exception e) {
