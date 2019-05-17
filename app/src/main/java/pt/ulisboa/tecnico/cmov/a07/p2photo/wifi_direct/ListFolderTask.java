@@ -54,6 +54,17 @@ class ListFolderTask extends AsyncTask<String, Void, ArrayList<String>> {
                 }
             }
         }
+
+
+        File cacheDir = new File(mActivity.getCacheDir() + "/P2PHOTO/" + SessionHandler.readTUsername(mActivity));
+        if(cacheDir.exists()) {
+            File[] files = cacheDir.listFiles();
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    albumsInfo.add(file.getName()); // <name>:<creator>
+                }
+            }
+        }
         return albumsInfo;
 
         //TODO get the photos from other users

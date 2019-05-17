@@ -67,6 +67,10 @@ public class ListPhotosInStorageTask extends AsyncTask<String, Void, ArrayList<S
             File currentAlbumDirectory = new File(albumFolderPath);
             ArrayList<String> mPhotoPathsList = imageReader(currentAlbumDirectory);
 
+            String albumFolderCachePath = mActivity.getCacheDir() + "/P2PHOTO/" + SessionHandler.readTUsername(mActivity) + "/" + albumName + ":" + creatorName;
+            File albumFolderCachePathFile = new File(albumFolderCachePath);
+            mPhotoPathsList.addAll(imageReader(albumFolderCachePathFile));
+
             //-------- Get photos from other users devices ---
             // TODO stuff from other devices, need to know how the wifi direct will work first
 
