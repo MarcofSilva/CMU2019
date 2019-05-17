@@ -52,7 +52,7 @@ public class GroupOwnerSocketHandler extends Thread {
         try {
             socket = new ServerSocket(8880);
             this.handler = handler;
-            Log.d("GroupOwnerSocketHandler", "Socket Started");
+            Log.d("CommunicationManager", "Socket Started");
         } catch (IOException e) {
             e.printStackTrace();
             pool.shutdownNow();

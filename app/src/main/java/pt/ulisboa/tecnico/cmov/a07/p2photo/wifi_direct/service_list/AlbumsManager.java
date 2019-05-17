@@ -47,11 +47,11 @@ public class AlbumsManager {
             }
 
         }
-        for (Map.Entry<String, String> entryu1 : inCommonU1.entrySet()) {
-            String key = entryu1.getKey();
-            Object value = entryu1.getValue();
+        for (Map.Entry<String, String> entryu2 : inCommonU2.entrySet()) {
+            res += entryu2.getKey() + "::" + entryu2.getValue() + ";";
         }
-        return "";
+
+        return res;
     }
 
     //use the mine base folder path
@@ -70,7 +70,6 @@ public class AlbumsManager {
             }
             result = result.substring(0, result.length() - 1);
         }
-        Toast.makeText(activity, result, Toast.LENGTH_LONG).show();
         return result;
     }
 
