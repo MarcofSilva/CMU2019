@@ -78,8 +78,8 @@ public class CreateAlbumTask extends AsyncTask<Void, Void, String> {
     protected void onPostExecute(final String response) {
         _activity.setmCreateAlb(null);
 
-        if(response != null && response.equals(SUCCESS)){ //TODO change this
-            Toast.makeText(_activity, "You created an album!", Toast.LENGTH_SHORT).show();
+        if(response != null && response.equals(SUCCESS)){
+            Toast.makeText(_activity, "Album created!", Toast.LENGTH_SHORT).show();
         }
         else if(response.equals(NEED_AUTHENTICATION)) {
             Toast.makeText(_activity, "Not properly authenticated. Login again.", Toast.LENGTH_LONG).show();

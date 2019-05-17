@@ -33,9 +33,6 @@ public class FindUsersActivity extends AppCompatActivity {
 
     private EditText searchUserView;
 
-    //TODO
-    private String DUMMY_LIST = "Marco123;Joao1;Matilde2";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -140,73 +137,3 @@ public class FindUsersActivity extends AppCompatActivity {
         usersCustomAdapter.addAllPermitted(permittedUsers);
     }
 }
-
-//TODO ir fazer desta forma ao CustomAdapterUsers usado porque e mais eficiente
-
-/*class CustomAdapterUsers extends BaseAdapter {
-
-    private final List<String> _users;
-    private final Activity _activity;
-
-    public CustomAdapterUsers(ArrayList<String> users, Activity act) {
-        this._users = users;
-        this._activity = act;
-    }
-
-    @Override
-    public int getCount() {
-        return _users.size();
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return _users.get(position);
-    }
-
-    public void clear() {
-        _users.clear();
-        notifyDataSetChanged();
-    }
-
-    public void addAll(ArrayList<String> users){
-        _users.addAll(users);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return 0;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-
-        View view;
-        UsersViewHolder holder;
-
-        if( convertView == null) {
-            view = _activity.getLayoutInflater().inflate(R.layout.activity_find_users_item, parent, false);
-            holder = new UsersViewHolder(view);
-            view.setTag(holder);
-        } else {
-            view = convertView;
-            holder = (UsersViewHolder) view.getTag();
-        }
-
-        String name = _users.get(position);
-
-        holder.name.setText(name);
-
-        return view;
-    }
-}
-
-
-class UsersViewHolder {
-
-    final TextView name;
-
-    public UsersViewHolder(View view) {
-        name = view.findViewById(R.id.find_user_text);
-    }
-}
-*/

@@ -40,9 +40,6 @@ public class GetUsersTask extends AsyncTask<Void, Void, String> {
             InputStream in = new BufferedInputStream(conn.getInputStream());
             response = SessionHandler.convertStreamToString(in);
 
-            //TODO dummy
-            //return DUMMY_LIST
-
             return response;
 
         } catch (Exception e) {

@@ -65,7 +65,6 @@ public class DropboxListPhotosTask extends AsyncTask<String, Void, ArrayList<Str
     @SuppressLint("NewApi")
     @Override
     protected ArrayList<String> doInBackground(String... params) {
-        //TODO inside threads should downloading and parsing catalogs at the same time that this thread would returning the images to the UI that already as been downloaded
         //In continuation of this idea the thread should return the images one by one as their are downloaded, instead of at the end (onProgress)
         DbxDownloader<FileMetadata> downloader = null;
         ArrayList<String> imagesPaths = new ArrayList<>();
@@ -75,7 +74,6 @@ public class DropboxListPhotosTask extends AsyncTask<String, Void, ArrayList<Str
             final File inCache_basePath = mActivity.getApplicationContext().getCacheDir();
 
             //Path were the thumbnails downloaded will be stored
-            //TODO if secure delete commented
             //String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/P2PHOTO/" + SessionHandler.readTUsername(mActivity) + params[0]; //Get the albums name from the path in the drop
             String path = inCache_basePath + "/P2PHOTO/" + SessionHandler.readTUsername(mActivity) + params[0]; //Get the albums name from the path in the drop
             File folderPath = new File(path);
@@ -90,7 +88,7 @@ public class DropboxListPhotosTask extends AsyncTask<String, Void, ArrayList<Str
                 FileMetadata fileMetadata = (FileMetadata) metadata;
                 File file = new File(path, fileMetadata.getName());
                 if(fileMetadata.getName().contains("PhotosCatalog")) {
-                    /*if(mActivity.creatorName == null) {TODO apagar?
+                    /*if(mActivity.creatorName == null) {
                         //fileMetadata.getPropertyGroups();
                         mDbxClient.files().download(fileMetadata.getPathLower(), fileMetadata.getRev()).download(new ByteArrayOutputStream(4048)).getPropertyGroups().get(0).getFields().get(0).getValue();
                     }*/
@@ -110,6 +108,19 @@ public class DropboxListPhotosTask extends AsyncTask<String, Void, ArrayList<Str
 
                 }
                 imagesPaths.add(file.getPath());
+            }
+
+            if(!KeyManager.containsKeyforAlbum(mActivity.getAlbumName())){
+                URL url = new URL(mActivity.getString(R.string.serverAddress) + "/getAlbumKey?albumName=" + mActivity.getAlbumName() + "&albumUser=" + mActivity.getCreatorName());
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setDoOutput(false);
+                conn.setRequestProperty("Authorization", SessionHandler.readToken(mActivity));
+                InputStream in = new BufferedInputStream(conn.getInputStream());
+                String response = SessionHandler.convertStreamToString(in);
+
+                byte[] albumKey = KeyManager.decryptAlbumKey(KeyManager.hexStringToBytes(response));
+                KeyManager.addAlbumKey(mActivity.getAlbumName(), albumKey);
             }
 
             //-------- Get photos from other users clouds --------

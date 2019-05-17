@@ -18,7 +18,6 @@ import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.Security.KeyManager;
 
 import static android.content.Context.MODE_PRIVATE;
 
-//TODO Rename this class to SessionHandler
 public class SessionHandler {
 
     private static final String CREDENTIALS_STORAGE = "credentials";
@@ -114,7 +113,6 @@ public class SessionHandler {
     }
 
     public static String readToken(Activity activity) {
-        //TODO missing security
         SharedPreferences prefs = activity.getSharedPreferences(CREDENTIALS_STORAGE, MODE_PRIVATE);
         String token = prefs.getString(ACCESS_TOKEN, null);
         if (token == null)
@@ -124,7 +122,6 @@ public class SessionHandler {
     }
 
     public static String readTUsername(Activity activity) {
-        //TODO missing security
         SharedPreferences prefs = activity.getSharedPreferences(CREDENTIALS_STORAGE, MODE_PRIVATE);
         String username = prefs.getString(USER_ID, null);
         if (username == null)

@@ -236,7 +236,6 @@ public abstract class AlbumsActivity extends AppCompatActivity implements Naviga
 
     }
 
-    //TODO probably get this class in a file, review its name and if it works to make all necessary activities use it...maybe a superclass?
     class MyBroadCastReceiver extends BroadcastReceiver{
 
         private AlbumsActivity _activity;

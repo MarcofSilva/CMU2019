@@ -29,7 +29,6 @@ public class AcceptAlbumTask extends AsyncTask<Void, Void, String> {
     private static final String NEED_AUTHENTICATION = "AuthenticationRequired";
     private static final String ERROR = "Error";
 
-    //server response types to request attempt TODO this strings should correspond to the ones sent by the server after login attempt
 
     AcceptAlbumTask(String userAlbum, String albumName, String dropboxUrl, String accepted, String appMode ,AlbumsInvitationsActivity act) {
         _userAlbum = userAlbum;
@@ -58,12 +57,7 @@ public class AcceptAlbumTask extends AsyncTask<Void, Void, String> {
                 Log.d("Debug Cenas","JSONArgs: user: " + _userAlbum + " album " + _albumName );
 
 
-                //TODO see what each of this properties do
-                //conn.setRequestProperty("accept", "*/*");
                 conn.setRequestProperty("Content-Type", "application/json");
-                //conn.setRequestProperty("Accept", "application/json");
-                //conn.setRequestProperty("connection", "Keep-Alive");
-                //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
                 conn.setDoOutput(true);
 
                 conn.setRequestProperty("Authorization", SessionHandler.readToken(_act));
@@ -93,12 +87,7 @@ public class AcceptAlbumTask extends AsyncTask<Void, Void, String> {
             Log.d("Debug Cenas","JSONArgs: user: " + _userAlbum + " album " + _albumName + " dropbox " + _dropboxUrl +" accepted " + _accepted);
 
 
-            //TODO see what each of this properties do
-            //conn.setRequestProperty("accept", "*/*");
             conn.setRequestProperty("Content-Type", "application/json");
-            //conn.setRequestProperty("Accept", "application/json");
-            //conn.setRequestProperty("connection", "Keep-Alive");
-            //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
             conn.setDoOutput(true);
 
             conn.setRequestProperty("Authorization", SessionHandler.readToken(_act));

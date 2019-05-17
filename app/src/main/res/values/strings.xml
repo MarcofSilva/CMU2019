@@ -46,7 +46,6 @@
     <string name="okText">Done</string>
 
     <!-- Constants -->
-    <!-- TODO get them here, to avoid the repetition-->
     <string name="serverAddress">http://sigma01.ist.utl.pt:8350</string>
 
     <!-- IntentExtraLabels -->

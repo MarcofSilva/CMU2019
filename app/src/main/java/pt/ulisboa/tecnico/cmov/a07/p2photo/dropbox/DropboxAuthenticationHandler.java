@@ -50,7 +50,6 @@ public class DropboxAuthenticationHandler {
             Auth.startOAuth2Authentication(mActivity.getApplicationContext(), mActivity.getString(R.string.dropbox_app_key));
         }
         else {
-            //TODO change this as a way to show the info about the account already logged in dropbox
             //Toast.makeText(AlbumsActivity.this, "", Toast.LENGTH_SHORT).show();
         }
     }

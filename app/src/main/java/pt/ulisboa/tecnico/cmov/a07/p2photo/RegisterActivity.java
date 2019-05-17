@@ -54,16 +54,6 @@ import static android.Manifest.permission.READ_CONTACTS;
  */
 public class RegisterActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
-    //request code for for result to LoginActivity
-    private static final int REQUEST_REGISTER_CODE = 1;
-    private static final String USERNAME_EXTRA = "username";
-    private static final String PASSWORD_EXTRA = "password";
-
-    //server response types to request attempt TODO this strings should correspond to the ones sent by the server after login attempt
-    private static final String REGISTER_SUCCESS = "Success";
-    private static final String REGISTER_USERNAME_ALREADY_EXISTS = "UsernameAlreadyExists";
-    private static final String REGISTER_ERROR = "Error";
-
     /**
      * Id to identity READ_CONTACTS permission request.
      */
@@ -253,7 +243,6 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
         return false;
     }
 
-    //TODO penso que seria melhor, em todos os casos aparecer uma mensagem com todos os tipos de caracteres necessarios, uma frase o mais curta possivel
     private boolean isPasswordValid(String password) {
         if(!password.matches("[^a-z]*[a-z].*")){
             mPasswordView1.setError(getString(R.string.error_invalid_password_small));
@@ -362,8 +351,8 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 
     private interface ProfileQuery {
         String[] PROJECTION = {
-                ContactsContract.CommonDataKinds.Email.ADDRESS, //TODO
-                ContactsContract.CommonDataKinds.Email.IS_PRIMARY, //TODO I dont know
+                ContactsContract.CommonDataKinds.Email.ADDRESS,
+                ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
         };
 
         int ADDRESS = 0;
@@ -438,20 +427,13 @@ class UserRegisterTask extends AsyncTask<Void, Void, String> {
             }
             postDataParams.put("publicKey",pk);
 
-            //TODO see what each of this properties do
-            //conn.setRequestProperty("accept", "*/*");
             conn.setRequestProperty("Content-Type", "application/json");
-            //conn.setRequestProperty("Accept", "application/json");
-            //conn.setRequestProperty("connection", "Keep-Alive");
-            //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
             conn.setDoOutput(true);
-
 
             OutputStream os = conn.getOutputStream();
             os.write(postDataParams.toString().getBytes());
             os.close();
 
-            // read the response TODO
             InputStream in = new BufferedInputStream(conn.getInputStream());
             response = SessionHandler.convertStreamToString(in);
 
@@ -468,7 +450,6 @@ class UserRegisterTask extends AsyncTask<Void, Void, String> {
         _activity.setmAuthTask(null);
         _activity.showProgress(false);
 
-        //TODO
         Toast.makeText(_activity, response, Toast.LENGTH_LONG).show();
 
         if (response == null || response.equals(REGISTER_ERROR)){ //REGISTER_ERROR is returned or something else not expected

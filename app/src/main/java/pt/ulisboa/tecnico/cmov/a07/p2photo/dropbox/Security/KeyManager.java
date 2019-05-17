@@ -46,6 +46,15 @@ public class KeyManager {
         _keyManager.albumKeys.put(albumName, albumKey);
     }
 
+    public static boolean containsKeyforAlbum(String albumName){
+        if(_keyManager.albumKeys.containsKey(albumName)){
+            if(_keyManager.albumKeys.get(albumName) != null){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void generateAlbumkey(String albumName){
         byte[] sliceKey = generateSecret();
         _keyManager.albumKeys.put(albumName, sliceKey);

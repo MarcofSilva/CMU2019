@@ -98,7 +98,6 @@ class GetMyKeysTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected String doInBackground(Void... params) {
-        //TODO to use with server
 
         String response = null;
         try {

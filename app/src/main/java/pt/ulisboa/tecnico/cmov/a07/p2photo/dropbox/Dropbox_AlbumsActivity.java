@@ -40,7 +40,7 @@ public class Dropbox_AlbumsActivity extends AlbumsActivity {
             public void onClick(View view) {
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(Dropbox_AlbumsActivity.this);
                 final EditText input = new EditText(Dropbox_AlbumsActivity.this);
-                input.setHint("Album's name"); //TODO security issue, se escreverem um nome tipo ../cenas podem explorar diretorias que nao deveriam, pelo menos na storage no smartphone
+                input.setHint("Album's name");
                 dialogBuilder.setTitle("Create New Album")
                         .setView(input)
                         .setPositiveButton("Create", new DialogInterface.OnClickListener() {

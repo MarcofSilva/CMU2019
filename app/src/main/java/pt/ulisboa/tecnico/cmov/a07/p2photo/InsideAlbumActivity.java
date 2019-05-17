@@ -24,7 +24,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File; //TODO nudar para o File do dropbox
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 

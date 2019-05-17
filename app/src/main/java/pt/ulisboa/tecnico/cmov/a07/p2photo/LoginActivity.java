@@ -1,5 +1,3 @@
-//TODO fazer super class para LoginActivity e RegisterActivity para evitar repeticao de codigo
-
 package pt.ulisboa.tecnico.cmov.a07.p2photo;
 
 import android.animation.Animator;
@@ -113,7 +111,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        //Click in link to start register activity for result to get the data to log in //TODO implement method onActivityResult and in register activity the setResult
         mSignUpLink = findViewById(R.id.link_sign_up);
         mSignUpLink.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,7 +124,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == REQUEST_REGISTER_CODE && resultCode == RESULT_OK && data != null) {
-            //TODO use the account information to log in the user that just registered
             mUsernameView.setText(data.getStringExtra(USERNAME_EXTRA));
             mPasswordView.setText(data.getStringExtra(PASSWORD_EXTRA));
             attemptLogin();
@@ -231,9 +227,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 focusView = mUsernameView;
                 cancel = true;
             }
-            else {
-                //TODO pedir ao servidor
-            }
         }
 
         if (cancel) {
@@ -266,7 +259,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     /**
      * Shows the progress UI and hides the login form.
      */
-    //TODO tive de meter public por causa do userLoginTask
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     public void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
@@ -346,8 +338,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private interface ProfileQuery {
         String[] PROJECTION = {
-                ContactsContract.CommonDataKinds.Email.ADDRESS, //TODO what to do...
-                ContactsContract.CommonDataKinds.Email.IS_PRIMARY, //TODO
+                ContactsContract.CommonDataKinds.Email.ADDRESS,
+                ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
         };
 
         int ADDRESS = 0;
@@ -390,7 +382,6 @@ class UserLoginTask extends AsyncTask<Void, Void, String> {
     private static final String LOGIN_INCORRECT_PASSWORD = "IncorrectPassword";
     private static final String LOGIN_ERROR = "Error";
 
-    private static final String USERNAME_EXTRA = "username"; //TODO se nao for usado apagar
 
     private final String mUsername;
     private final String mPassword;
@@ -406,8 +397,6 @@ class UserLoginTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected String doInBackground(Void... params) {
-        //TODO to use with server
-
         String response = null;
         try {
             URL url = new URL(_activity.getString(R.string.serverAddress) + "/login");
@@ -418,12 +407,7 @@ class UserLoginTask extends AsyncTask<Void, Void, String> {
             postDataParams.put("username", mUsername);
             postDataParams.put("password", mPassword);
 
-            //TODO see what each of this properties do
-            //conn.setRequestProperty("accept", "*/*");
             conn.setRequestProperty("Content-Type", "application/json");
-            //conn.setRequestProperty("Accept", "application/json");
-            //conn.setRequestProperty("connection", "Keep-Alive");
-            //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
             conn.setDoOutput(true);
 
             OutputStream os = conn.getOutputStream();
@@ -462,7 +446,6 @@ class UserLoginTask extends AsyncTask<Void, Void, String> {
         _activity.setmAuthTask(null);
         _activity.showProgress(false);
 
-        //TODO
         Toast.makeText(_activity, response, Toast.LENGTH_LONG).show();
 
         if (response == null || response.equals(LOGIN_ERROR)) { //LOGIN_ERROR is returned or something else not expected
@@ -473,10 +456,10 @@ class UserLoginTask extends AsyncTask<Void, Void, String> {
             Intent loginData;
 
             if(_appMode.equals(_activity.getApplicationContext().getString(R.string.AppModeDropBox))) {
-                loginData = new Intent(_activity.getApplicationContext(), Dropbox_AlbumsActivity.class); //TODO subclass dropbox
+                loginData = new Intent(_activity.getApplicationContext(), Dropbox_AlbumsActivity.class);
             }
             else { //wifiDirect
-                loginData = new Intent(_activity.getApplicationContext(), WifiDirect_AlbumsActivity.class); //TODO subclass wifiDirect
+                loginData = new Intent(_activity.getApplicationContext(), WifiDirect_AlbumsActivity.class);
             }
             _activity.startActivity(loginData);
             _activity.finish();

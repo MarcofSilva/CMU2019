@@ -56,7 +56,7 @@ class ListFolderTask extends AsyncTask<String, Void, ArrayList<String>> {
         }
         return albumsInfo;
 
-        //TODO get the photos from other users
+
 
     }
 }

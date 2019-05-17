@@ -84,7 +84,6 @@ public class DropboxUploadFileTask extends AsyncTask<String, Void, FileMetadata>
 
 
                 String catalogPath = remoteFolderPath + "/PhotosCatalog.txt";
-                //TODO if secure delete commented
                 //File localCatalogDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/P2PHOTO/" + SessionHandler.readTUsername(mActivity) + "/" + remoteFolderPath);
                 File localCatalogDir = new File(mActivity.getApplicationContext().getCacheDir() + "/P2PHOTO/" + SessionHandler.readTUsername(mActivity) + "/" + remoteFolderPath);
 

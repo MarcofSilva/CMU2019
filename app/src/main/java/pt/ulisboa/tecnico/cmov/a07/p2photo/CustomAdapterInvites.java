@@ -11,14 +11,11 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import javax.crypto.spec.SecretKeySpec;
 
 import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxClientFactory;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.DropboxCreateFolderTask;
 import pt.ulisboa.tecnico.cmov.a07.p2photo.wifi_direct.CreateFolderInStorageTask;
-import pt.ulisboa.tecnico.cmov.a07.p2photo.dropbox.Security.KeyManager;
 
-//TODO Use View Holder Pattern
 public class CustomAdapterInvites extends BaseAdapter {
 
     private final ArrayList<Invite> _invites;
@@ -44,7 +41,6 @@ public class CustomAdapterInvites extends BaseAdapter {
         notifyDataSetChanged();
     }
 
-    //TODO porque e que o clear tem o notify e estes nao?
     public void add(Invite invite){
         _invites.add(invite);
     }

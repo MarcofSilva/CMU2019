@@ -10,7 +10,6 @@ import android.provider.MediaStore;
 
 import java.io.File;
 
-//TODO review this class because it was taken from dropbox example
 public class UriHelper {
     private UriHelper() {}
 

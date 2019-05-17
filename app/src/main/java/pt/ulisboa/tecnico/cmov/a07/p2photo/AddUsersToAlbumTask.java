@@ -53,12 +53,7 @@ public class AddUsersToAlbumTask extends AsyncTask<Void, Void, String> {
             postDataParams.put("albumName", _albumName);
             postDataParams.put("usernames", fixStringsInArrayList_json(_usernamesToAdd));
 
-            //TODO see what each of this properties do
-            //conn.setRequestProperty("accept", "*/*");
             conn.setRequestProperty("Content-Type", "application/json");
-            //conn.setRequestProperty("Accept", "application/json");
-            //conn.setRequestProperty("connection", "Keep-Alive");
-            //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
             conn.setDoOutput(true);
 
             conn.setRequestProperty("Authorization", SessionHandler.readToken(_activity));
@@ -96,12 +91,7 @@ public class AddUsersToAlbumTask extends AsyncTask<Void, Void, String> {
 
             postDataParams.put("sliceKeyEnc", userKeyEncriptPair);
 
-            //TODO see what each of this properties do
-            //conn.setRequestProperty("accept", "*/*");
             conn.setRequestProperty("Content-Type", "application/json");
-            //conn.setRequestProperty("Accept", "application/json");
-            //conn.setRequestProperty("connection", "Keep-Alive");
-            //conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
             conn.setDoOutput(true);
 
             conn.setRequestProperty("Authorization", SessionHandler.readToken(_activity));
