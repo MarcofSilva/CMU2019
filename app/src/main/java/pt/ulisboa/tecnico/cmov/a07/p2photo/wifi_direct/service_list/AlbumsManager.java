@@ -70,9 +70,9 @@ public class AlbumsManager {
                     result += name + ",";
                 }
             }
-            if(result.length() > 0) {
+            /*if(result.length() > 0) {
                 result = result.substring(0, result.length() - 1);
-            }
+            }*/
         }
         return result;
     }
@@ -87,9 +87,9 @@ public class AlbumsManager {
             photos += line + ",";
         }
         reader.close();
-        if(photos.length() > 0) {
+        /*if(photos.length() > 0) {
             return photos.substring(0, photos.length() - 1);
-        }
+        }*/
         return "";
     }
 
@@ -100,6 +100,7 @@ public class AlbumsManager {
         for (String s1 : u1AlbumSplit) {
             String[] albumPhotosSplit = s1.split("::");
             String photoss = "";
+            if(albumPhotosSplit.length < 2){return "";} //TODO
             String[] photosSplit = albumPhotosSplit[1].split(",");
             for (String foto : photosSplit) {
                 File fileImage = new File(BASE_FOLDER_MINE + "/" + albumPhotosSplit[0], foto);
@@ -107,15 +108,15 @@ public class AlbumsManager {
                 String encodedImage = Base64.encodeToString(file, Base64.NO_WRAP);
                 photos += encodedImage + ",";
             }
-            if (photos.length() > 0) {
+            /*if (photos.length() > 0) {
                 photos = photos.substring(0, photos.length() - 1); //remove common
-            }
+            }*/
             res += albumPhotosSplit[0] + "::" + photos + ";";
         }
-        if (res.length() > 0) {
+        /*if (res.length() > 0) {
             return res.substring(0, res.length() - 1);
-        }
-        return "";
+        }*/
+        return res;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -129,6 +130,7 @@ public class AlbumsManager {
             if(!folder.exists()) {
                 folder.mkdirs();
             }
+            if(albumSplit.length < 2){return;} //TODO
             String[] fotos = albumSplit[1].split(",");
             int i = 0;
             for(String foto : fotos) {

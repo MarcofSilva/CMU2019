@@ -9,6 +9,8 @@ import android.widget.Toast;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -22,6 +24,7 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,6 +83,7 @@ public class CommunicationManager implements  Runnable{
                 String missingServer = read();
                 //enviar fotos para o server
                 String pics = albumsManager.photosToShare(missingServer);
+                Log.d("novo", "images to write####### " + pics);
                 write(pics);
                 //get my pics
                 String picsForMe = read();
@@ -119,7 +123,41 @@ public class CommunicationManager implements  Runnable{
     }
 
     private String read(){
-        byte[] buffer = new byte[1024];
+
+            byte[] length = new byte[4];
+
+            //get number of bytes to read
+
+            int read = 0;
+            int remaining = 4;
+        try {
+            while ((read = iStream.read(length, 0, Math.min(4, remaining))) > 0 && remaining > 0) {
+                remaining -= read;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+            ByteBuffer wrapped = ByteBuffer.wrap(length);
+            int receive_lenght = wrapped.getInt();
+
+            byte[] result = new byte[receive_lenght];
+
+            read = 0;
+            int totalRead = 0;
+            remaining = receive_lenght;
+        try{
+            while((read = iStream.read(result, 0, Math.min(result.length, remaining))) > 0) {
+                totalRead += read;
+                remaining -= read;
+                System.out.println("read " + totalRead + " bytes.");
+            }
+
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+/*
         int bytes;
         handler.obtainMessage(WiFiServiceDiscoveryActivity.MY_HANDLE, this).sendToTarget();
         String readMessage = "";
@@ -147,19 +185,35 @@ public class CommunicationManager implements  Runnable{
             } catch (IOException e) {
                 Log.e(TAG, "disconnected", e);
             }
-        }
-        handler.obtainMessage(WiFiServiceDiscoveryActivity.MESSAGE_READ, readMessage.getBytes().length, -1, readMessage.getBytes()).sendToTarget(); //isto chama a funçao handlemessage da atividade
-        return readMessage;
+        }*/
+        String received_message = new String(result);
+        Log.d("novo","read_########## " + receive_lenght + " " + received_message + "#######");
+
+        handler.obtainMessage(WiFiServiceDiscoveryActivity.MESSAGE_READ, received_message.getBytes().length, -1, received_message.getBytes()).sendToTarget(); //isto chama a funçao handlemessage da atividade
+        return received_message;
     }
 
     public void write(String msg) {
+
         final byte[] buffer = msg.getBytes();
         Thread thread = new Thread() {
             public void run() {
                 try {
-                    Log.d(TAG , "Writing hello2");
-                    oStream.write(buffer);
+                    byte[] lenght = ByteBuffer.allocate(4).putInt(buffer.length).array();
+                    Log.d("novo","write_########## " + buffer.length + " " + new String(buffer) + "#############");
+                    oStream.write(lenght);
                     oStream.flush();
+                    ByteArrayInputStream fis = new ByteArrayInputStream(buffer);
+                    int len=0;
+                    while((len=fis.read(buffer))!=-1)
+                    {
+                        oStream.write(buffer,0,len);
+                    }
+                    oStream.flush();
+
+                    /*Log.d(TAG , "Writing hello2");
+                    oStream.write(buffer);
+                    oStream.flush();*/
                 } catch (IOException e) {
                     Log.e(TAG, "Exception during write", e);
                 }
@@ -171,6 +225,7 @@ public class CommunicationManager implements  Runnable{
     public void sendImage(String path){
         final File imagefile = new File(path);
         final byte[] bytes = new byte[(int) imagefile.length()];
+
         Thread thread = new Thread() {
             public void run() {
                 try {

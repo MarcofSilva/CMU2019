@@ -45,16 +45,17 @@
     <string name="findUser_title">Choose Friends</string>
     <string name="okText">Done</string>
 
+    <!-- Wifi Direct -->
+    <string name="finding_service">Finding local services</string>
+
     <!-- Constants -->
-    <string name="serverAddress">http://sigma01.ist.utl.pt:8350</string>
+    <!-- TODO get them here, to avoid the repetition-->
+    <string name="serverAddress">http://sigma03.ist.utl.pt:8350</string>
 
     <!-- IntentExtraLabels -->
     <string name="AppMode">AppMode</string>
     <string name="AppModeDropBox">AppMode_Dropbox</string>
     <string name="AppModeWifiDirect">AppMode_WifiDirect</string>
-
-    <!-- Wifi Direct -->
-    <string name="finding_service">Finding local services</string>
 
 
     <!-- DropBox -->
